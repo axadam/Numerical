@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Scan",
+        "repositoryURL": "https://github.com/axadam/Scan",
+        "state": {
+          "branch": null,
+          "revision": "767f62e761545c327b5d30a8b98791ea8902a3e4",
+          "version": "1.0.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
