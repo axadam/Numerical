@@ -37,7 +37,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 ### Root finding
 
 Functions to find the root of a function of interest. These come in two main types: methods where you know the derivative
-of your function and methods where you do not. This initial release only includes Halley's method for functions where
+of your function and methods where you do not. This initial release only includes Halley's method, which is good functions where
 you can cheaply get both the first and second derivatives.
 
 ### Series
@@ -47,8 +47,6 @@ and then functions specifically for sums and product series where the terms are 
 
 ### Notes
 
-Care is taken to cite sources for algorithms and also to spell out derivations in the comments. There is a preference
-in the code for a functional style where it doesn't sacrifice performance. Testing has focused on accuracy and not
-performance so far, and is not at all broad enough yet on accuracy.
-
+Care is taken to cite sources for algorithms and also to spell out derivations in the comments. While the source algorithms
+are generally performant this code has not been optimized for performance.
 
