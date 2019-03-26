@@ -9,7 +9,7 @@ import Foundation
 import Scan
 
 public extension Sequence {
-    public func converge(max_iter: Int = 100, until f: (Element,Element) -> Bool) -> Element? {
+    func converge(max_iter: Int = 100, until f: (Element,Element) -> Bool) -> Element? {
         var g = makeIterator()
         var count = 0
         var last: Element? = nil
