@@ -86,3 +86,32 @@ func stepper(prev: Double, i: Int = 0, max_iter: Int, min: Double? = nil, max: D
     if abs(h) <= 1e-10 * abs(next) && i > 0 { return next }
     return stepper(prev: next, i: i + 1, max_iter: max_iter, min: min, max: max, step: step)
 }
+
+typealias bracketedRoot = (@escaping (Double) -> Double, Double, Double, Double, Double, Double) -> Double
+
+/// Root finder for univariate functions
+///
+/// Starting from your guess it will attempt to bracket a root, and then
+/// use the specified root finding method to find the root. Success can
+/// depend on how good your guess is, especially if the function is not
+/// monotonic.
+///
+/// If you can cheaply get one or two derivatives of your function then
+/// use the appropriate variant of `root()`.
+///
+/// Default root finding method is Brent's.
+func root(f: @escaping (Double) -> Double, guess: Double, method: bracketedRoot = brentRoot) -> Double {
+    guard let (a, b, fa, fb) = bracket(f: f, guess: guess) else { return .nan }
+    let r = root(f: f, a: a, b: b, fa: fa, fb: fb, method: method)
+    return r
+}
+
+func root(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double = 1e-10, method: bracketedRoot) -> Double {
+    switch (fa,fb) {
+    case (-epsilon...epsilon,_): return a
+    case (_,-epsilon...epsilon): return b
+    case (..<0,..<0): fallthrough
+    case (0...,0...): return .nan
+    default: return method(f, a, b, fa, fb, epsilon)
+    }
+}

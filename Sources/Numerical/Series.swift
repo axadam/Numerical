@@ -29,6 +29,13 @@ public extension Sequence {
     }
 }
 
+public func recursiveSequence<Indices: Sequence, State>(indices: Indices, initialState: State, maxIter: Int, update: @escaping (Int, State) -> State, until: (State, State) -> Bool) -> State? where Indices.Element == Int {
+    let result = indices.lazy.scan( initialState ) { state0, index in
+        return update(index, state0)
+    }.converge(max_iter: maxIter, until: until)
+    return result
+}
+
 public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: @escaping (Double,Double) -> Double, update: @escaping (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
     let result = indices.lazy.scan( (accum0,0,state0)) { arg0, i -> (Double,Double,State) in
         let (accumPrev,_,statePrev) = arg0
