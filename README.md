@@ -36,9 +36,15 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 ### Root finding
 
-Functions to find the root of a function of interest. These come in two main types: methods where you know the derivative
-of your function and methods where you do not. This initial release only includes Halley's method, which is good functions where
-you can cheaply get both the first and second derivatives.
+Functions to find the root of a function of interest.
+
+* `root(guess:xmin?:xmax?:epsilon:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Brent's (default), Dekker's, Ridders'.
+
+* `root(guess:xmin?:xmax?:xtol:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
+
+* `root(guess:xmin?:xmax?:xtol:f:f1:f2)` - Finds a root of f using its first and second derivatives. This uses Halley's method.
+
+* `root(guess:xmin?:xmax?:xtol:f:f1:f2f1)` - Same as above but takes the ratio of the second derivative to the first. For use in cases where the ratio is cheaper.
 
 ### Series
 

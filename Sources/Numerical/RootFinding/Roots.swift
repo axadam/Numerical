@@ -7,87 +7,16 @@
 
 import Foundation
 
-/// Halley's Method to find a root. Builds on Newton's method by adding the
-/// second term in the Taylor series.
-///
-/// Creates a closure to calculate the Halley step and sends to generic
-/// root finding function.
-///
-/// This version uses the ratio of the second derivative to the first.
-///
-/// x_n+1 = x_n - 2 * f(x_n) * f'(x_n) / (2 * f'(x_n)^2 - f(x_n) * f''(x_n))
-///
-/// = x_n - 2 * f / (2 * f' - f * f'' / f')
-///
-/// = x_n - f / f' (1 - f'' f / (f')² / 2)⁻¹
-///
-/// = x_n - u (1 - t / 2)⁻¹, t = u * f'' / f', u = f / f'
+/// Type signature for functions providing derivative free root finding within an interval
 ///
 /// - Parameters:
-///     - guess: Initial guess for root.
-///     - xmin: Minimum allowed value for root. Optional.
-///     - xmax: Maximum allowed value for root. Optional.
-///     - max_iter: Maximum iterations allowed. Optional.
-///     - f: Function in which to find root
-///     - f1: First derivative of f
-///     - f2f1: Ratio of second derivative of f to first derivative of f
-public func halley(guess: Double, xmin: Double? = nil, xmax: Double? = nil, max_iter: Int = 100, f: @escaping (Double) -> Double, f1: @escaping (Double) -> Double, f2f1: @escaping (Double) -> Double) -> Double {
-    let step: (Double) -> Double = { x in
-        let u = f(x) / f1(x)
-        let tx = min(1, u * f2f1(x))
-        return u / (1 - 0.5 * tx)
-    }
-    return stepper(prev: guess, max_iter: max_iter, min: xmin, max: xmax, step: step)
-}
-
-/// Halley's Method to find a root. Builds on Newton's method by adding the
-/// second term in the Taylor series.
-///
-/// Creates a closure to calculate the Halley step and sends to generic
-/// root finding function.
-///
-/// This version takes the second derivative as an argument.
-///
-/// x_n+1 = x_n - 2 * f(x_n) * f'(x_n) / (2 * f'(x_n)^2 - f(x_n) * f''(x_n))
-///
-/// = x_n - 2 * f / (2 * f' - f * f'' / f')
-///
-/// - Parameters:
-///     - guess: Initial guess for root.
-///     - xmin: Minimum allowed value for root. Optional.
-///     - xmax: Maximum allowed value for root. Optional.
-///     - max_iter: Maximum iterations allowed. Optional.
-///     - f: Function in which to find root
-///     - f1: First derivative of f
-///     - f2: Second derivative of f
-public func halley(guess: Double, xmin: Double? = nil, xmax: Double? = nil, max_iter: Int = 100, f: @escaping (Double) -> Double, f1: @escaping (Double) -> Double, f2: @escaping (Double) -> Double) -> Double {
-    let step: (Double) -> Double = { x in
-        let f = f(x)
-        let f1 = f1(x)
-        return 2 * f / (2 * f1 - f * f2(x) / f1)
-    }
-    return stepper(prev: guess, max_iter: max_iter, min: xmin, max: xmax, step: step)
-}
-
-/// Basic root finding function that lets you supply your own step function
-///
-/// This provides only the very basics and should only be used when you know
-/// your function and your guess well enough. Checks for bounds and falls back on bisection.
-///
-/// This is a recursive implementation.
-func stepper(prev: Double, i: Int = 0, max_iter: Int, min: Double? = nil, max: Double? = nil, step: (Double) -> Double) -> Double {
-    if i >= max_iter { return prev }
-    let h = step(prev)
-    let next: Double = {
-        if let min = min, h >= prev - min { return (prev + min) / 2 }
-        if let max = max, h <= prev - max { return (prev + max) / 2 }
-        return prev - h
-    }()
-    if abs(h) <= 1e-10 * abs(next) && i > 0 { return next }
-    return stepper(prev: next, i: i + 1, max_iter: max_iter, min: min, max: max, step: step)
-}
-
-typealias bracketedRoot = (@escaping (Double) -> Double, Double, Double, Double, Double, Double) -> Double
+///     - f: function whose root we seek.
+///     - a: Lower end of the interval to search in.
+///     - b: Upper end of the interval to search in.
+///     - fa: Function f evaluated at a, f(a).
+///     - fb: Function f evaluated at b, f(b).
+///     - epsilon: Convergence criteria in terms of how close to zero we need to get.
+public typealias bracketedRoot = (@escaping (Double) -> Double, Double, Double, Double, Double, Double) -> Double
 
 /// Root finder for univariate functions
 ///
@@ -100,9 +29,16 @@ typealias bracketedRoot = (@escaping (Double) -> Double, Double, Double, Double,
 /// use the appropriate variant of `root()`.
 ///
 /// Default root finding method is Brent's.
-func root(f: @escaping (Double) -> Double, guess: Double, method: bracketedRoot = brentRoot) -> Double {
-    guard let (a, b, fa, fb) = bracket(f: f, guess: guess) else { return .nan }
-    let r = root(f: f, a: a, b: b, fa: fa, fb: fb, method: method)
+///
+/// - Parameters:
+///     - guess: Initial guess for root.
+///     - xmin: Minimum allowed value for root. Optional.
+///     - xmax: Maximum allowed value for root. Optional.
+///     - epsilon: Convergence criteria in terms of how close to zero we need to get. Default 1e-10.
+///     - method: Root finding method. Defaults to Brent's method.
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, epsilon: Double = 1e-10, method: bracketedRoot = brentRoot, f: @escaping (Double) -> Double) -> Double {
+    guard let (a, b, fa, fb) = bracket(f: f, guess: guess, xmin: xmin, xmax: xmax) else { return .nan }
+    let r = root(f: f, a: a, b: b, fa: fa, fb: fb, epsilon: epsilon, method: method)
     return r
 }
 
@@ -114,4 +50,78 @@ func root(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb:
     case (0...,0...): return .nan
     default: return method(f, a, b, fa, fb, epsilon)
     }
+}
+
+/// Root finder for univariate function with one derivative
+///
+/// Starting from your guess uses Newton's method to find a root of your
+/// function. Optionally accepts bounds. Success can depend on having a good
+/// enough guess. Can be vulnerable to poorly behaved functions, especially
+/// those with flat regions.
+///
+/// - Parameters:
+///     - guess: Initial guess for root.
+///     - xmin: Minimum allowed value for root. Optional.
+///     - xmax: Maximum allowed value for root. Optional.
+///     - maxIter: Maximum iterations allowed. Default 100.
+///     - xtol: Convergence criteria in terms how small a step we've made. Default 1e-10.
+///     - f: Function in which to find root
+///     - f1: First derivative of f, f'
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 10, xtol: Double = 1e-10, f: @escaping (Double) -> Double, f1: @escaping (Double) -> Double) -> Double {
+    return newtonRoot(f: f, f1: f1, guess: guess, xmin: xmin, xmax: xmax, max_iter: maxIter, xtol: xtol)
+}
+
+/// Root finder for univariate function with two derivatives
+///
+/// Starting from your guess, uses the specified second order root finding
+/// method to find the root of your function. Optionally accepts bounds. Success
+/// can depend on having a good enough guess.
+///
+/// This version takes the ratio of the second derivative to the first as
+/// an argument.
+///
+/// - Parameters:
+///     - guess: Initial guess for root.
+///     - xmin: Minimum allowed value for root. Optional.
+///     - xmax: Maximum allowed value for root. Optional.
+///     - maxIter: Maximum iterations allowed. Default 100.
+///     - xtol: Convergence criteria in terms how small a step we've made. Default 1e-10.
+///     - f: Function in which to find root
+///     - f1: First derivative of f, f'
+///     - f2f1: Ratio of second derivative of f to the first, f" / f'
+public func rootSecondOrder(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping (Double) -> Double, f1: @escaping (Double) -> Double, f2: @escaping (Double) -> Double) -> Double {
+    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol, f: f, f1: f1, f2: f2)
+}
+
+/// Root finder for univariate function with two derivatives
+///
+/// Starting from your guess, uses the specified second order root finding
+/// method to find the root of your function. Optionally accepts bounds. Success
+/// can depend on having a good enough guess.
+///
+/// - Parameters:
+///     - guess: Initial guess for root.
+///     - xmin: Minimum allowed value for root. Optional.
+///     - xmax: Maximum allowed value for root. Optional.
+///     - maxIter: Maximum iterations allowed. Default 100.
+///     - xtol: Convergence criteria in terms how small a step we've made. Default 1e-10.
+///     - f: Function in which to find root
+///     - f1: First derivative of f, f'
+///     - f2: Second derivative of f, f"
+public func rootSecondOrder(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping (Double) -> Double, f1: @escaping (Double) -> Double, f2f1: @escaping (Double) -> Double) -> Double {
+    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol, f: f, f1: f1, f2f1: f2f1)
+}
+
+/// Helper function for root finding
+///
+/// Provides bounds with bisection if your step goes out of bounds
+func rootHelper(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, step: @escaping (Double) -> Double) -> Double {
+    let r = (1...maxIter).lazy.scan( guess) { x0, i in
+        let x1 = step(x0)
+        if let xmin = xmin, x1 < xmin { return bisectionStep(a: x0, b: xmin) }
+        if let xmax = xmax, x1 > xmax { return bisectionStep(a: x0, b: xmax) }
+        return x1
+        }.converge(max_iter: maxIter, until: { s1, s2 in abs(s2 - s1) < xtol })
+    guard let root = r else { return .nan }
+    return root
 }

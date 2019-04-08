@@ -182,10 +182,10 @@ public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
     let afac = -lbeta(a: a, b: b)
     let a1 = a - 1
     let b1 = b - 1
-    let x = halley(guess: guess,
+    let x = rootSecondOrder(guess: guess,
                     xmin: 0,
                     xmax: 1,
-                    max_iter: 10,
+                    maxIter: 10,
                     f: { x in beta_reg(x: x, a: a, b: b) - p },
                     f1: { x in exp(a1 * log(x) + b1 * log(1 - x) + afac) },
                     f2f1: { x in a1 / x - b1 / (1 - x) })

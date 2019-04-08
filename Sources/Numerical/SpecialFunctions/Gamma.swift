@@ -131,9 +131,9 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
         // p_gamma''(x) = e^-x (a - x - 1) x^(a-2) / Γ(a)
         // p_gamma''(x) / p_gamma'(x) = e^-x (a - x - 1) x^(a-2) / e^-x x^(a-1)
         //                            = (a - x - 1) / x = (a-1)/x - 1
-        let x = halley(guess: guess,
+        let x = rootSecondOrder(guess: guess,
                         xmin: 0,
-                        max_iter: 11,
+                        maxIter: 11,
                         f: { x in p_gamma(a, x) - p },
                         f1: { x in
                             switch a {

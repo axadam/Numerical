@@ -13,7 +13,7 @@ import Foundation
 /// step, but if that goes beyond the brackets it falls back on bisection.
 ///
 /// Numerical Recipes §9.3
-func brentRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func brentRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter = 50
     
     // start out c equal to b

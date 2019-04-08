@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Dekker's method of root finding
+/// Dekker's method of root finding step
 ///
 /// Find the next guess from both bisection and secant methods. Use the
 /// secant method's only if it is between our last guess and bisection's.
@@ -18,7 +18,11 @@ func dekkerStep(a1: Double, b0: Double, b1: Double, fa1: Double, fb0: Double, fb
     return b2
 }
 
-func dekkerRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+/// Dekker's method of root finding
+///
+/// Find the next guess from both bisection and secant methods. Use the
+/// secant method's only if it is between our last guess and bisection's.
+public func dekkerRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter = 50
     
     // for initial state make the bound that is a better estimate our last guess

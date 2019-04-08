@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Ridders' root finding method
+/// Ridders' root finding step
 ///
 /// This is essentially false position but on f(a), f(m)e^Q, and f(b)e^2Q
 /// where e^Q is the solution to quadratic equation f(a) - 2 f(m) e^Q + f(b) e^2Q = 0,
@@ -41,7 +41,11 @@ func ridderStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Dou
     return (a1_,b1_,fa1_,fb1_)
 }
 
-func ridderRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+/// Ridders' root finding method
+///
+/// Approximates the functions curve with an exponential instead of a
+/// polynomial. Robust.
+public func ridderRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter = 30
     
     let r = (0..<maxIter).lazy.scan( (state: (x0: a, x1: b, y0: fa, y1: fb), guess: b) ) { arg0, i in
