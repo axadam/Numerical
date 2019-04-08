@@ -51,7 +51,7 @@ final class RootFindingTests: XCTestCase {
     }
     
     func testRidder() {
-        let a = root(guess: 2, method: ridderRoot, f: f)
+        let a = root(guess: 2, method: riddersRoot, f: f)
         let b = f(a)
         XCTAssertEqual(b, 0, accuracy: 1e-10)
     }

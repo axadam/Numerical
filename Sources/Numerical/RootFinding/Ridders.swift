@@ -20,7 +20,7 @@ import Foundation
 /// x' = m + (m - a) sign[f(a) - f(b)] f(m) / √(f(m)² - f(a) f(b))
 ///
 /// Numerical Recipes §9.2.1
-func ridderStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double) -> (x0: Double, x1: Double, y0: Double, y1: Double) {
+func riddersStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double) -> (x0: Double, x1: Double, y0: Double, y1: Double) {
     // find the mid point and evaluate there
     let m = (a + b) / 2
     let fm = f(m)
@@ -37,7 +37,7 @@ func ridderStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Dou
         return (xnew,b,fnew,fb)
     }()
     let (a1_,b1_,fa1_,fb1_) = abs(fa1) < abs(fb1) ? (b1,a1,fb1,fa1) : (a1,b1,fa1,fb1)
-    print("ridder \(b1_), acc: \(fb1_)")
+    print("ridders \(b1_), acc: \(fb1_)")
     return (a1_,b1_,fa1_,fb1_)
 }
 
@@ -45,12 +45,12 @@ func ridderStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Dou
 ///
 /// Approximates the functions curve with an exponential instead of a
 /// polynomial. Robust.
-public func ridderRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func riddersRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter = 30
     
     let r = (0..<maxIter).lazy.scan( (state: (x0: a, x1: b, y0: fa, y1: fb), guess: b) ) { arg0, i in
         let (x0, x1, y0, y1) = arg0.state
-        let state1 = ridderStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
+        let state1 = riddersStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
         return (state: state1, guess: state1.x1)
         }.converge { s1, s2 in abs(s2.state.y1) < epsilon }
     guard let res = r else { return .nan }
