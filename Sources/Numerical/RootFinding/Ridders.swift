@@ -37,7 +37,6 @@ func riddersStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Do
         return (xnew,b,fnew,fb)
     }()
     let (a1_,b1_,fa1_,fb1_) = abs(fa1) < abs(fb1) ? (b1,a1,fb1,fa1) : (a1,b1,fa1,fb1)
-    print("ridders \(b1_), acc: \(fb1_)")
     return (a1_,b1_,fa1_,fb1_)
 }
 

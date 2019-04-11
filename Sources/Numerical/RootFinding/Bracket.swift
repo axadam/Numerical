@@ -49,6 +49,6 @@ public func bracket(f: @escaping (Double) -> Double, guess: Double, xmin: Double
             let fb1 = f(b1)
             return (a0,b1,fa0,fb1)
         }
-    }, until: { s1, s2 in print(s2); return s2.fa * s2.fb < 0 })
+    }, until: { s1, s2 in s2.fa * s2.fb < 0 })
     return r
 }

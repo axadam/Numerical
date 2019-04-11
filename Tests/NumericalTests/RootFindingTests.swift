@@ -61,5 +61,9 @@ final class RootFindingTests: XCTestCase {
         let b = f(a)
         XCTAssertEqual(b, 0, accuracy: 1e-10)
     }
-    
+    func test748() {
+        let a = root(guess: 2, method: toms748Root, f: f)
+        let b = f(a)
+        XCTAssertEqual(b, 0, accuracy: 1e-10)
+    }
 }

@@ -38,7 +38,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 Functions to find the root of a function of interest.
 
-* `root(guess:xmin?:xmax?:epsilon:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Brent's (default), Dekker's, Ridders'.
+* `root(guess:xmin?:xmax?:epsilon:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Brent's (default), Dekker's, Ridders', and TOMS Algo 748.
 
 * `root(guess:xmin?:xmax?:xtol:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
 

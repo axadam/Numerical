@@ -27,7 +27,6 @@ public func brentRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa:
         let (a0,b0,c0,fa0,fb0,fc0,d0,e0,xm,tol1) = arg0.state
         let (a1,b1,c1,fa1,fb1,fc1,d1,e1) = brentStep(f: f, a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1)
         let state1 = brentBookkeeping(a: a1, b: b1, c: c1, fa: fa1, fb: fb1, fc: fc1, d: d1, e: e1, epsilon: epsilon, tol: epsilon)
-        print("brent \(state1.b)")
         return (state: state1, guess: state1.b)
         }.converge { s1, s2 in abs(s2.state.xm) <= s2.state.tol1 || abs(s2.state.fb) <= epsilon }
     guard let res = r else { return .nan }
