@@ -71,7 +71,7 @@ public func toms748Root(f: @escaping (Double) -> Double, a: Double, b: Double, f
         let (uᵢ,fuᵢ) = abs(fāᵢ) < abs(fb̄ᵢ) ? (āᵢ,fāᵢ) : (b̄ᵢ,fb̄ᵢ)
         
         // 4.1.6 Modified secant method for our next guess
-        let c̄ᵢ = uᵢ - 2 * (b̄ᵢ - āᵢ) / (fāᵢ - fb̄ᵢ) * fuᵢ
+        let c̄ᵢ = uᵢ - 2 * (b̄ᵢ - āᵢ) / (fb̄ᵢ - fāᵢ) * fuᵢ
         
         // 4.1.7 But don't trust secant further than half the width of the interval
         let ĉᵢ = abs(c̄ᵢ - uᵢ) > 0.5 * (b̄ᵢ - āᵢ) ? 0.5 * (b̄ᵢ + āᵢ) : c̄ᵢ

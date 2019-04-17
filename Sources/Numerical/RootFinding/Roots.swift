@@ -121,7 +121,7 @@ func rootHelper(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter
         if let xmin = xmin, x1 < xmin { return bisectionStep(a: x0, b: xmin) }
         if let xmax = xmax, x1 > xmax { return bisectionStep(a: x0, b: xmax) }
         return x1
-        }.converge(max_iter: maxIter, until: { s1, s2 in abs(s2 - s1) < xtol })
+        }.converge(until: { s1, s2 in abs(s2 - s1) < xtol })
     guard let root = r else { return .nan }
     return root
 }
