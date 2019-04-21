@@ -17,7 +17,7 @@ import Foundation
 /// domain.
 ///
 /// Numerical Recipes §9.1 with additions
-public func bracket(f: @escaping (Double) -> Double, guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 30) -> (a: Double, b: Double, fa: Double, fb: Double)? {
+public func bracket(f: (Double) -> Double, guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 30) -> (a: Double, b: Double, fa: Double, fb: Double)? {
     let factor = 1.6
     let a = guess
     let fa = f(a)

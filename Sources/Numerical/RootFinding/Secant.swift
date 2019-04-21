@@ -31,19 +31,19 @@ func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
 /// This method can fail in some pathological cases where f is flat near root.
 ///
 /// Numerical Recipes §9.2
-public func secantRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func secantRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter = 30
     
     // for initial state make the bound that is a better estimate our last guess
     let (x0, x1, y0, y1) = abs(fa) < abs(fb) ? (b, a, fb, fa) : (a, b, fa, fb)
     
-    let r = (0..<maxIter).lazy.scan( (state: (x0: x0, x1: x1, y0: y0, y1: y1), guess: x1) ) { arg0, i in
+    let r = recursiveSequence(indices: 0..<maxIter, initialState: (state: (x0: x0, x1: x1, y0: y0, y1: y1), guess: x1), maxIter: maxIter, update: { i, arg0 in
         let (x0, x1, y0, y1) = arg0.state
         let xnew = secantStep(x0: x0, x1: x1, y0: y0, y1: y1)
         let ynew = f(xnew)
         let state1 = (x0: x1, x1: xnew, y0: y1, y1: ynew)
         return (state1, xnew)
-        }.converge { s1, s2 in abs(s2.guess - s1.guess) < epsilon || abs(s2.state.y1) < epsilon }
+    }, until: { s1, s2 in abs(s2.guess - s1.guess) < epsilon || abs(s2.state.y1) < epsilon })
     guard let res = r else { return .nan }
     return res.guess
 }

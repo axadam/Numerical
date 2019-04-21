@@ -21,7 +21,7 @@ func bisectionStep(a: Double, b: Double) -> Double {
 /// while keeping the root bracketed. Slow but guaranteed to get there.
 ///
 /// Numerical Recipes §9.1.1
-public func bisectionRoot(f: @escaping (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func bisectionRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
     let maxIter: Int = 50
     let q = recursiveSequence(indices: 0...,
                               initialState: (x0: a, x1: b, y0: fa, y1: fb),
