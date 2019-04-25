@@ -20,7 +20,7 @@ public func invErfC(_ p: Double) -> Double {
         
         // main case
     case _:
-        let pp = p <= 1 ? p : 2 - p
+        let pp = p < 1 ? p : 2 - p
 
         // sin(π/4) = 0.70711
         let guess = 0.70711 * qapprox(p: 0.5 * pp)
@@ -36,7 +36,7 @@ public func invErfC(_ p: Double) -> Double {
                         f: { x in erfc(x) - pp },
                         f1: { x in -1.12837916709551257 * exp(-x * x) },
                         f2f1: { x in -2 * x })
-        return x
+        return p < 1 ? x : -x
     }
 }
 

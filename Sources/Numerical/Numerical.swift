@@ -23,3 +23,17 @@ public extension FloatingPoint {
         return Self(signOf: self, magnitudeOf: 1)
     }
 }
+
+/// Round double to integer. Round half away from zero.
+public func iround(_ x: Double) -> Int {
+    let r = x.rounded(.toNearestOrAwayFromZero)
+    let i = Int(r)
+    return i
+}
+
+/// Round double to integer. Rounds towards zero (floor of magnitude)
+public func itrunc(_ x: Double) -> Int {
+    let r = x.rounded(.towardZero)
+    let i = Int(r)
+    return i
+}
