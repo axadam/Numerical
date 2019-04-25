@@ -36,19 +36,19 @@ public typealias bracketedRoot = ((Double) -> Double, Double, Double, Double, Do
 ///     - xmax: Maximum allowed value for root. Optional.
 ///     - epsilon: Convergence criteria in terms of how close to zero we need to get. Default 1e-10.
 ///     - method: Root finding method. Defaults to Brent's method.
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, epsilon: Double = 1e-10, method: bracketedRoot = brentRoot, f: (Double) -> Double) -> Double {
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolerance: Double = 10e-15, method: bracketedRoot = brentRoot, f: (Double) -> Double) -> Double {
     guard let (a, b, fa, fb) = bracket(f: f, guess: guess, xmin: xmin, xmax: xmax) else { return .nan }
-    let r = root(f: f, a: a, b: b, fa: fa, fb: fb, epsilon: epsilon, method: method)
+    let r = root(f: f, a: a, b: b, fa: fa, fb: fb, tolerance: tolerance, method: method)
     return r
 }
 
-func root(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double = 1e-10, method: bracketedRoot) -> Double {
+func root(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double, method: bracketedRoot) -> Double {
     switch (fa,fb) {
-    case (-epsilon...epsilon,_): return a
-    case (_,-epsilon...epsilon): return b
+    case (-tolerance...tolerance,_): return a
+    case (_,-tolerance...tolerance): return b
     case (..<0,..<0): fallthrough
     case (0...,0...): return .nan
-    default: return withoutActuallyEscaping(f) { g in method(g, a, b, fa, fb, epsilon) }
+    default: return withoutActuallyEscaping(f) { g in method(g, a, b, fa, fb, tolerance) }
     }
 }
 

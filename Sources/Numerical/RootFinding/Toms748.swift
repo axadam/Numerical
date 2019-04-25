@@ -13,7 +13,7 @@ import Foundation
 /// interpolation and bracketing to keep the process safe.
 ///
 /// TOMS Algorithm 748 (1995), Section 4, Algorithm 4.2
-public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
     let maxIter = 30
     // factor by which we must shrink interval each iteration or we choose bisection
     // usually chosen as 0.5
@@ -23,7 +23,7 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
     let c₁ = a - fa * (b - a) / (fb - fa)
     
     // 4.1.2 Bracket
-    let (a₂, b₂, d₂, fa₂, fb₂, fd₂) = bracket(f: f, a: a, b: b, c: c₁, fa: fa, fb: fb)
+    let (a₂, b₂, d₂, fa₂, fb₂, fd₂) = bracket(f: f, a: a, b: b, c: c₁, fa: fa, fb: fb, tolerance: tolerance)
     
     let r = recursiveSequence(indices: 2...,
                               initialState: (a: a₂, b: b₂, d: d₂, e: 1.0, fa: fa₂, fb: fb₂, fd: fd₂, fe: 1e5),
@@ -47,8 +47,8 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
         
         // 4.2.4 Keep track of previous d, then bracket. Check if we've found root
         let (ẽᵢ,fẽᵢ) = (dᵢ,fdᵢ)
-        let (ãᵢ, b̃ᵢ, d̃ᵢ, fãᵢ, fb̃ᵢ, fd̃ᵢ) = bracket(f: f, a: aᵢ, b: bᵢ, c: cᵢ, fa: faᵢ, fb: fbᵢ)
-        if fãᵢ == 0 || b̃ᵢ - ãᵢ < 2 * tole(a: ãᵢ, b: b̃ᵢ, fa: fãᵢ, fb: fb̃ᵢ) {
+        let (ãᵢ, b̃ᵢ, d̃ᵢ, fãᵢ, fb̃ᵢ, fd̃ᵢ) = bracket(f: f, a: aᵢ, b: bᵢ, c: cᵢ, fa: faᵢ, fb: fbᵢ, tolerance: tolerance)
+        if fãᵢ == 0 || b̃ᵢ - ãᵢ < 2 * tole(a: ãᵢ, b: b̃ᵢ, fa: fãᵢ, fb: fb̃ᵢ, tolerance: tolerance) {
             return (ãᵢ, b̃ᵢ, d̃ᵢ, ẽᵢ, fãᵢ, fb̃ᵢ, fd̃ᵢ, fẽᵢ)
         }
         
@@ -66,8 +66,8 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
         }()
         
         // 4.2.6 Bracket our latest guess and check if we've found root
-        let (āᵢ, b̄ᵢ, d̄ᵢ, fāᵢ, fb̄ᵢ, fd̄ᵢ) = bracket(f: f, a: ãᵢ, b: b̃ᵢ, c: c̃ᵢ, fa: fãᵢ, fb: fb̃ᵢ)
-        if fāᵢ == 0 || b̄ᵢ - āᵢ < tole(a: āᵢ, b: b̄ᵢ, fa: fāᵢ, fb: fb̄ᵢ) {
+        let (āᵢ, b̄ᵢ, d̄ᵢ, fāᵢ, fb̄ᵢ, fd̄ᵢ) = bracket(f: f, a: ãᵢ, b: b̃ᵢ, c: c̃ᵢ, fa: fãᵢ, fb: fb̃ᵢ, tolerance: tolerance)
+        if fāᵢ == 0 || b̄ᵢ - āᵢ < tole(a: āᵢ, b: b̄ᵢ, fa: fāᵢ, fb: fb̄ᵢ, tolerance: tolerance) {
             return (āᵢ, b̄ᵢ, d̄ᵢ, ẽᵢ, fāᵢ, fb̄ᵢ, fd̄ᵢ, fẽᵢ)
         }
         
@@ -81,7 +81,7 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
         let ĉᵢ = abs(c̄ᵢ - uᵢ) > 0.5 * (b̄ᵢ - āᵢ) ? 0.5 * (b̄ᵢ + āᵢ) : c̄ᵢ
         
         // 4.1.8 Bracket our latest guess
-        let (âᵢ,b̂ᵢ,d̂ᵢ,fâᵢ,fb̂ᵢ,fd̂ᵢ) = bracket(f: f, a: āᵢ, b: b̄ᵢ, c: ĉᵢ, fa: fāᵢ, fb: fb̄ᵢ)
+        let (âᵢ,b̂ᵢ,d̂ᵢ,fâᵢ,fb̂ᵢ,fd̂ᵢ) = bracket(f: f, a: āᵢ, b: b̄ᵢ, c: ĉᵢ, fa: fāᵢ, fb: fb̄ᵢ, tolerance: tolerance)
         
         // 4.1.9 Accept our latest guess if we shrank the interval by µ, otherwise
         //       choose the midpoint and re-bracket using that
@@ -89,9 +89,9 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
             return (âᵢ,b̂ᵢ,d̂ᵢ,d̄ᵢ,fâᵢ,fb̂ᵢ,fd̂ᵢ,fd̄ᵢ)
         }
         let (eᵢ₊₁,feᵢ₊₁) = (d̂ᵢ,fd̂ᵢ)
-        let (aᵢ₊₁,bᵢ₊₁,dᵢ₊₁,faᵢ₊₁,fbᵢ₊₁,fdᵢ₊₁) = bracket(f: f, a: âᵢ, b: b̂ᵢ, c: 0.5 * (âᵢ + b̂ᵢ), fa: fâᵢ, fb: fb̂ᵢ)
+        let (aᵢ₊₁,bᵢ₊₁,dᵢ₊₁,faᵢ₊₁,fbᵢ₊₁,fdᵢ₊₁) = bracket(f: f, a: âᵢ, b: b̂ᵢ, c: 0.5 * (âᵢ + b̂ᵢ), fa: fâᵢ, fb: fb̂ᵢ, tolerance: tolerance)
         return (aᵢ₊₁,bᵢ₊₁,dᵢ₊₁,eᵢ₊₁,faᵢ₊₁,fbᵢ₊₁,fdᵢ₊₁,feᵢ₊₁)
-    }, until: { s1, s2 in s2.fa == 0 || s2.b - s2.a <= 2 * tole(a: s2.a, b: s2.b, fa: s2.fa, fb: s2.fb) })
+    }, until: { s1, s2 in s2.fa == 0 || s2.b - s2.a <= 2 * tole(a: s2.a, b: s2.b, fa: s2.fa, fb: s2.fb, tolerance: tolerance) })
     guard let res = r else { return .nan }
     return abs(res.fa) < abs(res.fb) ? res.a : res.b
 }
@@ -100,9 +100,9 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
 /// Algo 748 Re-bracketing method
 ///
 /// TOMS Algorithm 748 (1995), Section 6, Subroutine bracket(a, b, c, ā, b̄, d)
-func bracket(f: (Double) -> Double, a: Double, b: Double, c: Double, fa: Double, fb: Double) -> (a: Double, b: Double, d: Double, fa: Double, fb: Double, fd: Double) {
+func bracket(f: (Double) -> Double, a: Double, b: Double, c: Double, fa: Double, fb: Double, tolerance: Double) -> (a: Double, b: Double, d: Double, fa: Double, fb: Double, fd: Double) {
     let λ = 0.7
-    let δ = λ * tole(a: a, b: b, fa: fa, fb: fb)
+    let δ = λ * tole(a: a, b: b, fa: fa, fb: fb, tolerance: tolerance)
     
     // if c is outside interval or too close to edges move it towards the middle
     let c1: Double = {
@@ -132,9 +132,8 @@ func bracket(f: (Double) -> Double, a: Double, b: Double, c: Double, fa: Double,
 /// Algo 748 Relative Tolerance method
 ///
 /// TOMS Algorithm 748 (1995), Section 6, Equation 25
-func tole(a: Double, b: Double, fa: Double, fb: Double) -> Double {
-    let tol = 1e-15
+func tole(a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
     let u = abs(fa) < abs(fb) ? a : b
-    let tole = 2 * abs(u) * Double.ulpOfOne + tol
+    let tole = 2 * abs(u) * Double.ulpOfOne + tolerance
     return tole
 }

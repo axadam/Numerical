@@ -31,7 +31,7 @@ func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
 /// This method can fail in some pathological cases where f is flat near root.
 ///
 /// Numerical Recipes §9.2
-public func secantRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, epsilon: Double) -> Double {
+public func secantRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
     let maxIter = 30
     
     // for initial state make the bound that is a better estimate our last guess
@@ -43,7 +43,7 @@ public func secantRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, 
         let ynew = f(xnew)
         let state1 = (x0: x1, x1: xnew, y0: y1, y1: ynew)
         return (state1, xnew)
-    }, until: { s1, s2 in abs(s2.guess - s1.guess) < epsilon || abs(s2.state.y1) < epsilon })
+    }, until: { s1, s2 in abs(s2.guess - s1.guess) < tolerance || abs(s2.state.y1) < tolerance })
     guard let res = r else { return .nan }
     return res.guess
 }
