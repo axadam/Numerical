@@ -153,11 +153,11 @@ public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
         // approximation from HMF §26.5.22
         case (1...,1...):
             // inverse normal approximation
-            let yp = p < 0.5 ? -qapprox(p: p) : qapprox(p: 1 - p)
+            let yp = p < 0.5 ? qapprox(p: p) : -qapprox(p: 1 - p)
             
             let λ = (yp^^2 - 3) / 6
             let h = 2 / (1 / (2 * a - 1) + 1 / (2 * b - 1))
-            let w = yp * sqrt(λ + h) / h - (1 / (2 * b - 1) - 1 / (2 * a - 1)) * (λ + 5 / 6 - 2 / (3 * h))
+            let w = yp * sqrt(h + λ) / h - (1 / (2 * b - 1) - 1 / (2 * a - 1)) * (λ + 5 / 6 - 2 / (3 * h))
             return a / (a + b * exp(2 * w))
         // At least one of a and b < 1. Use NR approximation
         case (_,_):

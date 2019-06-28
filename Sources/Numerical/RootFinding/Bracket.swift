@@ -21,7 +21,17 @@ public func bracket(f: (Double) -> Double, guess: Double, xmin: Double? = nil, x
     let factor = 1.6
     let a = guess
     let fa = f(a)
-    let b = guess * factor
+    let b = { () -> Double in
+        let factorb = guess * factor
+        if let xmin = xmin, factorb < a {
+            return xmin - (xmin - a) / factor
+        } else if let xmax = xmax, factorb > a {
+            return xmax - (xmax - a) / factor
+        } else {
+            return factorb
+        }
+    }()
+    
     let fb = f(b)
     if fa * fb < 0 { return (a, b, fa, fb) }
     let r = recursiveSequence(indices: 0..<maxIter, initialState: (a: a, b: b, fa: fa, fb: fb), maxIter: maxIter, update: { i, state0 in
