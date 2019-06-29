@@ -111,6 +111,9 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
         // initial guess
         // a <= 1: P(a,1) ~ 0.253a + 0.12a²
         // a  > 1: normal quantile approx and then Handbook of Mathematical Functions, §26.4.17
+        // Q(p) = 2 P⁻¹(ν / 2, p) = ν  ( 1 - 2/(9ν)  + xp √(2/(9ν))  )³
+        //      = 2 P⁻¹(a    , p) = 2a ( 1 - 2/(18a) + xp √(2/(18a)) )³
+        //          P⁻¹(a    , p) =  a ( 1 - 1/(9a)  + xp √(1/(9a))  )³
         let guess: Double = {
             switch a {
             case ...1:
@@ -121,8 +124,8 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
                     return 1 - log( 1 - (p-t) / (1-t))
                 }
             case _:
-                let x2 = p < 0.5 ? qapprox(p: p) : -qapprox(p: 1 - p)
-                return fmax(1e-3, (a * (1 - 1/(9 * a) - x2 / (3 * sqrt(a))^^3)))
+                let xp = p < 0.5 ? qapprox(p: p) : -qapprox(p: 1 - p)
+                return fmax(1e-3, a * (1 - 1/(9 * a) - xp / (3 * sqrt(a)))^^3)
             }
         }()
         
