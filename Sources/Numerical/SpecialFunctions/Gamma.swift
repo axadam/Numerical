@@ -9,35 +9,49 @@ import Foundation
 
 /// Regularized Incomplete Gamma Function (lower), P(a,x)
 ///
-/// P(a,x) = 𝛾(a,x) / 𝛤(a), 𝛾(a,x) = ∫0..x e^(-t) t^(a-1) dt, a > 0
+/// P(a,x) = 𝛾(a,x) / 𝛤(a),
 ///
-/// For small x (less than a + 1) use the series approach, for large
-/// use the continued fraction approach. NR also advises using quadrature
-/// for large a but that is not yet implemented.
+/// 𝛾(a,x) = ∫0..x e^(-t) t^(a-1) dt, a > 0
 ///
-/// Numerical Receipes §6.2
+/// Split up the domains of computation into four areas according to Temme.
+///
+/// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
+/// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
 public func p_gamma(_ a: Double, _ x: Double) -> Double {
+    let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
     switch (a,x) {
     case (...0,_): return .nan
     case (_,..<0): return .nan
     case (_,0): return 0
-    case (_,..<(a + 1)): return p_gamma_series(a: a, x: x)
-    case (_,_): return 1 - q_gamma_frac(a: a, x: x)
+    case (12...,(0.3*a)...(2.35*a)):
+        return pq_gamma_uniform_asymptotic(a: a, x: x, isLower: true)
+    case (α...,     _): return p_gamma_series(a: a, x: x)
+    case (   _,..<1.5): return 1 - q_gamma_series(a: a, x: x)
+    case (   _,     _): return 1 - q_gamma_frac(a: a, x: x)
     }
 }
 
 /// Regularized Incomplete Gamma Function (upper), Q(a,x)
 ///
-/// Q(a,x) = 𝛤(a,x) / 𝛤(a), 𝛤(a,x) = ∫x..∞ e^(-t) t^(a-1) dt, a > 0
+/// Q(a,x) = 𝛤(a,x) / 𝛤(a),
 ///
-/// Implemented simply as complement of lower: Q(a,x) = 1 - P(a,x)
+/// 𝛤(a,x) = ∫x..∞ e^(-t) t^(a-1) dt, a > 0
+///
+/// Split up the domains of computation into four areas according to Temme.
+///
+/// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
+/// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
 public func q_gamma(_ a: Double, _ x: Double) -> Double {
+    let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
     switch (a,x) {
-    case (...0,_): return .nan
-    case (_,..<0): return .nan
-    case (_,0): return 1
-    case (_,..<(a + 1)): return 1 - p_gamma_series(a: a, x: x)
-    case (_,_): return q_gamma_frac(a: a, x: x)
+    case (...0,     _): return .nan
+    case (   _,  ..<0): return .nan
+    case (   _,     0): return 1
+    case (12...,(0.3*a)...(2.35*a)):
+        return pq_gamma_uniform_asymptotic(a: a, x: x, isLower: false)
+    case (α...,     _): return 1 - p_gamma_series(a: a, x: x)
+    case (   _,..<1.5): return q_gamma_series(a: a, x: x)
+    case (   _,     _): return q_gamma_frac(a: a, x: x)
     }
 }
 
@@ -57,8 +71,64 @@ func p_gamma_series(a: Double, x: Double) -> Double {
         let ap = a + Double(i)
         let state1 = state * x / ap
         return (state1, state1)
-    }, until: { a, b in a.0 == b.0 }, max_iter: 1_000_000)
+    }, until: { a, b in a.0 == b.0 })
     return prefix * sum
+}
+
+/// Taylor series approximation of Q(a,x)
+///
+/// Q(a,x) = u + v,
+///
+/// u = 1 - x^a / Γ(a + 1)
+///
+///   = 1 - 1 / Γ(a + 1) + (1 - x^a) / Γ(a + 1),
+///
+/// v = x^a / Γ(a + 1) [1 - Γ(a + 1) 𝛾*(a,x)],
+///
+/// 𝛾*(a,x) = x^(-a) / Γ(a) 𝛾(a,x)
+///
+/// A Computational Procedure for Incomplete Gamma Functions, Gautschi 1979, Section 4.1
+///
+/// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
+/// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Section 2.3
+func q_gamma_series(a: Double, x: Double) -> Double {
+    // u₁ = 1 - 1 / Γ(a + 1)
+    let u₁ = -inverse_gamma_p1m1(a)
+    
+    /// 1 / Γ(a + 1)
+    let Γ⁻¹a1 = 1 - u₁
+    
+    // u₂ = (1 - x^a) / Γ(a + 1)
+    //    = -(e^(a log x) - 1) / Γ(a + 1)
+    let lnx = log(x)
+    let u₂ = -expm1(a * lnx) * Γ⁻¹a1
+    
+    /// u = 1 - 1 / Γ(a + 1) + (1 - x^a) / Γ(a + 1)
+    let u = u₁ + u₂
+    
+    // v = -x^a Σ i=0... (-x)ⁱ / ((a + i) i!) / Γ(a)
+    //   = x^(a+1) / (a+1) Σ i=0... tᵢ / Γ(a),
+    // tᵢ = (a + 1) (-x)ⁱ / ((a + i + 1) (i + 1)!)
+    //    = -(a + i) x / ((a + i + 1)(i + 1)) tᵢ₋₁,
+    //    = -pᵢ tᵢ₋₁ / qᵢ, t₀ = 1
+    // pᵢ = (a + i) x = pᵢ₋₁ + x, p₀ = ax
+    // qᵢ = (a + i + 1) (i + 1) = qᵢ₋₁ + rᵢ₋₁, q₀ = a + 1
+    // rᵢ = a + 2i + 3 = rᵢ₋₁ + 2, r₀ = a + 3
+    //
+    // A Computational Procedure for Incomplete Gamma Functions, Gautschi 1979, Eq 4.10
+    let Σtᵢ = recursiveSum(indices: 1..., sum0: 1.0, state0: (a * x,a + 1,a + 3,1.0), update: { i, prev in
+        let (pᵢ₋₁, qᵢ₋₁, rᵢ₋₁, tᵢ₋₁) = prev
+        let pᵢ = pᵢ₋₁ + x
+        let qᵢ = qᵢ₋₁ + rᵢ₋₁
+        let rᵢ = rᵢ₋₁ + 2
+        let tᵢ = -pᵢ * tᵢ₋₁ / qᵢ
+        return (tᵢ, (pᵢ,qᵢ,rᵢ,tᵢ))
+    }, until: { a, b in abs(b.1 / b.0) < 1e-15 })
+    
+    /// v = 1 / Γ(a) x^(a + 1) / (a + 1) Σtᵢ
+    let v = a * Γ⁻¹a1 * exp((a + 1) * lnx) * Σtᵢ / (a + 1)
+    
+    return u + v
 }
 
 /// Continued fraction approximation of Q(a,x)
@@ -84,6 +154,53 @@ func q_gamma_frac(a: Double, x: Double) -> Double {
         return (c1 * d1, (b: b1, c: c1, d: d1))
     }, until: { a, b in abs(b.1 - 1) < 1e-15 })
     return prefix * frac
+}
+
+/// Series repesentation of Q(a,x) or P(a,x) when a and x are large
+///
+/// Q(a,x) = 1/2 erfc(η √(a/2)) + Rₐ(η),
+///
+/// P(a,x) = 1/2 erfc(-η √(a/2)) - Rₐ(η),
+///
+/// Rₐ(η) = e^(-1/2 η²a) / √(2πa) Sₐ(η),
+///
+/// Sₐ(η) = a / (a + β₁) Σi=0... βᵢηⁱ
+///
+// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
+// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2.5
+func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool = true) -> Double {
+    /// Sign depends on which tail we want
+    let sgn = isLower ? -1.0 : 1.0
+    
+    /// µ = λ - 1, λ = x / a
+    let µ = (x - a) / a
+    
+    /// 1/2 η² = µ - log(1 + µ), Temme 1979 Eq. 1.3
+    let hη² = -log1pmx(µ)
+    
+    /// η = s √(2 (µ - log(1 + µ)), s = sign(µ)
+    let η = µ.signum * sqrt(2 * hη²)
+    
+    /// u = 1/2 erfc(√(a/2) η)
+    let u = 0.5 * erfc(sgn * η * sqrt(a / 2))
+
+    /// prefix = e^(-1/2 η²a) / √2πa
+    let Rprefix = exp(-hη² * a) / sqrt(2 * .pi * a)
+    
+    /// βᵢ = 1/a (i + 2) βᵢ₊₂ + dᵢ₊₁
+    let β = C.temme_d.enumerated().reversed().scan((βᵢ₊₁: 0.0, βᵢ₊₂: 0.0)) { prev, term in
+        let (βᵢ₊₁,βᵢ₊₂) = prev
+        let (n   ,dᵢ₊₁) = term
+        let i = Double(n - 1)
+        let βᵢ = (i + 2) * βᵢ₊₂ / a + dᵢ₊₁
+        return (βᵢ₊₁: βᵢ, βᵢ₊₂: βᵢ₊₁)
+        }.dropFirst().dropLast().map { $0.βᵢ₊₁ }.reversed()
+    
+    /// S = a / (a + β₁) Σi=0... βᵢηⁱ
+    let S = a / (a + Array(β)[1]) * evaluate_polynomial(poly: Array(β), z: η)
+    
+    let v = sgn * Rprefix * S
+    return u + v
 }
 
 /// Derivative of regularized lower incomplete gamma function, P
@@ -193,7 +310,7 @@ public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
 /// Primarily based on the method describe in "EFFICIENT AND ACCURATE ALGORITHMS FOR THE
 /// COMPUTATION AND INVERSION OF THE INCOMPLETE GAMMA FUNCTION RATIOS", Gil, Segura,
 /// Temme 2013. Also falls back in one case on an approximation from A & S.
-public func invertGuess(a: Double, p: Double, q: Double) -> Double {
+func invertGuess(a: Double, p: Double, q: Double) -> Double {
     let r = exp( (log(p) + lgamma(1 + a)) / a )
     switch (a,r,q) {
         
@@ -332,18 +449,27 @@ func epsilon(η₀: Double) -> (Double, Double, Double) {
 
 /// Gamma star function from Temme
 ///
-/// Γ∗(a) = Γ(a) / (√(2π/a) a^a e^(-a))
+/// Γ∗(a) = Γ(a) / (√(2π/a) (a/e)^a), a > 0
 ///
-/// = Γ(a) / ( √(2π) e^( -x + ( x - 0.5 ) * log(x) ) )
+/// = Γ(a) / ( √(2π) e^( -a + ( a - 0.5 ) * log(a) ) )
 ///
-/// or if a >> 0 then Stirling series:
+/// if a >> 0 we use the Stirling series:
 ///
 /// = ∼ 1 + 1/12a−1+ 1/288a−2 +...
 ///
+/// Γ∗ tries to capture just the correction term in the Stirling series for Γ:
+///
+/// Γ(a) = √(2π/a) (a/e)^a Σi...N-1 (cᵢ / aⁱ)
+///
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
-/// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2012, Eq. 2.5, 2.7
-public func gammastar(_ a: Double) -> Double {
-    return tgamma(a) / ( sqrt(2 * .pi) * exp((a - 0.5) * log(a) - a))
+/// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Eq. 2.5, 2.7
+func gammastar(_ a: Double) -> Double {
+    switch a {
+    case ...3:
+        return tgamma(a) / ( sqrt(2 * .pi) * exp((a - 0.5) * log(a) - a))
+    case    _:
+        return evaluate_polynomial(poly: C.stirling, z: 1 / a)
+    }
 }
 
 /// Find η from a and q. For relatively small a and q
@@ -359,8 +485,8 @@ public func gammastar(_ a: Double) -> Double {
 /// η = √(-2 log(q √(2πa) Γ∗(a)) / a)
 ///
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
-/// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2012, Eq. 2.5
-public func eta(_ a: Double, _ q: Double) -> Double {
+/// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Eq. 2.4
+func eta(_ a: Double, _ q: Double) -> Double {
     return sqrt( -2 * log(q * sqrt(2 * .pi) * gammastar(a)) / a )
 }
 
@@ -371,7 +497,7 @@ public func eta(_ a: Double, _ q: Double) -> Double {
 ///                  η₀ = erfc⁻¹(2q) / √(a/2)
 ///
 /// temme 1992, Eq 3.2
-public func eta0(a: Double, q: Double) -> Double {
+func eta0(a: Double, q: Double) -> Double {
     return invErfC(2 * q) / sqrt(a / 2)
 }
 
@@ -390,7 +516,7 @@ public func eta0(a: Double, q: Double) -> Double {
 /// -W[-e^(-η² / 2 - 1)] = λ
 ///
 /// temme 2013 Eq. 2.6
-public func lambda(_ η: Double) -> Double {
+func lambda(_ η: Double) -> Double {
     let s = 0.5 * η^^2
     let λ: Double = {
         switch η {
@@ -451,6 +577,170 @@ public func lambda(_ η: Double) -> Double {
 /// η² / 2 = λ - 1 - log(λ)
 ///
 /// η = s √(2 (λ - 1 - log(λ))), s = sign(λ - 1)
-public func eta(_ λ: Double) -> Double {
+func eta(λ: Double) -> Double {
     return (λ - 1).signum * sqrt(2 * (λ - 1 - log(λ)))
+}
+
+/// Finds η for a given µ
+///
+/// Finds the root of the following with sign of µ:
+///
+/// η = s √(2 (µ - log(1 + µ)), s = sign(µ)
+///
+/// THE ASYMPTOTIC EXPANSION OF THE INCOMPLETE GAMMA FUNCTIONS, Temme 1979, Eq. 1.3
+func eta(µ: Double) -> Double {
+    return µ.signum * sqrt(2 * (-log1pmx(µ)))
+}
+
+/// Calculates 1 / Γ(x + 1) - 1, uses an expansion when x is small
+///
+/// 1 / Γ(x) = Σi=1... aᵢxⁱ
+///
+/// 1 / Γ(x + 1) - 1 = -1 + Σi=1... aᵢ₊₁xⁱ
+///
+/// Concerning two series for the gamma function, JW Wrench 1967, Eq. 22
+func inverse_gamma_p1m1(_ x: Double) -> Double {
+    switch x {
+    case ..<1.5: return evaluate_polynomial(poly: C.wrench, z: x)
+    case      _: return 1 / tgamma(x + 1) - 1
+    }
+}
+
+/// Coefficient vectors
+///
+/// This is fine while we are using Double but needs more thought if we
+/// want to go generic. In particular, note that literals don't currently
+/// work as expected for types other than Float or Double.
+fileprivate struct C {
+    /// Stirling series for Γ(a)
+    ///
+    /// Provides the cᵢ in
+    ///
+    /// Γ(a) = √(2π/a) (a/e)^a Σi...N-1 (cᵢ / aⁱ)
+    ///
+    /// Note that this series is not convergent so more terms start to hurt at
+    /// some point (where depends on a).
+    ///
+    /// Concerning two series for the gamma function, JW Wrench 1967, Table 2
+    static let stirling: [Double] = [
+         1,
+         0.08333_33333_33333_33333_33333_33333_33333_33333_33333_33333,
+         0.00347_22222_22222_22222_22222_22222_22222_22222_22222_22222,
+        -0.00268_13271_60493_88888_88888_88888_88888_88888_88888_88888,
+        -0.00022_94720_93621_39917_69547_32510_28806_58444_44444_44444,
+         0.00078_40392_21720_06662_74740_34881_44228_88496_96257_10366,
+         0.00006_97281_37583_65857_77429_39882_85757_83308_29359_63594,
+        -0.00059_21664_37353_69388_28648_36225_60440_11873_91585_19680,
+        -0.00005_17179_09082_60592_19337_05784_30020_58822_81785_34534,
+         0.00083_94987_20672_08727_99933_57516_76498_34451_98182_11159,
+         0.00007_20489_54160_20010_55908_57193_02250_15052_06345_17380,
+        -0.00191_44384_98565_47752_65008_98858_32852_25448_76893_57895,
+        -0.00016_25162_62783_91581_68986_35123_98027_09981_05872_59193,
+         0.00640_33628_33808_06979_48236_38090_26579_58304_01893_93280,
+         0.00054_01647_67892_60451_51804_67508_57024_17355_47254_41598,
+        -0.02952_78809_45699_12050_54406_51054_69382_44465_65482_82544,
+        -0.00248_17436_00264_99773_09156_58368_74346_43239_75168_04723,
+         0.17954_01170_61234_85610_76994_07722_22633_05309_12823_38692,
+         0.01505_61130_40026_42441_23842_21877_13112_72602_59815_45541,
+        -1.39180_10932_65337_48139_91477_63542_27314_93580_45617_72646,
+        -0.11654_62765_99463_20085_07340_36907_14796_96789_37334_38371,
+    ]
+
+    /// Taylor expansion of 1 / Γ(1 + x) - 1, x < 1.5
+    ///
+    /// This is modified from the original series for 1 / Γ(x) in two ways: (1)
+    /// we remove the first coefficient, thererby dividing the whole series by x
+    /// and making it a series for 1 / Γ(1 + x), and (2) we subtract 1 from the
+    /// first (constant) term to make it 1 / Γ(1 + x) - 1.
+    ///
+    /// Concerning two series for the gamma function, JW Wrench 1967, Table 5
+    static let wrench: [Double] = [
+         0,
+         0.57721_56649_01532_86060_65120_90082_4,
+        -0.65587_80715_20253_88107_70195_15145_4,
+        -0.04200_26350_34095_23552_90039_34875_4,
+         0.16653_86113_82291_48950_17007_95102_1,
+        -0.04219_77345_55544_33674_82083_01289_2,
+        -0.00962_19715_27876_97356_21149_21672_3,
+         0.00721_89432_46663_09954_23950_10340_5,
+        -0.00116_51675_91859_06511_21139_71084_0,
+        -0.00021_52416_74114_95097_28157_29963_1,
+         0.00012_80502_82388_11618_61531_98626_3,
+        -0.00002_01348_54780_78823_86556_89391_4,
+        -0.00000_12504_93482_14267_06573_45359_5,
+         0.00000_11330_27231_98169_58823_74128_9,
+        -0.00000_02056_33841_69776_07103_45015_9,
+         0.00000_00061_16095_10448_14158_17863_4,
+         0.00000_00050_02007_64446_92229_30056_2,
+        -0.00000_00011_81274_57048_70201_44588_3,
+         0.00000_00001_04342_67116_91100_51048_8,
+         0.00000_00000_07782_26343_99050_71253_7,
+        -0.00000_00000_03696_80561_86422_05708_2,
+         0.00000_00000_00510_03702_87454_47597_9,
+        -0.00000_00000_00020_58326_05356_65067_9,
+        -0.00000_00000_00005_34812_25394_23018_0,
+         0.00000_00000_00001_22677_86282_38260_9,
+        -0.00000_00000_00000_11812_59301_69745_6,
+         0.00000_00000_00000_00118_66922_54751_7,
+         0.00000_00000_00000_00141_23806_55318_0,
+        -0.00000_00000_00000_00022_98745_68443_6,
+         0.00000_00000_00000_00001_71440_63219_3,
+         0.00000_00000_00000_00000_01337_35173_1,
+        -0.00000_00000_00000_00000_02054_23355_1,
+         0.00000_00000_00000_00000_00273_60300_6,
+        -0.00000_00000_00000_00000_00017_32356_4,
+        -0.00000_00000_00000_00000_00000_23606_0,
+         0.00000_00000_00000_00000_00000_18650_0,
+        -0.00000_00000_00000_00000_00000_02218_0,
+         0.00000_00000_00000_00000_00000_00129_9,
+         0.00000_00000_00000_00000_00000_00001_2,
+        -0.00000_00000_00000_00000_00000_00001_1,
+         0.00000_00000_00000_00000_00000_00000_1
+    ]
+    
+    /// Temme's d coefficients used in the uniform asymptotic expansion
+    /// of the incomplete gamma function with large a and x near a.
+    ///
+    /// They are defined as the coefficients in the following expansion:
+    ///
+    /// η / (λ - 1) = Σi=0... dᵢ ηⁱ,
+    ///
+    /// d₀ = -1 / 3, dᵢ = (i + 2) αᵢ₊₂,
+    ///
+    /// Where the αᵢ are from the expansion for the Lambert W's -1 branch. Temme
+    /// says we only need 25 terms when a > 12
+    ///
+    /// THE ASYMPTOTIC EXPANSION OF THE INCOMPLETE GAMMA FUNCTIONS, Temme 1979,
+    /// Eq. 3.8 and following
+    ///
+    /// Listings of the Lambert W coefficients available as OEIS A005447/A005446
+    static let temme_d: [Double] = [
+         1,
+        -3.33333_33333_33333_33333_33333_33333e-1,
+         8.33333_33333_33333_33333_33333_33333e-2,
+        -1.48148_14814_81481_48148_14814_81481e-2,
+         1.15740_74074_07407_40740_74074_07407e-3,
+         3.52733_68606_70194_00352_73368_60670e-4,
+        -1.78755_14403_29218_10699_58847_73663e-4,
+         3.91926_31785_22437_78169_70409_56300e-5,
+        -2.18544_85106_79992_16147_36429_55124e-6,
+        -1.85406_22107_15159_96070_17988_36230e-6,
+         8.29671_13409_53086_00501_62421_31664e-7,
+        -1.76659_52736_82607_93043_60054_24574e-7,
+         6.70785_35434_01498_58036_93971_00296e-9,
+         1.02618_09784_24030_80425_73957_32273e-8,
+        -4.38203_60184_53353_18655_29746_22447e-9,
+         9.14769_95822_36790_23418_24881_76331e-10,
+        -2.55141_93994_94624_97668_77953_79939e-11,
+        -5.83077_21325_50425_06746_40894_50400e-11,
+         2.43619_48020_66741_62436_94069_67078e-11,
+        -5.02766_92801_14175_58909_05498_59257e-12,
+         1.10043_92031_95613_47708_37417_44972e-13,
+         3.37176_32624_00985_37882_76988_41692e-13,
+        -1.39238_87224_18162_06591_93661_84895e-13,
+         2.85348_93807_04744_32039_66909_90528e-14,
+        -5.13911_18342_42572_61899_06458_03004e-16,
+        -1.97522_88294_34944_28353_96240_15807e-15,
+         8.09952_11567_04561_33407_11566_87025e-16,
+    ]
 }
