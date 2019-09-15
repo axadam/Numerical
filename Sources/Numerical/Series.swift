@@ -13,11 +13,12 @@ public extension Sequence {
         var g = makeIterator()
         var count = 0
         var last: Element? = nil
-        while let e = g.next(), count < max_iter {
+        while let e = g.next() {
             if let lasty = last, f(lasty,e) {
                 return e
             }
             last = e
+            if count >= max_iter { break }
             count += 1
         }
         if count >= max_iter {

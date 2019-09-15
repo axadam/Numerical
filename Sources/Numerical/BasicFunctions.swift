@@ -52,3 +52,22 @@ public func log1pmx(_ x: Double) -> Double {
     }
 }
 
+/// Calculate x - sin(x) with precision even when x is small
+///
+/// sin(x) = Σi=0... (-1)ⁱ x²ⁱ⁺¹ / (2i + 1)!
+///
+/// x - sin(x) = Σi=1... (-1)ⁱ⁺¹ x²ⁱ⁺¹ / (2i + 1)!
+public func xmsin(_ x: Double) -> Double {
+    switch x {
+    case 1...:
+        return x - sin(x)
+    case _   :
+        let x² = x^^2
+        let s = recursiveSum(indices: 1..., sum0: 0.0, state0: -x, update: { i, prev in
+            let j = Double(2 * i + 1)
+            let t = -prev * x² / (j * (j - 1))
+            return (t, t)
+        }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
+        return s
+    }
+}

@@ -133,7 +133,7 @@ func q_gamma_series(a: Double, x: Double) -> Double {
 
 /// Continued fraction approximation of Q(a,x)
 ///
-/// Q(a,x) = e^(-x) x^a 1 / (1 + x - a -) 1 (1 - a) / (3 + x - a -)  2 (2 - a) / (5 + x - a -)
+/// Q(a,x) = e^(-x) x^a / 𝛤(a) * 1 / (1 + x - a -) 1 (1 - a) / (3 + x - a -)  2 (2 - a) / (5 + x - a -)
 ///
 /// This is the even part of the following (converges faster):
 ///
@@ -142,17 +142,10 @@ func q_gamma_series(a: Double, x: Double) -> Double {
 /// Numerical Receipes §6.2
 func q_gamma_frac(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
-    let b = 1 + x - a
-    let c = 1 / Double.leastNormalMagnitude
-    let d = 1 / b
-    let frac = recursiveProduct(indices: 1..., product0: d, state0: (b: b, c: c, d: d), update: { i, state in
-        let an = Double(-i) * (Double(i) - a)
-        let (b0, c0, d0) = state
-        let b1 = b0 + 2
-        let c1 = max(Double.leastNormalMagnitude, b1 + an / c0)
-        let d1 = 1 / max(Double.leastNormalMagnitude, b1 + an * d0)
-        return (c1 * d1, (b: b1, c: c1, d: d1))
-    }, until: { a, b in abs(b.1 - 1) < 1e-15 })
+    let frac = continued_fraction(
+        b0: 0,
+        a: { iInt in let i = Double(iInt); return iInt == 0 ? 1 : i * (a - i) },
+        b: { 1 + x - a + 2 * Double($0) })
     return prefix * frac
 }
 
