@@ -81,6 +81,16 @@ public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     }
 }
 
+/// Derivative of the Marcum Q function with respect to y
+///
+/// ∂Qᵤ(x,y)/∂y = Qᵤ₋₁(x,y) - Qᵤ(x,y), Eq. 16
+///
+/// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013, §2.3
+public func marcum_derivative(µ: Double, x: Double, y: Double) -> Double {
+    // FIXME: use the recurrence relation instead of doing two full calculations
+    return marcum(µ: µ - 1, x: x, y: y).q - marcum(µ: µ, x: x, y: y).q
+}
+
 /// Series method upper tail
 ///
 /// Qᵤ(x,y) = e^(-x) Σi=0..∞ xⁱ / i! Qᵤ₊ᵢ(y), Eq. 7
@@ -252,11 +262,11 @@ public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
-    let cµr = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
-    print("µ̃: \(µ̃), ξ: \(ξ), cµr: \(cµr)")
+    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
+    print("µ̃: \(µ̃), ξ: \(ξ), cµ̃: \(cµ̃)")
     
     // recurse back up to the original µ
-    let recurse = (0..<n).reduce((qᵢ₋₁: q₋₁, qᵢ: q₀, cᵢ: cµr)) { stateᵢ, iInt in
+    let recurse = (0..<n).reduce((qᵢ₋₁: q₋₁, qᵢ: q₀, cᵢ: cµ̃)) { stateᵢ, iInt in
         let (qᵢ₋₁, qᵢ, cᵢ) = stateᵢ
         let i = Double(iInt)
         let cᵢ₊₁ = (y / cᵢ - (µ̃ + i)) / x
@@ -318,11 +328,11 @@ public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
-    let cµr = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
-    print("µ̃: \(µ̃), ξ: \(ξ), cµr: \(cµr)")
+    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
+    print("µ̃: \(µ̃), ξ: \(ξ), cµ̃: \(cµ̃)")
     
     // recurse back up to the original µ
-    let recurse = (0..<n).reduce((pᵢ₊₁: p₊₁, pᵢ: p₀, cᵢ: cµr)) { stateᵢ, iInt in
+    let recurse = (0..<n).reduce((pᵢ₊₁: p₊₁, pᵢ: p₀, cᵢ: cµ̃)) { stateᵢ, iInt in
         let (pᵢ₊₁, pᵢ, cᵢ) = stateᵢ
         let i = Double(iInt)
         let cᵢ₋₁ = y / (µ̃ - i - 1 + x * cᵢ)
