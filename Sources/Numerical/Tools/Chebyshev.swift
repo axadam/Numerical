@@ -56,7 +56,6 @@ public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> =
     }
     
     // Evaluate
-    print("c₀: \(c₀), d₁: \(d₁), d₂: \(d₂)")
     let f = c₀ / 2 + y * d₁ - d₂
     return f
 }

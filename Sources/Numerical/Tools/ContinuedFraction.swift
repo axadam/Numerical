@@ -30,7 +30,6 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S) -> Double whe
         let dᵢ = 1 / absmax(small, bᵢ + aᵢ * dᵢ₋₁)
         let delta = cᵢ * dᵢ
         let fracᵢ = fracᵢ₋₁ * delta
-        print("a: \(aᵢ), b: \(bᵢ), dorig: \(dᵢ₋₁), d0: \(dᵢ), corig: \(cᵢ₋₁), c0: \(cᵢ), delta: \(delta), fc: \(fracᵢ)")
         return (cᵢ₋₁: cᵢ, dᵢ₋₁: dᵢ, fracᵢ₋₁: fracᵢ)
         }.converge(until: { a, b in abs(b.cᵢ₋₁ * b.dᵢ₋₁ - 1) < 1e-15 })
     guard let cfrac = cf else {

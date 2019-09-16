@@ -44,7 +44,6 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
     
     // initial estimate
     let I₀ = 0.5 * Δx₀ * (f(a) + f(b))
-    print("range: \(range), Δx₀: \(Δx₀), I₀: \(I₀)")
     
     // iteratively bisect the interval until we get desired convergence
     let q = (1...).lazy.scan((I: I₀, Δx: Δx₀, n: 1)) { accum, jInt in
@@ -67,7 +66,6 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
         // double the number of intervals
         let nⱼ = nⱼ₋₁ * 2
         
-        print("i: \(jInt), nᵢ: \(nⱼ₋₁), hᵢ: \(Δxⱼ₋₁), sum: \(sum), Iᵢ: \(Iⱼ)")
         return (Iⱼ,Δxⱼ,nⱼ)
         }.converge(max_iter: 10, until: { a, b in abs(b.I / a.I - 1) < 1e-10 })
     guard let quad = q else {

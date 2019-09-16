@@ -46,37 +46,30 @@ public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
         
     // 1. if x < 30 compute the series expansion
     case (     _,..<30,  ...(x + µ),                           _):
-        print("p series")
         let p = p_series(µ: µ, x: x, y: y)
         return (p: p, q: 1 - p)
     case (     _,..<30,  (x + µ)...,                           _):
-        print("q series")
         let q = q_series(µ: µ, x: x, y: y)
         return (p: 1 - q, q: q)
         
     // 2. if ξ > 30 and µ² < 2ξ use the large ξ asymptotic expansion
     case (     _,    _,           _,max(30,0.5 * µ^^2).nextUp...):
-        print("big xy")
         return bigxy(µ: µ, x: x, y: y)
         
     // 3. if f₁(x,µ) < y < f₂(x,µ) and µ < 135 use recurrence
     case (..<135,    _,f₁...(x + µ),                           _):
-        print("p recursion")
         let p = p_recursion(µ: µ, x: x, y: y)
         return (p: p, q: 1 - p)
     case (..<135,    _,(x + µ)...f₂,                           _):
-        print("q recursion")
         let q = q_recursion(µ: µ, x: x, y: y)
         return (p: 1 - q, q: q)
         
     // 4. if f₁(x,µ) < y < f₂(x,µ) and µ ≥ 135 use the large µ aysmptotic expansion
     case (135...,    _,     f₁...f₂,                           _):
-        print("big µ")
         return bigmu(µ: µ, x: x, y: y)
         
     // 5. in other cases use the quadrature method
     case (     _,    _,           _,                           _):
-        print("quadrature")
         return quadrature(µ: µ, x: x, y: y)
     }
 }
@@ -112,7 +105,6 @@ public func q_series(µ: Double, x: Double, y: Double) -> Double {
     
     // seed the modifier term: y^(µ-1) e^(-y) / 𝛤(µ)
     let d₀ = pow(y, µ - 1) * exp(-y) / tgamma(µ)
-    print("Q₀: \(Qᵤ), p₀: \(1), d₀: \(d₀), t₀: \(Qᵤ)")
 
     // calculate the sum deriving the terms recursively
     let s = recursiveSum(indices: 1..., sum0: Qᵤ, state0: (Q: Qᵤ, d: d₀, p: 1.0), update: { iInt, state in
@@ -130,8 +122,6 @@ public func q_series(µ: Double, x: Double, y: Double) -> Double {
         let Qᵤ₊ᵢ = Qᵤ₊ᵢ₋₁ + dᵢ
         let tᵢ = pᵢ * Qᵤ₊ᵢ
         
-        print("i: \(iInt), Qᵤ₊ᵢ: \(Qᵤ₊ᵢ), pᵢ: \(pᵢ), dᵢ: \(dᵢ), tᵢ: \(tᵢ)")
-
         return (tᵢ,(Qᵤ₊ᵢ,dᵢ,pᵢ))
     }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
     return exp(-x) * s
@@ -180,14 +170,12 @@ public func p_series(µ: Double, x: Double, y: Double) -> Double {
     let n̂ = root(guess: guess, f: f, f1: fʹ)
     let n₀ = ceil(n̂)
     let n₀Int = Int(n₀)
-    print("n₀: \(n₀)")
     
     // first term of the sum is xⁱ / i! Pᵤ₊ᵢ(y), i = n₀
     let P₀ = p_gamma(µ + n₀, y)
     let p₀ = x^^n₀Int / tgamma(n₀ + 1)
     let d₀ = pow(y,µ + n₀) * exp(-y) / tgamma(µ + n₀ + 1)
     let t₀ = p₀ * P₀
-    print("P₀: \(P₀), p₀: \(p₀), d₀: \(d₀), t₀: \(t₀)")
     
     let s = recursiveSum(indices: (1...n₀Int).reversed(), sum0: t₀, state0: (P: P₀, d: d₀, p: p₀), update: { iInt, state in
         let (Pᵤ₊ᵢ₊₁, dᵢ₊₁, pᵢ₊₁) = state
@@ -203,8 +191,6 @@ public func p_series(µ: Double, x: Double, y: Double) -> Double {
         
         let Pᵤ₊ᵢ = Pᵤ₊ᵢ₊₁ + dᵢ
         let tᵢ = pᵢ * Pᵤ₊ᵢ
-        
-        print("i: \(iInt), Pᵤ₊ᵢ: \(Pᵤ₊ᵢ), pᵢ: \(pᵢ), dᵢ: \(dᵢ), tᵢ: \(tᵢ)")
         
         return (tᵢ,(Pᵤ₊ᵢ,dᵢ,pᵢ))
     }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
@@ -246,11 +232,9 @@ public func p_series(µ: Double, x: Double, y: Double) -> Double {
 ///
 /// - Returns: The upper tail CDF of the distribution
 public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
-    print("µ: \(µ), x: \(x), y: \(y)")
     
     // find the nearest µ that fits the criteria for using quadrature
     let µʹ = y - x + 1 - sqrt(2 * (x + y) + 1)
-    print("ν: \(µʹ), ν is less than µ: \(µʹ < µ)")
     
     // for recursion we need to move an integer distance
     let µ̃ = µ - ceil(µ - µʹ)
@@ -263,7 +247,6 @@ public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
     let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
-    print("µ̃: \(µ̃), ξ: \(ξ), cµ̃: \(cµ̃)")
     
     // recurse back up to the original µ
     let recurse = (0..<n).reduce((qᵢ₋₁: q₋₁, qᵢ: q₀, cᵢ: cµ̃)) { stateᵢ, iInt in
@@ -271,7 +254,6 @@ public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
         let i = Double(iInt)
         let cᵢ₊₁ = (y / cᵢ - (µ̃ + i)) / x
         let qᵢ₊₁ = (1 + cᵢ) * qᵢ - cᵢ * qᵢ₋₁
-        print("i: \(iInt), µ': \(µ̃ + Double(i)), qᵢ₋₁: \(qᵢ₋₁), qᵢ: \(qᵢ), qᵢ₊₁: \(qᵢ₊₁), cᵢ: \(cᵢ)")
         return (qᵢ₋₁: qᵢ, qᵢ: qᵢ₊₁, cᵢ: cᵢ₊₁)
     }
     return recurse.qᵢ
@@ -312,11 +294,9 @@ public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
 ///
 /// - Returns: The lower tail CDF of the distribution
 public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
-    print("µ: \(µ), x: \(x), y: \(y)")
     
     // find the nearest µ that fits the criteria for using quadrature
     let µʹ = y - x + 1 + sqrt(2 * (x + y) + 1)
-    print("ν: \(µʹ), ν is less than µ: \(µʹ < µ)")
     
     // for recursion we need to move an integer distance
     let µ̃ = µ + ceil(µʹ - µ)
@@ -329,7 +309,6 @@ public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
     let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
-    print("µ̃: \(µ̃), ξ: \(ξ), cµ̃: \(cµ̃)")
     
     // recurse back up to the original µ
     let recurse = (0..<n).reduce((pᵢ₊₁: p₊₁, pᵢ: p₀, cᵢ: cµ̃)) { stateᵢ, iInt in
@@ -337,7 +316,6 @@ public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
         let i = Double(iInt)
         let cᵢ₋₁ = y / (µ̃ - i - 1 + x * cᵢ)
         let pᵢ₋₁ = ((1 + cᵢ) * pᵢ - pᵢ₊₁) / cᵢ
-        print("i: \(iInt), µ': \(µ̃ - Double(i)), pᵢ₋₁: \(pᵢ₋₁), pᵢ: \(pᵢ), pᵢ₊₁: \(pᵢ₊₁), cᵢ: \(cᵢ)")
         return (pᵢ₊₁: pᵢ, pᵢ: pᵢ₋₁, cᵢ: cᵢ₋₁)
     }
     return recurse.pᵢ
@@ -489,7 +467,6 @@ public func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²:
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
 public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
-    print("µ: \(µ), x: \(x), y: \(y)")
     // ξ = 2 √xy           (xi)
     // σ = (√y - √x)² / ξ  (sigma)
     // ρ = √(y / x)        (rho)    Eq. 31
@@ -499,10 +476,6 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     let σξ = sqσξ^^2
     let ρ = sqrt(y / x)
     let ρµ = pow(ρ,µ)
-    print("ξ: \(ξ)")
-    print("σξ: \(σξ)")
-    print("ρ: \(ρ)")
-    print("ρ^µ: \(ρµ)")
     guard ρµ > 0 else {
         print("MarcumQ big xy underflow")
         return (p: .nan, q: .nan)
@@ -521,7 +494,6 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     // because we factor it out of 𝜙ᵢ.
     // prefix = ρ^µ / 2√2π e^(-σξ)
     let prefix = ρµ / (2 * sqrt(2 * .pi)) * exp(-σξ)
-    print("prefix: \(prefix)")
 
     // A₀(µ) = 1 Γ(1/2 + µ + 0) / 1 Γ(1/2 + µ - 0)
     //       = 1
@@ -549,8 +521,6 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
         prefix * sqξ * C₀ * 𝜙₀ :
         // ψ̃₀ = ρ^µ / 2√ρ erfc(√(σξ)), Eq. 40
         0.5 * ρµ / sqrt(ρ) * erfc(sqσξ) // * exp(σξ)
-    print("ψ₀: \(ψ₀)")
-    print("i: 0, A₀: \(A₀), 𝜙₀: \(𝜙₀), ξ⁰sqξ: \(sqξ)")
     
     // Now compute the sum ψ₀ + Σi=1..∞ ψᵢ
     let pq = recursiveSum(indices: 1..., sum0: ψ₀, state0: (Aᵢ: A₀, 𝜙ᵢ: 𝜙₀, ξ⁻ⁱsqξ: sqξ, sgnᵢ: sgn₀), update: { iInt, stateᵢ₋₁ in
@@ -589,9 +559,8 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
         // ψᵢ = ρ^µ / 2√(2π) (-1)ⁱ [Aᵢ(µ-1) + 1 / ρ Aᵢ(µ)] 𝜙ᵢ
         // ψᵢ e^(σξ) = ρ^µ / 2√(2π) (-1)ⁱ Cᵢ(µ) ξ⁻ⁱ⁺¹/² [𝜙ᵢ e^(σξ) ξⁱ⁻¹/²]
         let ψᵢ = prefix * sgnᵢ * ξ⁻ⁱsqξ * Cᵢ * 𝜙ᵢ
-        print("i: \(iInt), Aᵢ: \(Aᵢ), Cᵢ: \(Cᵢ), 𝜙ᵢ: \(𝜙ᵢ), ξ⁻ⁱsqξ: \(ξ⁻ⁱsqξ), ψᵢ: \(ψᵢ)")
         return (ψᵢ, (Aᵢ,𝜙ᵢ,ξ⁻ⁱsqξ,sgnᵢ))
-    }, until: { a, b in print("sum: \(b.0)"); return abs(b.1 / b.0) < 1e-10 })
+    }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
     
     // We calculated either p or q depending on whether y > x
     return y >= x ? (p: 1 - pq, q: pq) : (p: pq, q: 1 - pq)
@@ -621,21 +590,17 @@ public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> (p: Double, 
     let µ = µp1 - 1
     let x = µx / µ
     let y = µy / µ
-    print("µ: \(µ), x: \(x), y: \(y)")
     
     // ζ = sign(x + 1 - y) √(2𝜙(ξ) - 2𝜙(z₀)), eq. 56
     let ζ = zeta(x: x, y: y)
     let sgn = ζ < 0 ? 1.0 : -1.0
     let sgnζ = sgn * ζ
-    print("ζ: \(ζ)")
     
     // ψ₀(ζ) = √(π / 2µ) erfc(-ζ √(µ/2)) eq. 67
     let ψ₀ = sqrt(.pi / (2 * µ)) * erfc(-sgnζ * sqrt(µ / 2))
-    print("ψ₀: \(ψ₀)")
     
     // e^(-1/2 µ ζ²)
     let ehµζ² = exp(-0.5 * µ * sgnζ^^2)
-    print("ehµζ²: \(ehµζ²)")
     guard ehµζ² > 0 else {
         print("Marcum Q big µ method underflow")
         return (p: .nan, q: .nan)
@@ -650,28 +615,22 @@ public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> (p: Double, 
         let ζⁱ = -sgnζ * ζⁱ⁻¹
         return (ψᵢ₋₁,ψᵢ,ζⁱ)
         }.map { $0.ψᵢ₋₁ }
-    print("ψᵢ: \(ψⱼ)")
     
     // pre-calculate power of µ so we don't repeat ourselves below
     let µⁿ = (1...3).scan(1) { prev, n in prev * µ }
-    print("µⁿ: \(µⁿ)")
     
     // u = 1 / √(2x + 1) eq. 88
     let u = 1 / sqrt(2 * x + 1)
-    print("u: \(u)")
     
     let s = recursiveSum(indices: 1...3, sum0: ψ₀, state0: (), update: { i, stateᵢ₋₁ in
         // Bᵢ = Σ j=0...i fⱼ ᵢ₋ⱼ 𝛹ⱼ(ζ) / µⁱ⁻j, eq. 71
         let Bᵢ = (0...i).reduce(0.0) { accum, j in
             let fjij = f(j,i - j,u)
-            print("j: \(j), i - j: \(i - j), f(j,i - j): \(fjij)")
             let tⱼ = sgn^^j * fjij * ψⱼ[j] / µⁿ[i - j]
             return accum + tⱼ
         }
-        print("B\(i): \(Bᵢ)")
         return (Bᵢ, ())
     }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
-    print("s: \(s)")
     let pq = sqrt(µ / (2 * .pi)) * s
     return ζ < 0 ? (p: 1 - pq, q: pq) : (p: pq, q: 1 - pq)
 }
