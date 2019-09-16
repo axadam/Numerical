@@ -26,8 +26,8 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S) -> Double whe
     let cf = coeffs.lazy.scan((cᵢ₋₁: c₀, dᵢ₋₁: d₀, fracᵢ₋₁: h₀)) { accum, coeffᵢ in
         let (cᵢ₋₁,dᵢ₋₁,fracᵢ₋₁) = accum
         let (aᵢ,bᵢ) = coeffᵢ
-        let cᵢ = max(small, bᵢ + aᵢ / cᵢ₋₁)
-        let dᵢ = 1 / max(small, bᵢ + aᵢ * dᵢ₋₁)
+        let cᵢ = absmax(small, bᵢ + aᵢ / cᵢ₋₁)
+        let dᵢ = 1 / absmax(small, bᵢ + aᵢ * dᵢ₋₁)
         let delta = cᵢ * dᵢ
         let fracᵢ = fracᵢ₋₁ * delta
         print("a: \(aᵢ), b: \(bᵢ), dorig: \(dᵢ₋₁), d0: \(dᵢ), corig: \(cᵢ₋₁), c0: \(cᵢ), delta: \(delta), fc: \(fracᵢ)")
@@ -54,4 +54,14 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S) -> Double whe
 public func continued_fraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double) -> Double {
     let seq = (0...).lazy.map { return (a: a($0), b: b($0)) }
     return continued_fraction(b0: b0, coeffs: seq)
+}
+
+/// Returns the argument with the largest absolute value
+///
+/// absmax(x, y) = abs(x) < abs(y) ? y : x
+///
+/// Convenience function frequently used in Lentz form
+/// of continued fractions.
+func absmax(_ x: Double, _ y: Double = Double.leastNormalMagnitude) -> Double {
+    return abs(x) < abs(y) ? y : x
 }
