@@ -175,7 +175,7 @@ func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool = true) -> 
     let η = µ.signum * sqrt(2 * hη²)
     
     /// u = 1/2 erfc(√(a/2) η)
-    let u = 0.5 * erfc(sgn * η * sqrt(a / 2))
+    let u: Double = 0.5 * erfc(sgn * η * sqrt(a / 2.0))
 
     /// prefix = e^(-1/2 η²a) / √2πa
     let Rprefix = exp(-hη² * a) / sqrt(2 * .pi * a)
@@ -320,7 +320,7 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
     //
     // Asymptotic Inversion of Incomplete Gamma Functions, Temme 1992, Eq. 6.2
     case (_,_,0.5):
-        return a - 1/3 + (8/405)/a + (184/25515)/(a^^2) + (2248/3444525)/(a^^3)
+        return a - 1.0/3.0 + (8.0/405.0)/a + (184.0/25515.0)/(a^^2) + (2248.0/3444525.0)/(a^^3)
         
     // When p is close to zero and a is relatively small we have an asymptotic expansion
     //
@@ -329,11 +329,11 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
     //
     // EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
     // GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Eq. 3.2 and 3.3
-    case (_,..<(0.2 * (1 + a)),_):
-        let c2 = 1 / (a + 1)
-        let c3 = (3 * a + 5) / (2 * (a+1)^^2 * (a + 2))
-        let c4 = (8 * a^^2 + 33 * a + 31) / (3 * (a + 1)^^3 * (a + 2) * (a + 3))
-        let c5 = (125 * a^^4 + 1179 * a^^3 + 3971 * a^^2 + 5661 * a + 2888) / (24 * (a + 1)^^4 * (a + 2)^^2 * (a + 3) * (a + 4))
+    case (_,..<(0.2 * (1.0 + a)),_):
+        let c2 = 1.0 / (a + 1.0)
+        let c3 = (3.0 * a + 5.0) / (2.0 * (a+1.0)^^2 * (a + 2.0))
+        let c4 = (8.0 * a^^2 + 33.0 * a + 31.0) / (3.0 * (a + 1.0)^^3 * (a + 2.0) * (a + 3.0))
+        let c5 = (125.0 * a^^4 + 1179.0 * a^^3 + 3971.0 * a^^2 + 5661.0 * a + 2888.0) / (24.0 * (a + 1.0)^^4 * (a + 2.0)^^2 * (a + 3.0) * (a + 4.0))
         return r + c2 * r^^2 + c3 * r^^3 + c4 * r^^4 + c5 * r^^5
         
     // When q is close to zero and a is relatively small we have an asymptotic expansion
@@ -349,10 +349,10 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
         let b = 1 - a
         let L = log(x₀)
 
-        let d₁ = L - 1
-        let d₂ = (1/2) * (2 + 3 * b - 2 * b * L - 2 * L + L^^2)
-        let d₃ = (1/6) * (24 * b * L - 11 * b^^2 - 24 * b - 6 * L^^2 + 12 * L - 12 - 9 * b * L^^2 + 6 * b^^2 * L + 2 * L^^3)
-        let d₄ = (1/12) * (72 + 36 * L^^2 + 3 * L^^4 - 72 * L + 162 * b - 168 * b * L - 12 * L^^3 + 25 * b^^3 - 22 * b * L^^3 + 36 * b^^2 * L^^2 - 12 * b^^3 * L + 84 * b * L^^2 + 120 * b^^2 - 114 * b^^2 * L)
+        let d₁ = L - 1.0
+        let d₂ = (1.0/2.0) * (2.0 + 3.0 * b - 2.0 * b * L - 2.0 * L + L^^2)
+        let d₃ = (1.0/6.0) * (24.0 * b * L - 11.0 * b^^2 - 24.0 * b - 6.0 * L^^2 + 12.0 * L - 12.0 - 9.0 * b * L^^2 + 6.0 * b^^2 * L + 2.0 * L^^3)
+        let d₄ = (1.0/12.0) * (72.0 + 36.0 * L^^2 + 3.0 * L^^4 - 72.0 * L + 162.0 * b - 168.0 * b * L - 12.0 * L^^3 + 25.0 * b^^3 - 22.0 * b * L^^3 + 36.0 * b^^2 * L^^2 - 12.0 * b^^3 * L + 84.0 * b * L^^2 + 120.0 * b^^2 - 114.0 * b^^2 * L)
         return x₀ - L + b * evaluate_polynomial(poly: [0.0,d₁,d₂,d₃,d₄], z: 1 / x₀)
         
     // When a < 1 the following starting point leads to inexpensive iteration
@@ -393,7 +393,7 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
     // Handbook of Mathematical Functions, §26.4.17
     case (_,_,_):
         let xp = p < 0.5 ? qapprox(p: p) : -qapprox(p: q)
-        return fmax(1e-3, a * (1 - 1/(9 * a) - xp / (3 * sqrt(a)))^^3)
+        return fmax(1e-3, a * (1.0 - 1.0/(9.0 * a) - xp / (3.0 * sqrt(a)))^^3)
     }
 }
 
@@ -403,11 +403,11 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
 func epsilon(η₀: Double) -> (Double, Double, Double) {
     switch η₀ {
     case -0.3...0.3:
-        let coef1: [Double] = [-1/3, 1/36, 1/1620, -7/6480, 5/18144, -11/382725, -101/16329600]
+        let coef1: [Double] = [-1.0/3.0, 1.0/36.0, 1.0/1620.0, -7.0/6480.0, 5.0/18144.0, -11.0/382725.0, -101.0/16329600.0]
         let ε₁ = evaluate_polynomial(poly: coef1, z: η₀)
-        let coef2: [Double] = [-7.0/405, -7/2592, 533/204120, -1579/2099520, 109/1749600, 10217/251942400]
+        let coef2: [Double] = [-7.0/405.0, -7.0/2592.0, 533.0/204120.0, -1579.0/2099520.0, 109.0/1749600.0, 10217.0/251942400.0]
         let ε₂ = evaluate_polynomial(poly: coef2, z: η₀)
-        let coef3: [Double] = [449/102060, -63149/20995200, 29233/36741600, 346793/5290790400, -18442139/130947062400]
+        let coef3: [Double] = [449.0/102060.0, -63149.0/20995200.0, 29233.0/36741600.0, 346793.0/5290790400.0, -18442139.0/130947062400.0]
         let ε₃ = evaluate_polynomial(poly: coef3, z: η₀)
         return (ε₁,ε₂,ε₃)
     case ..<1000:
@@ -421,8 +421,8 @@ func epsilon(η₀: Double) -> (Double, Double, Double) {
         let ε₁ = log(f) / η₀
         
         // Temme 1992 section 5
-        let ε₂ = (12 / η₀^^2 - 12 * f^^2 / η₀^^2 - 12 * f / η₀ - 12 * f^^2 * ε₁ / η₀ - 12 * f * ε₁ - 1 - 6 * ε₁^^2) / (12 * η₀)
-        let ε₃ = (-30 / η₀^^4 + 12 * f^^2 * ε₁ / η₀^^3 + 12 * f * ε₁ / η₀^^2 + 24 * f^^2 * ε₁ / η₀ + 6 * ε₁^^3 / η₀ - 12 * f^^2 / η₀^^4 + 60 * f^^3 * ε₁ / η₀^^2 + 31 * f^^2 / η₀^^2 + 72 * f^^3 / η₀^^3 + 42 * f^^4 / η₀^^4 + 18 * f^^3 * ε₁^^2 / η₀ + 6 * f^^2 * ε₁^^2 + 36 * f^^4 * ε₁ / η₀^^3 + 12 * f * ε₁^^2 / η₀ + 12 * f^^2 * ε₁^^2 / η₀^^2 - 12 * ε₁ / η₀^^3 + ε₁ / η₀ + f / η₀ - 12 * f / η₀^^3 + 12 * f^^4 * ε₁^^2 / η₀^^2) / (12 * η₀)
+        let ε₂ = (12.0 / η₀^^2 - 12.0 * f^^2 / η₀^^2 - 12.0 * f / η₀ - 12.0 * f^^2 * ε₁ / η₀ - 12.0 * f * ε₁ - 1.0 - 6.0 * ε₁^^2) / (12.0 * η₀)
+        let ε₃ = (-30.0 / η₀^^4 + 12.0 * f^^2 * ε₁ / η₀^^3 + 12.0 * f * ε₁ / η₀^^2 + 24.0 * f^^2 * ε₁ / η₀ + 6.0 * ε₁^^3 / η₀ - 12.0 * f^^2 / η₀^^4 + 60.0 * f^^3 * ε₁ / η₀^^2 + 31.0 * f^^2 / η₀^^2 + 72.0 * f^^3 / η₀^^3 + 42.0 * f^^4 / η₀^^4 + 18.0 * f^^3 * ε₁^^2 / η₀ + 6.0 * f^^2 * ε₁^^2 + 36.0 * f^^4 * ε₁ / η₀^^3 + 12.0 * f * ε₁^^2 / η₀ + 12.0 * f^^2 * ε₁^^2 / η₀^^2 - 12.0 * ε₁ / η₀^^3 + ε₁ / η₀ + f / η₀ - 12.0 * f / η₀^^3 + 12.0 * f^^4 * ε₁^^2 / η₀^^2) / (12.0 * η₀)
         
         return (ε₁,ε₂,ε₃)
     case _:
@@ -433,8 +433,8 @@ func epsilon(η₀: Double) -> (Double, Double, Double) {
         let f = η₀ / µ
 
         let ε₁ = log(f) / η₀
-        let ε₂ = -1 / (12 * η₀)
-        let ε₃ = ε₁ / (12 * η₀^^2)
+        let ε₂ = -1 / (12.0 * η₀)
+        let ε₃ = ε₁ / (12.0 * η₀^^2)
 
         return (ε₁,ε₂,ε₃)
     }
@@ -480,7 +480,7 @@ func gammastar(_ a: Double) -> Double {
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Eq. 2.4
 func eta(_ a: Double, _ q: Double) -> Double {
-    return sqrt( -2 * log(q * sqrt(2 * .pi) * gammastar(a)) / a )
+    return sqrt( -2.0 * log(q * sqrt(2.0 * .pi) * gammastar(a)) / a )
 }
 
 /// Find η₀ from a and q. Works on wide range of values
@@ -538,10 +538,10 @@ func lambda(_ η: Double) -> Double {
             let L₂ = log(L₁)
             let a₁ = 1.0
             let a₂ = (2 - L₂) / 2
-            let a₃ = (6 - 9 * L₂ + 2 * L₂^^2) / 6
-            let a₄ = -(-12 + 36 * L₂ - 22 * L₂^^2 + 3 * L₂^^3) / 12
-            let a₅ = (60 - 300 * L₂ + 350 * L₂^^2 - 125 * L₂^^3 + 12 * L₂^^4) / 60
-            let a₆ = -(-120 + 900 * L₂ - 1700 * L₂^^2 + 1125 * L₂^^3 - 274 * L₂^^4 + 20 * L₂^^5) / 120
+            let a₃ = (6.0 - 9.0 * L₂ + 2.0 * L₂^^2) / 6.0
+            let a₄ = -(-12.0 + 36.0 * L₂ - 22.0 * L₂^^2 + 3.0 * L₂^^3) / 12.0
+            let a₅ = (60.0 - 300.0 * L₂ + 350.0 * L₂^^2 - 125.0 * L₂^^3 + 12.0 * L₂^^4) / 60.0
+            let a₆ = -(-120.0 + 900.0 * L₂ - 1700.0 * L₂^^2 + 1125.0 * L₂^^3 - 274.0 * L₂^^4 + 20.0 * L₂^^5) / 120.0
             return L₁ + L₂ * evaluate_polynomial(poly: [1,a₁,a₂,a₃,a₅,a₄,a₆], z: 1 / L₁)
         }
     }()

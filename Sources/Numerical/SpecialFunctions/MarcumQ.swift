@@ -378,6 +378,8 @@ public func quadrature(µ: Double, x µx: Double, y µy: Double) -> (p: Double, 
 ///
 /// r(θ) = 1/(2y) (θ/sinθ + ρ(θ,ξ)), Eq. 3.16
 ///
+/// rʹ(θ) = (sinθ -θcosθ) / (2ysin²θ) [1 + θ / (ρ(θ,ξ)sinθ)), Eq. 3.30
+///
 /// ρ(θ,ξ) = √((θ/sinθ)² + ξ²), Eq. 3.16
 ///
 /// We decompose ψ(θ) into two terms and attack the computation of each according
@@ -414,7 +416,7 @@ public func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²:
     // compute the named quantities
     let ρ = sqrt(θ_sinθ^^2 + ξ²)
     let r = (θ_sinθ + ρ) / (2 * y)
-    let rʹ = (-θmsinθ + 2 * θ * sin(0.5 * θ)^^2) / (2 * y * sin²θ) * (1 + θ_sinθ / ρ)
+    let rʹ = (-θmsinθ + 2.0 * θ * sin(0.5 * θ)^^2) / (2.0 * y * sin²θ) * (1.0 + θ_sinθ / ρ)
     let f = (sinθ * rʹ + (cosθ - r) * r) / (r * (r - 2 * cosθ) + 1)
 
     // ψ₁ = cos(θ)ρ(θ,ξ) - √(1 + ξ²),
@@ -486,7 +488,7 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     }
     
     // precompute some terms that are constant in the sum
-    let fourµ² = 4 * µ^^2
+    let fourµ² = 4.0 * µ^^2
     let iInvariantNum = (2 * µ - 1) * (ρ - 1)
     let iInvariantDenom = ρ * (2 * µ - 1)
 
