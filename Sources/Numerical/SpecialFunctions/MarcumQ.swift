@@ -33,7 +33,7 @@ import Scan
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
+public func marcum(µ: Double, x: Double, y: Double) -> Probability {
     let ξ = 2 * sqrt(x * y)
     
     // these two functions draw a parabola outside of which quadrature
@@ -47,10 +47,10 @@ public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     // 1. if x < 30 compute the series expansion
     case (     _,..<30,  ...(x + µ),                           _):
         let p = p_series(µ: µ, x: x, y: y)
-        return (p: p, q: 1 - p)
+        return Probability(p: p)
     case (     _,..<30,  (x + µ)...,                           _):
         let q = q_series(µ: µ, x: x, y: y)
-        return (p: 1 - q, q: q)
+        return Probability(q: q)
         
     // 2. if ξ > 30 and µ² < 2ξ use the large ξ asymptotic expansion
     case (     _,    _,           _,max(30,0.5 * µ^^2).nextUp...):
@@ -59,10 +59,10 @@ public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     // 3. if f₁(x,µ) < y < f₂(x,µ) and µ < 135 use recurrence
     case (..<135,    _,f₁...(x + µ),                           _):
         let p = p_recursion(µ: µ, x: x, y: y)
-        return (p: p, q: 1 - p)
+        return Probability(p: p)
     case (..<135,    _,(x + µ)...f₂,                           _):
         let q = q_recursion(µ: µ, x: x, y: y)
-        return (p: 1 - q, q: q)
+        return Probability(q: q)
         
     // 4. if f₁(x,µ) < y < f₂(x,µ) and µ ≥ 135 use the large µ aysmptotic expansion
     case (135...,    _,     f₁...f₂,                           _):
@@ -78,10 +78,144 @@ public func marcum(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
 ///
 /// ∂Qᵤ(x,y)/∂y = Qᵤ₋₁(x,y) - Qᵤ(x,y), Eq. 16
 ///
+/// Note that this is the derivative of the Q, or upper tail. If you want the derivative of the P
+/// then you must negate.
+///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013, §2.3
 public func marcum_derivative(µ: Double, x: Double, y: Double) -> Double {
     // FIXME: use the recurrence relation instead of doing two full calculations
     return marcum(µ: µ - 1, x: x, y: y).q - marcum(µ: µ, x: x, y: y).q
+}
+
+/// Inverse of the Marcum Q function with respect to y
+///
+/// For a given µ and x and (p,q) pair find the y such that Qᵤ(x,y) = (p,q)
+///
+/// We first come up with a guess for y based on an approximation of ζ, then use
+/// root finding to get the final result. We use just the first two terms of the approximation of ζ.
+///
+/// ζ ~ ζ₀ + Σi=1... ζ ᵢ / µⁱ, Eq. 5.23
+///
+/// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §5.2
+public func marcum_inverse(µ: Double, x µx: Double, p: Probability) -> Double {
+    // this asymptotic method works on x normalized for µ
+    let x = µx / µ
+        
+    // 1/2 erfc(ζ₀√(µ/2)) = q, Eq. 5.11
+    // ζ₀ = erfc⁻¹(2q) √(2/µ)
+    // to avoid rounding error we work on the smaller of p and q
+    let (s,prob) = p.p < 0.5 ? (-1.0,p.p) : (1.0,p.q)
+    let ζ₀ = s * invErfC(2 * prob) * sqrt(2 / µ)
+    
+    // find y₀ corresponding to ζ₀
+    let y₀ = y(ζ₀,x)
+    
+    // find ζ₁ corresponding to ζ₀, x, and y₀
+    let ζ₁ = zeta1(ζ₀,x,y₀)
+    
+    // two term approximation of ζ
+    // ζ ~ ζ₀ + ζ₁ / µ, Eq. 5.23
+    let ζ = ζ₀ + ζ₁ / µ
+    
+    // scale back up by µ for final guess
+    let guess = µ * y(ζ,x)
+    
+    // root finding to get final answer
+    // FIXME: default bracketing goes wayy too wide here, wasting work
+    let r = root(guess: guess, tolerance: 1e-15 * prob) { marcum(µ: µ, x: µx, y: $0) - p }
+    return r
+}
+
+/// Find y given ζ (zeta) and x
+///
+/// Where x, y, and ζ are related by:
+///
+/// 1/2 ζ² = x + y - √(1 + 4xy) + log [(1 + √(1 + 4xy)) / (2y)], Eq. 7.1
+///
+/// When ζ is not small we find the root with Newton's method. Note that there will be two roots
+/// and we need to find the one that satisfies sign(ζ) = sign(y - x - 1).
+///
+/// When ζ is small |y - x - 1| is small and we use an expansion of y - x - 1:
+///
+/// y = x + 1 + Σi=1... bᵢ(x) ζ ⁱ, Eq. 7.5
+///
+/// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §7
+public func y(_ ζ: Double, _ x: Double) -> Double {
+    switch abs(ζ) {
+    
+    // Small ζ use expansion in Eq. 7.5
+    // b₁(x) = √(2x + 1), Eq. 7.6
+    // b₂(x) = (3x + 1) / (3(2x + 1)),
+    // b₃(x) = (6x + 1) / (36(2x + 1)⁵/²)
+    case ..<0.5:
+        let x2p1 = 2.0 * x + 1.0
+        let b₁ = sqrt(x2p1)
+        let b₂ = (1 + 3 * x) / (3 * x2p1)
+        let b₃ = (1 + 6 * x) / (36 * pow(x2p1, 2.5))
+        let sum = evaluate_polynomial(poly: [0.0,b₁,b₂,b₃], z: ζ)
+        return x + 1 + sum
+        
+    // Normal size ζ, use Newton's method
+    case    _:
+        // 1/2 ζ²
+        let hζ² = 0.5 * ζ^^2
+        
+        // There will be two roots. We need to choose the starting point
+        // so that we get the right root to satisfy:
+        // sign(ζ) = sign(y - x - 1)
+        // so if ζ < 0 we want the root less than x + 1 and vice versa
+        let guess = ζ > 0 ? x + 2 : 0.5
+        
+        // Newton's method
+        // f(y) = x + y - √(1 + 4xy) + log [(1 + √(1 + 4xy)) / (2y)] - 1/2 ζ²
+        // fʹ(y) = (y - 2xy - 1 + (y - 1) √(1 + 4xy)) / (y(1 + √(1 + 4xy)))
+        // Eq. 7.12
+        let r = root(guess: guess,
+                     xmin: 1e-100,
+                     f: { y in
+                        let sq = sqrt(1 + 4 * x * y)
+                        return x + y - sq + log((1 + sq) / (2 * y)) - hζ²
+        },
+                     f1: { y in
+                        let sq = sqrt(1 + 4 * x * y)
+                        return (y - 2 * x * y - 1 + (y - 1) * sq) / (y * (1 + sq))
+        })
+        return r
+    }
+}
+
+/// Find ζ₁ given ζ₀, x, and y₀
+///
+/// ζ₁ = 1 / ζ₀ log f(ζ₀), Eq. 5.24
+///
+/// f(ζ₀) = ζ₀/ (y - x - 1) (1 + 2x + √(1 + 4xy)) / (2 (1 + 4xy)¹/⁴), Eq. 5.26
+///
+/// When ζ₀ is small we can use the expansion:
+///
+/// ζ₁ = Σi=0... dᵢ(x) ζ₀ ⁱ, Eq. 7.7
+///
+/// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §5, §7
+public func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
+    switch abs(ζ₀) {
+    // Small |ζ₀|, use expansion
+    // d₀(x) = -1/3 (3x + 1) (2x + 1)⁻³/², Eq. 7.9
+    // d₁(x) = 1/36 (36x² + x + 1) (2x + 1)⁻³,
+    // d₂(x) = -1/1620 (2160x³ - 594x² - 9x - 1) (2x + 1)⁻⁹/²
+    case ..<0.5:
+        let x2p1 = 2.0 * x + 1.0
+        let xx = x2p1 * sqrt(x2p1)
+        let d₀ = -(3.0 * x + 1.0) / (3.0 * xx)
+        let d₁ = (36.0 * x^^2 + x + 1.0) / (36.0 * xx^^2)
+        let d₂ = -(2160.0 * x^^3 - 594.0 * x^^2 - 9.0 * x - 1) / (1620.0 * xx^^3)
+        let sum = evaluate_polynomial(poly: [d₀,d₁,d₂], z: ζ₀)
+        return sum
+        
+    // Large |ζ₀| can directly evalute
+    case      _:
+        let sq1pξ² = sqrt(1 + 4 * x * y)
+        let f = ζ₀ / (y - x - 1.0) * (1.0 + 2.0 * x + sq1pξ²) / (2.0 * sqrt(sq1pξ²))
+        return log(f) / ζ₀
+    }
 }
 
 /// Series method upper tail
@@ -346,7 +480,7 @@ public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
 ///   - y: the point at which to evaluate. don't scale by µ, this is handled internally
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func quadrature(µ: Double, x µx: Double, y µy: Double) -> (p: Double, q: Double) {
+public func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probability {
     // get unscaled parameters
     let x = µx / µ
     let y = µy / µ
@@ -363,7 +497,7 @@ public func quadrature(µ: Double, x µx: Double, y µy: Double) -> (p: Double, 
     let pq = exp(-0.5 * µ * ζ^^2) * integral / .pi
     
     // sign of ζ determines if we've got p or q
-    return ζ < 0 ? (p: 1 - pq, q: pq) : (p: -pq, q: 1 + pq)
+    return ζ < 0 ? Probability(q: pq) : Probability(p: -pq)
 }
 
 /// Integrand for the quadrature method of the Marcum Q method
@@ -468,7 +602,7 @@ public func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²:
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
+public func bigxy(µ: Double, x: Double, y: Double) -> Probability {
     // ξ = 2 √xy           (xi)
     // σ = (√y - √x)² / ξ  (sigma)
     // ρ = √(y / x)        (rho)    Eq. 31
@@ -480,11 +614,11 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     let ρµ = pow(ρ,µ)
     guard ρµ > 0 else {
         print("MarcumQ big xy underflow")
-        return (p: .nan, q: .nan)
+        return .nan
     }
     guard ρµ.isFinite else {
         print("MarcumQ big xy overflow")
-        return (p: .nan, q: .nan)
+        return .nan
     }
     
     // precompute some terms that are constant in the sum
@@ -565,7 +699,7 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
     }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
     
     // We calculated either p or q depending on whether y > x
-    return y >= x ? (p: 1 - pq, q: pq) : (p: pq, q: 1 - pq)
+    return Probability(value: pq, isComplement: y >= x)
 }
 
 /// Asymptotic for big µ
@@ -588,7 +722,7 @@ public func bigxy(µ: Double, x: Double, y: Double) -> (p: Double, q: Double) {
 ///   - y: the point at which to evaluate. don't scale by µ, this is handled internally
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> (p: Double, q: Double) {
+public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probability {
     let µ = µp1 - 1
     let x = µx / µ
     let y = µy / µ
@@ -605,7 +739,7 @@ public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> (p: Double, 
     let ehµζ² = exp(-0.5 * µ * sgnζ^^2)
     guard ehµζ² > 0 else {
         print("Marcum Q big µ method underflow")
-        return (p: .nan, q: .nan)
+        return .nan
     }
     
     // ψᵢ(ζ) = (i - 1) / µ ψᵢ₋₂ + (-ζ)ⁱ⁻¹ / µ e^(-1/2 µ ζ²), eq. 68
@@ -634,7 +768,7 @@ public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> (p: Double, 
         return (Bᵢ, ())
     }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
     let pq = sqrt(µ / (2 * .pi)) * s
-    return ζ < 0 ? (p: 1 - pq, q: pq) : (p: pq, q: 1 - pq)
+    return Probability(value: pq, isComplement: ζ < 0)
 }
 
 fileprivate func f(_ j: Int, _ i: Int, _ u: Double) -> Double {

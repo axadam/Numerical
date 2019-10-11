@@ -60,6 +60,17 @@ final class SpecialFunctionsTests: XCTestCase {
         XCTAssertEqual(marcum(µ: µ, x: x(0.08), y: y).p, 5.526239087335513e-3, accuracy: 1e-10)
         XCTAssertEqual(marcum(µ: µ, x: x(0.09), y: y).p, 3.750276163593746e-4, accuracy: 1e-10)
         XCTAssertEqual(marcum(µ: µ, x: x(0.10), y: y).p, 1.386276448162126e-5, accuracy: 1e-10)
+
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.01), p: .q(1.9845278031193e-4)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.02), p: .q(4.138241872117e-3)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.03), p: .q(0.04000364971081)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.04), p: .q(0.191650654805848)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.05), p: .q(0.498535453743169)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.06), p: .p(0.1964796269915073)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.07), p: .p(0.04434265824612003)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.08), p: .p(5.526239087335513e-3)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.09), p: .p(3.750276163593746e-4)), y, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: µ, x: x(0.10), p: .p(1.386276448162126e-5)), y, accuracy: 1e-5)
     }
     
     /// Marcum Q far tail test cases
@@ -75,6 +86,12 @@ final class SpecialFunctionsTests: XCTestCase {
         XCTAssertEqual(marcum(µ: 1 , x: 75,  y: 0.5).p, 3.287840255874e-30, accuracy: 1e-42)
         XCTAssertEqual(marcum(µ: 2 , x: 100, y: 2  ).p, 1.557081489535e-35, accuracy: 1e-45)
         XCTAssertEqual(marcum(µ: 10, x: 100, y: 1  ).p, 5.152185145235e-48, accuracy: 1e-60)
+
+        XCTAssertEqual(marcum_inverse(µ: 5, x: 150, p: .p(1.215915354045e-23)), 30, accuracy: 1e-10)
+        XCTAssertEqual(marcum_inverse(µ: 1, x: 75, p: .p(3.287840255874e-30)), 0.5, accuracy: 1e-10)
+        XCTAssertEqual(marcum_inverse(µ: 2, x: 100, p: .p(1.557081489535e-35)), 2, accuracy: 1e-10)
+        XCTAssertEqual(marcum_inverse(µ: 10, x: 100, p: .p(5.152185145235e-48)), 1, accuracy: 1e-10)
+
     }
     
     /// Marcum Q test cases for various methods
@@ -84,18 +101,33 @@ final class SpecialFunctionsTests: XCTestCase {
     func testMarcum() {
         // p series
         XCTAssertEqual(marcum(µ: 11.5, x: 15.3, y: 23).p, 0.2948691834572695, accuracy: 1e-12)
-        
+        XCTAssertEqual(marcum_inverse(µ: 11.5, x: 15.3, p: .p(0.2948691834572695)), 23.0, accuracy: 1e-12)
+
         // q series
         XCTAssertEqual(marcum(µ: 11.5, x: 15.3, y: 29).p, 0.6555891257392535, accuracy: 1e-11)
-        
+        XCTAssertEqual(marcum_inverse(µ: 11.5, x: 15.3, p: .p(0.6555891257392535)), 29.0, accuracy: 1e-9)
+
         // p recursion
         XCTAssertEqual(marcum(µ: 25, x: 35, y: 49).p, 0.1258610027087132, accuracy: 1e-11)
+        XCTAssertEqual(marcum_inverse(µ: 25, x: 35, p: .p(0.1258610027087132)), 49, accuracy: 1e-12)
 
         // q recursion
         XCTAssertEqual(marcum(µ: 25, x: 35, y: 65).p, 0.7079055833201373, accuracy: 1e-11)
+        XCTAssertEqual(marcum_inverse(µ: 25, x: 35, p: .p(0.7079055833201373)), 65, accuracy: 1e-12)
+    }
+    
+    func testInverseMarcum() {
+        XCTAssertEqual(marcum_inverse(µ: 11.5, x: 15.3, p: .p(0.2948691834572695)), 23.0, accuracy: 1e-12)
+        
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .p(1e-10)), 3.26354, accuracy: 1e-5)
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .p(1e-20)), 0.690816, accuracy: 1e-6)
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .p(1e-30)), 0.15206, accuracy: 1e-6)
+
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .q(1e-10)), 83.7808, accuracy: 1e-4)
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .q(1e-20)), 122.571, accuracy: 1e-3)
+        XCTAssertEqual(marcum_inverse(µ: 15.3, x: 11.5, p: .q(1e-30)), 157.415, accuracy: 1e-3)
     }
 
-    
     static var allTests = [
         ("testInvErf", testInvErf),
     ]
