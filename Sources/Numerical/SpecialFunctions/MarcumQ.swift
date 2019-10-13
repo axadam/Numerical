@@ -82,7 +82,7 @@ public func marcum(µ: Double, x: Double, y: Double) -> Probability {
 /// then you must negate.
 ///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013, §2.3
-public func marcum_derivative(µ: Double, x: Double, y: Double) -> Double {
+public func marcum_deriv(µ: Double, x: Double, y: Double) -> Double {
     // FIXME: use the recurrence relation instead of doing two full calculations
     return marcum(µ: µ - 1, x: x, y: y).q - marcum(µ: µ, x: x, y: y).q
 }
@@ -97,7 +97,7 @@ public func marcum_derivative(µ: Double, x: Double, y: Double) -> Double {
 /// ζ ~ ζ₀ + Σi=1... ζ ᵢ / µⁱ, Eq. 5.23
 ///
 /// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §5.2
-public func marcum_inverse(µ: Double, x µx: Double, p: Probability) -> Double {
+public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
     // this asymptotic method works on x normalized for µ
     let x = µx / µ
         
