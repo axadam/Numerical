@@ -200,7 +200,14 @@ func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool = true) -> 
 ///
 /// e^-x * x^(a-1) / Γ(a) = e^(-x + (a-1) * log(x) - logΓ(a))
 public func p_gamma_deriv(a: Double, x: Double) -> Double {
-    return exp(-x + (a - 1) * log(x) - lgamma(a))
+    switch a {
+    case 0.5:
+        return exp(-x) / (sqrt(x) * sqrt(.pi))
+    case 1:
+        return exp(-x)
+    case _:
+        return exp(-x + (a - 1) * log(x) - lgamma(a))
+    }
 }
 
 /// Inverse of the lower regularized incomplete gamma P(a,x) function.
