@@ -8,6 +8,8 @@
 import Foundation
 import Scan
 
+// MARK: Marcum Q
+
 /// Generalized Marcum Q function
 ///
 /// The Marcum Q function Qᵤ(x,y) is equivalent to the upper tail of the distribution
@@ -74,6 +76,8 @@ public func marcum(µ: Double, x: Double, y: Double) -> Probability {
     }
 }
 
+// MARK: Marcum Q Derivative
+
 /// Derivative of the Marcum Q function with respect to y
 ///
 /// ∂Qᵤ(x,y)/∂y = Qᵤ₋₁(x,y) - Qᵤ(x,y), Eq. 16
@@ -86,6 +90,8 @@ public func marcum_deriv(µ: Double, x: Double, y: Double) -> Double {
     // FIXME: use the recurrence relation instead of doing two full calculations
     return marcum(µ: µ - 1, x: x, y: y).q - marcum(µ: µ, x: x, y: y).q
 }
+
+// MARK: Inverse Marcum Q
 
 /// Inverse of the Marcum Q function with respect to y
 ///
@@ -126,6 +132,8 @@ public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
     return r
 }
 
+// MARK: Implementation
+
 /// Find y given ζ (zeta) and x
 ///
 /// Where x, y, and ζ are related by:
@@ -140,7 +148,7 @@ public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
 /// y = x + 1 + Σi=1... bᵢ(x) ζ ⁱ, Eq. 7.5
 ///
 /// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §7
-public func y(_ ζ: Double, _ x: Double) -> Double {
+fileprivate func y(_ ζ: Double, _ x: Double) -> Double {
     switch abs(ζ) {
     
     // Small ζ use expansion in Eq. 7.5
@@ -195,7 +203,7 @@ public func y(_ ζ: Double, _ x: Double) -> Double {
 /// ζ₁ = Σi=0... dᵢ(x) ζ₀ ⁱ, Eq. 7.7
 ///
 /// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §5, §7
-public func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
+fileprivate func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
     switch abs(ζ₀) {
     // Small |ζ₀|, use expansion
     // d₀(x) = -1/3 (3x + 1) (2x + 1)⁻³/², Eq. 7.9
@@ -232,7 +240,7 @@ public func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
 /// i = 0. There is a risk of underflow in the first terms.
 ///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013 §3
-public func q_series(µ: Double, x: Double, y: Double) -> Double {
+fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
     // central gamma
     // FIXME: handle underflow of initial terms
     let Qᵤ = q_gamma(µ, y)
@@ -278,7 +286,7 @@ public func q_series(µ: Double, x: Double, y: Double) -> Double {
 /// C = log(𝛤(µ) / (2πε), Eq. 26
 ///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013 §3
-public func p_series(µ: Double, x: Double, y: Double) -> Double {
+fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     
     // first find the starting point for backwards recursion, n₀, by finding
     // the root of the following function:
@@ -365,7 +373,7 @@ public func p_series(µ: Double, x: Double, y: Double) -> Double {
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: The upper tail CDF of the distribution
-public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
+fileprivate func q_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the nearest µ that fits the criteria for using quadrature
     let µʹ = y - x + 1 - sqrt(2 * (x + y) + 1)
@@ -427,7 +435,7 @@ public func q_recursion(µ: Double, x: Double, y: Double) -> Double {
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: The lower tail CDF of the distribution
-public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
+fileprivate func p_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the nearest µ that fits the criteria for using quadrature
     let µʹ = y - x + 1 + sqrt(2 * (x + y) + 1)
@@ -480,7 +488,7 @@ public func p_recursion(µ: Double, x: Double, y: Double) -> Double {
 ///   - y: the point at which to evaluate. don't scale by µ, this is handled internally
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probability {
+fileprivate func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probability {
     // get unscaled parameters
     let x = µx / µ
     let y = µy / µ
@@ -524,7 +532,7 @@ public func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probability 
 ///
 /// "Recent software developments for special functions in the
 /// Santander-Amsterdam project", Gil, Segura, Temme 2014
-public func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²: Double) -> Double {
+fileprivate func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²: Double) -> Double {
     // Special handling of the θ = 0 case
     if θ == 0 {
         // ρ(0,ξ) = √(1 + ξ²),
@@ -602,7 +610,7 @@ public func integrand(θ: Double, µ: Double, y: Double, ξ²: Double, sq1pξ²:
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func bigxy(µ: Double, x: Double, y: Double) -> Probability {
+fileprivate func bigxy(µ: Double, x: Double, y: Double) -> Probability {
     // ξ = 2 √xy           (xi)
     // σ = (√y - √x)² / ξ  (sigma)
     // ρ = √(y / x)        (rho)    Eq. 31
@@ -722,7 +730,7 @@ public func bigxy(µ: Double, x: Double, y: Double) -> Probability {
 ///   - y: the point at which to evaluate. don't scale by µ, this is handled internally
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probability {
+fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probability {
     let µ = µp1 - 1
     let x = µx / µ
     let y = µy / µ
@@ -798,7 +806,7 @@ fileprivate struct ji: Hashable {
 /// z = (y - x - 1) / (2x + 1)²
 ///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013
-public func zeta(x: Double, y: Double) -> Double {
+fileprivate func zeta(x: Double, y: Double) -> Double {
     let ymxm1 = y - x - 1
     switch abs(ymxm1) {
     case 0.5...:
@@ -811,6 +819,8 @@ public func zeta(x: Double, y: Double) -> Double {
         return -ymxm1 / sqrt(2 * x + 1) * s
     }
 }
+
+// MARK: Coefficients
 
 /// Coefficients for fji, eq. 90
 ///
