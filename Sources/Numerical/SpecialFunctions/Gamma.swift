@@ -7,6 +7,47 @@
 
 import Foundation
 
+/// Regularized Incomplete Gamma Function
+///
+/// This function gives both the upper and lower regularized gamma functions as a
+/// `Probability` value.
+///
+/// Lower regularized gamma function:
+///
+/// P(a,x) = 𝛾(a,x) / 𝛤(a),
+///
+/// 𝛾(a,x) = ∫0..x e^(-t) t^(a-1) dt, a > 0
+///
+/// Upper regularized gamma function:
+///
+/// Q(a,x) = 𝛤(a,x) / 𝛤(a),
+///
+/// 𝛤(a,x) = ∫x..∞ e^(-t) t^(a-1) dt, a > 0
+///
+/// We split up the domains of computation into four areas according to Temme.
+///
+/// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
+/// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
+public func gamma_reg(_ a: Double, _ x: Double) -> Probability {
+    let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
+    switch (a,x) {
+    case (...0,_): return .nan
+    case (_,..<0): return .nan
+    case (_,0): return .p(0)
+    case (12...,(0.3*a)...(2.35*a)):
+        let pq = pq_gamma_uniform_asymptotic(a: a, x: x, isLower: a > α)
+        return a > α ? .p(pq) : .q(pq)
+    case (α...,     _):
+        let p = p_gamma_series(a: a, x: x)
+        return .p(p)
+    case (   _,..<1.5):
+        let q = q_gamma_series(a: a, x: x)
+        return .q(q)
+    case (   _,     _):
+        let q = q_gamma_frac(a: a, x: x)
+        return .q(q)
+    }
+}
 /// Regularized Incomplete Gamma Function (lower), P(a,x)
 ///
 /// P(a,x) = 𝛾(a,x) / 𝛤(a),
@@ -18,17 +59,7 @@ import Foundation
 /// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
 public func p_gamma(_ a: Double, _ x: Double) -> Double {
-    let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
-    switch (a,x) {
-    case (...0,_): return .nan
-    case (_,..<0): return .nan
-    case (_,0): return 0
-    case (12...,(0.3*a)...(2.35*a)):
-        return pq_gamma_uniform_asymptotic(a: a, x: x, isLower: true)
-    case (α...,     _): return p_gamma_series(a: a, x: x)
-    case (   _,..<1.5): return 1 - q_gamma_series(a: a, x: x)
-    case (   _,     _): return 1 - q_gamma_frac(a: a, x: x)
-    }
+    return gamma_reg(a,x).p
 }
 
 /// Regularized Incomplete Gamma Function (upper), Q(a,x)
@@ -42,17 +73,7 @@ public func p_gamma(_ a: Double, _ x: Double) -> Double {
 /// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
 public func q_gamma(_ a: Double, _ x: Double) -> Double {
-    let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
-    switch (a,x) {
-    case (...0,     _): return .nan
-    case (   _,  ..<0): return .nan
-    case (   _,     0): return 1
-    case (12...,(0.3*a)...(2.35*a)):
-        return pq_gamma_uniform_asymptotic(a: a, x: x, isLower: false)
-    case (α...,     _): return 1 - p_gamma_series(a: a, x: x)
-    case (   _,..<1.5): return q_gamma_series(a: a, x: x)
-    case (   _,     _): return q_gamma_frac(a: a, x: x)
-    }
+    return gamma_reg(a,x).q
 }
 
 /// Series approximation of P(a,x)
@@ -210,32 +231,36 @@ public func p_gamma_deriv(a: Double, x: Double) -> Double {
     }
 }
 
-/// Inverse of the lower regularized incomplete gamma P(a,x) function.
-/// Gives x such that P(a,x) = p.
+/// Inverse regularized gamma function
 ///
-/// Start with approximation and then use Halley's method to find root of P(a,x) - p.
-public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
-    switch (a, p) {
+/// Calculates x such that P(a,x) = p and Q(a,x) = q
+///
+/// Takes a `Probability` value as argument allowing either very small p or q.
+///
+/// Start with an approximation and then use Halley's method to find the exact value.
+public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
+    switch (a, pq.p, pq.q) {
     // handle domain edges
-    case (...0,_): return .nan
-    case (_,..<0): return .nan
-    case (_,1.0.nextUp...): return .nan
-    case (_,0): return 0
-    case (_,1): return .infinity
+    case (...0,_,_): return .nan
+    case (_,..<0,_): return .nan
+    case (_,1.0.nextUp...,_): return .nan
+    case (_,0,_): return 0
+    case (_,_,0): return .infinity
         
-    // closed form solution when a is 1, quantile is -log(1 - p)
-    // only valid when 1 - p doesn't lose precision
-    case (1,1e-3...): return -log(1 - p)
+    // closed form solution when a is 1, quantile is -log(q)
+    // only valid when q doesn't lose precision (p isn't too small)
+    case (1,1e-3...,_): return -log(pq.q)
         
     // normal case
-    case (_,_):
+    case (_,_,_):
         // initial guess
-        let guess = invertGuess(a: a, p: p, q: 1 - p)
+        let guess = invertGuess(a: a, p: pq.p, q: pq.q)
         
         // Halley method
-        // p_gamma'(x) = e^-x * x^(a-1) / Γ(a)
-        // p_gamma''(x) = e^-x (a - x - 1) x^(a-2) / Γ(a)
-        // p_gamma''(x) / p_gamma'(x) = e^-x (a - x - 1) x^(a-2) / e^-x x^(a-1)
+        // Derivatives of the lower regularized gamma. Negate for upper.
+        // Pʹ(a,x) = e^-x * x^(a-1) / Γ(a)
+        // Pʺ(a,x) = e^-x (a - x - 1) x^(a-2) / Γ(a)
+        // Pʺ(a,x) / Pʹ(a,x) = e^-x (a - x - 1) x^(a-2) / e^-x x^(a-1)
         //                            = (a - x - 1) / x = (a-1)/x - 1
         let a1 = a - 1
         let lna1 = log(a1)
@@ -244,7 +269,7 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
         let x = rootSecondOrder(guess: guess,
                         xmin: 0,
                         maxIter: 11,
-                        f: { x in p_gamma(a, x) - p },
+                        f: { x in gamma_reg(a, x) - pq },
                         f1: { x in
                             switch a {
                             case ...1:
@@ -256,6 +281,14 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
                         f2f1: { x in a1 / x - 1 })
         return x
     }
+
+}
+/// Inverse of the lower regularized incomplete gamma P(a,x) function.
+/// Gives x such that P(a,x) = p.
+///
+/// Start with approximation and then use Halley's method to find root of P(a,x) - p.
+public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
+    return inv_gamma_reg(a, .p(p))
 }
 
 /// Inverse of the upper regularized incomplete gamma Q(a,x) function.
@@ -263,46 +296,7 @@ public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
 ///
 /// Start with approximation and then use Halley's method to find root of Q(a,x) - q.
 public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
-    switch (a, q) {
-    // handle domain edges
-    case (...0,_): return .nan
-    case (_,..<0): return .nan
-    case (_,0): return .infinity
-    case (_,1): return 0
-    case (_,1...): return .nan
-        
-    // close form solution when a is 1, quantile is -log(q)
-    case (1,_): return -log(q)
-        
-    // normal case
-    case (_,_):
-        // initial guess
-        let guess = invertGuess(a: a, p: 1 - q, q: q)
-        
-        // Halley method
-        // q_gamma'(x) = -e^-x * x^(a-1) / Γ(a)
-        // q_gamma''(x) = -e^-x (a - x - 1) x^(a-2) / Γ(a)
-        // q_gamma''(x) / q_gamma'(x) = -e^-x (a - x - 1) x^(a-2) / -e^-x x^(a-1)
-        //                            = (a - x - 1) / x = (a-1)/x - 1
-        let a1 = a - 1
-        let lna1 = log(a1)
-        let gln: Double = lgamma(a)
-        let afac = exp(a1 * (lna1 - 1) - gln)
-        let x = rootSecondOrder(guess: guess,
-                                xmin: 0,
-                                maxIter: 11,
-                                f: { x in q_gamma(a, x) - q },
-                                f1: { x in
-                                    switch a {
-                                    case ...1:
-                                        return -exp( -x + a1 * log(x) - gln)
-                                    case _:
-                                        return -afac * exp( -(x - a1) + a1 * (log(x) - lna1))
-                                    }
-                                },
-                                f2f1: { x in a1 / x - 1 })
-        return x
-    }
+    return inv_gamma_reg(a, .q(q))
 }
 
 /// Provide initial guess for inverse P and Q regularized incomplete gamma functions
