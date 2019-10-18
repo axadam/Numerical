@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: Regularized Gamma
+
 /// Regularized Incomplete Gamma Function
 ///
 /// This function gives both the upper and lower regularized gamma functions as a
@@ -75,6 +77,94 @@ public func p_gamma(_ a: Double, _ x: Double) -> Double {
 public func q_gamma(_ a: Double, _ x: Double) -> Double {
     return gamma_reg(a,x).q
 }
+
+// MARK: Derivative
+
+/// Derivative of regularized lower incomplete gamma function, P
+///
+/// e^-x * x^(a-1) / Γ(a) = e^(-x + (a-1) * log(x) - logΓ(a))
+public func p_gamma_deriv(a: Double, x: Double) -> Double {
+    switch a {
+    case 0.5:
+        return exp(-x) / (sqrt(x) * sqrt(.pi))
+    case 1:
+        return exp(-x)
+    case _:
+        return exp(-x + (a - 1) * log(x) - lgamma(a))
+    }
+}
+
+// MARK: Inverse
+
+/// Inverse regularized gamma function
+///
+/// Calculates x such that P(a,x) = p and Q(a,x) = q
+///
+/// Takes a `Probability` value as argument allowing either very small p or q.
+///
+/// Start with an approximation and then use Halley's method to find the exact value.
+public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
+    switch (a, pq.p, pq.q) {
+    // handle domain edges
+    case (...0,_,_): return .nan
+    case (_,..<0,_): return .nan
+    case (_,1.0.nextUp...,_): return .nan
+    case (_,0,_): return 0
+    case (_,_,0): return .infinity
+        
+    // closed form solution when a is 1, quantile is -log(q)
+    // only valid when q doesn't lose precision (p isn't too small)
+    case (1,1e-3...,_): return -log(pq.q)
+        
+    // normal case
+    case (_,_,_):
+        // initial guess
+        let guess = invertGuess(a: a, p: pq.p, q: pq.q)
+        
+        // Halley method
+        // Derivatives of the lower regularized gamma. Negate for upper.
+        // Pʹ(a,x) = e^-x * x^(a-1) / Γ(a)
+        // Pʺ(a,x) = e^-x (a - x - 1) x^(a-2) / Γ(a)
+        // Pʺ(a,x) / Pʹ(a,x) = e^-x (a - x - 1) x^(a-2) / e^-x x^(a-1)
+        //                            = (a - x - 1) / x = (a-1)/x - 1
+        let a1 = a - 1
+        let lna1 = log(a1)
+        let gln: Double = lgamma(a)
+        let afac = exp(a1 * (lna1 - 1) - gln)
+        let x = rootSecondOrder(guess: guess,
+                        xmin: 0,
+                        maxIter: 11,
+                        f: { x in gamma_reg(a, x) - pq },
+                        f1: { x in
+                            switch a {
+                            case ...1:
+                                return exp( -x + a1 * log(x) - gln)
+                            case _:
+                                return afac * exp( -(x - a1) + a1 * (log(x) - lna1))
+                            }
+                        },
+                        f2f1: { x in a1 / x - 1 })
+        return x
+    }
+
+}
+/// Inverse of the lower regularized incomplete gamma P(a,x) function.
+/// Gives x such that P(a,x) = p.
+///
+/// Start with approximation and then use Halley's method to find root of P(a,x) - p.
+public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
+    return inv_gamma_reg(a, .p(p))
+}
+
+/// Inverse of the upper regularized incomplete gamma Q(a,x) function.
+/// Gives x such that Q(a,x) = q.
+///
+/// Start with approximation and then use Halley's method to find root of Q(a,x) - q.
+public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
+    return inv_gamma_reg(a, .q(q))
+}
+
+// MARK: Implementation
 
 /// Series approximation of P(a,x)
 ///
@@ -215,88 +305,6 @@ fileprivate func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool
     
     let v = sgn * Rprefix * S
     return u + v
-}
-
-/// Derivative of regularized lower incomplete gamma function, P
-///
-/// e^-x * x^(a-1) / Γ(a) = e^(-x + (a-1) * log(x) - logΓ(a))
-public func p_gamma_deriv(a: Double, x: Double) -> Double {
-    switch a {
-    case 0.5:
-        return exp(-x) / (sqrt(x) * sqrt(.pi))
-    case 1:
-        return exp(-x)
-    case _:
-        return exp(-x + (a - 1) * log(x) - lgamma(a))
-    }
-}
-
-/// Inverse regularized gamma function
-///
-/// Calculates x such that P(a,x) = p and Q(a,x) = q
-///
-/// Takes a `Probability` value as argument allowing either very small p or q.
-///
-/// Start with an approximation and then use Halley's method to find the exact value.
-public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
-    switch (a, pq.p, pq.q) {
-    // handle domain edges
-    case (...0,_,_): return .nan
-    case (_,..<0,_): return .nan
-    case (_,1.0.nextUp...,_): return .nan
-    case (_,0,_): return 0
-    case (_,_,0): return .infinity
-        
-    // closed form solution when a is 1, quantile is -log(q)
-    // only valid when q doesn't lose precision (p isn't too small)
-    case (1,1e-3...,_): return -log(pq.q)
-        
-    // normal case
-    case (_,_,_):
-        // initial guess
-        let guess = invertGuess(a: a, p: pq.p, q: pq.q)
-        
-        // Halley method
-        // Derivatives of the lower regularized gamma. Negate for upper.
-        // Pʹ(a,x) = e^-x * x^(a-1) / Γ(a)
-        // Pʺ(a,x) = e^-x (a - x - 1) x^(a-2) / Γ(a)
-        // Pʺ(a,x) / Pʹ(a,x) = e^-x (a - x - 1) x^(a-2) / e^-x x^(a-1)
-        //                            = (a - x - 1) / x = (a-1)/x - 1
-        let a1 = a - 1
-        let lna1 = log(a1)
-        let gln: Double = lgamma(a)
-        let afac = exp(a1 * (lna1 - 1) - gln)
-        let x = rootSecondOrder(guess: guess,
-                        xmin: 0,
-                        maxIter: 11,
-                        f: { x in gamma_reg(a, x) - pq },
-                        f1: { x in
-                            switch a {
-                            case ...1:
-                                return exp( -x + a1 * log(x) - gln)
-                            case _:
-                                return afac * exp( -(x - a1) + a1 * (log(x) - lna1))
-                            }
-                        },
-                        f2f1: { x in a1 / x - 1 })
-        return x
-    }
-
-}
-/// Inverse of the lower regularized incomplete gamma P(a,x) function.
-/// Gives x such that P(a,x) = p.
-///
-/// Start with approximation and then use Halley's method to find root of P(a,x) - p.
-public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
-    return inv_gamma_reg(a, .p(p))
-}
-
-/// Inverse of the upper regularized incomplete gamma Q(a,x) function.
-/// Gives x such that Q(a,x) = q.
-///
-/// Start with approximation and then use Halley's method to find root of Q(a,x) - q.
-public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
-    return inv_gamma_reg(a, .q(q))
 }
 
 /// Provide initial guess for inverse P and Q regularized incomplete gamma functions
@@ -601,6 +609,8 @@ fileprivate func inverse_gamma_p1m1(_ x: Double) -> Double {
     case      _: return 1 / tgamma(x + 1) - 1
     }
 }
+
+// MARK: Coefficients
 
 /// Coefficient vectors
 ///
