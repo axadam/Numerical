@@ -85,7 +85,7 @@ public func q_gamma(_ a: Double, _ x: Double) -> Double {
 /// For initial term: 𝛤(a) / 𝛤(a + 1) = 1 / a
 ///
 /// Numerical Receipes §6.2
-func p_gamma_series(a: Double, x: Double) -> Double {
+fileprivate func p_gamma_series(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
     let first = 1 / a
     let sum = recursiveSum(indices: 1..., sum0: first, state0: first, update: { i, state in
@@ -112,7 +112,7 @@ func p_gamma_series(a: Double, x: Double) -> Double {
 ///
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Section 2.3
-func q_gamma_series(a: Double, x: Double) -> Double {
+fileprivate func q_gamma_series(a: Double, x: Double) -> Double {
     // u₁ = 1 - 1 / Γ(a + 1)
     let u₁ = -inverse_gamma_p1m1(a)
     
@@ -161,7 +161,7 @@ func q_gamma_series(a: Double, x: Double) -> Double {
 /// Q(a,x) = e^(-x) x^a 1 / (x +) (1 - a) / (1 +) 1 / (x +) (2 - a) / (2 +) 2 / (x +)
 ///
 /// Numerical Receipes §6.2
-func q_gamma_frac(a: Double, x: Double) -> Double {
+fileprivate func q_gamma_frac(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
     let frac = continued_fraction(
         b0: 0,
@@ -182,7 +182,7 @@ func q_gamma_frac(a: Double, x: Double) -> Double {
 ///
 // EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 // GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2.5
-func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool = true) -> Double {
+fileprivate func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool = true) -> Double {
     /// Sign depends on which tail we want
     let sgn = isLower ? -1.0 : 1.0
     
@@ -304,7 +304,7 @@ public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
 /// Primarily based on the method describe in "EFFICIENT AND ACCURATE ALGORITHMS FOR THE
 /// COMPUTATION AND INVERSION OF THE INCOMPLETE GAMMA FUNCTION RATIOS", Gil, Segura,
 /// Temme 2013. Also falls back in one case on an approximation from A & S.
-func invertGuess(a: Double, p: Double, q: Double) -> Double {
+fileprivate func invertGuess(a: Double, p: Double, q: Double) -> Double {
     let r = exp( (log(p) + lgamma(1 + a)) / a )
     switch (a,r,q) {
         
@@ -401,7 +401,7 @@ func invertGuess(a: Double, p: Double, q: Double) -> Double {
 /// Calculate first three εᵢ from η₀
 ///
 /// Method based on Temme 1992 section 5
-func epsilon(η₀: Double) -> (Double, Double, Double) {
+fileprivate func epsilon(η₀: Double) -> (Double, Double, Double) {
     switch η₀ {
     case -0.3...0.3:
         let coef1: [Double] = [-1.0/3.0, 1.0/36.0, 1.0/1620.0, -7.0/6480.0, 5.0/18144.0, -11.0/382725.0, -101.0/16329600.0]
@@ -457,7 +457,7 @@ func epsilon(η₀: Double) -> (Double, Double, Double) {
 ///
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Eq. 2.5, 2.7
-func gammastar(_ a: Double) -> Double {
+fileprivate func gammastar(_ a: Double) -> Double {
     switch a {
     case ...3:
         return tgamma(a) / ( sqrt(2 * .pi) * exp((a - 0.5) * log(a) - a))
@@ -480,18 +480,20 @@ func gammastar(_ a: Double) -> Double {
 ///
 /// "EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS", Gil, Segura, Temme 2013, Eq. 2.4
-func eta(_ a: Double, _ q: Double) -> Double {
+fileprivate func eta(_ a: Double, _ q: Double) -> Double {
     return sqrt( -2.0 * log(q * sqrt(2.0 * .pi) * gammastar(a)) / a )
 }
 
 /// Find η₀ from a and q. Works on wide range of values
 ///
 /// 1/2 erfc(η₀ √(a/2)) = q
-///           η₀ √(a/2) = erfc⁻¹(2q)
-///                  η₀ = erfc⁻¹(2q) / √(a/2)
+///
+/// η₀ √(a/2) = erfc⁻¹(2q)
+///
+/// η₀ = erfc⁻¹(2q) / √(a/2)
 ///
 /// temme 1992, Eq 3.2
-func eta0(a: Double, q: Double) -> Double {
+fileprivate func eta0(a: Double, q: Double) -> Double {
     return invErfC(2 * q) / sqrt(a / 2)
 }
 
@@ -510,7 +512,7 @@ func eta0(a: Double, q: Double) -> Double {
 /// -W[-e^(-η² / 2 - 1)] = λ
 ///
 /// temme 2013 Eq. 2.6
-func lambda(_ η: Double) -> Double {
+fileprivate func lambda(_ η: Double) -> Double {
     let s = 0.5 * η^^2
     let λ: Double = {
         switch η {
@@ -571,7 +573,7 @@ func lambda(_ η: Double) -> Double {
 /// η² / 2 = λ - 1 - log(λ)
 ///
 /// η = s √(2 (λ - 1 - log(λ))), s = sign(λ - 1)
-func eta(λ: Double) -> Double {
+fileprivate func eta(λ: Double) -> Double {
     return (λ - 1).signum * sqrt(2 * (λ - 1 - log(λ)))
 }
 
@@ -582,7 +584,7 @@ func eta(λ: Double) -> Double {
 /// η = s √(2 (µ - log(1 + µ)), s = sign(µ)
 ///
 /// THE ASYMPTOTIC EXPANSION OF THE INCOMPLETE GAMMA FUNCTIONS, Temme 1979, Eq. 1.3
-func eta(µ: Double) -> Double {
+fileprivate func eta(µ: Double) -> Double {
     return µ.signum * sqrt(2 * (-log1pmx(µ)))
 }
 
@@ -593,7 +595,7 @@ func eta(µ: Double) -> Double {
 /// 1 / Γ(x + 1) - 1 = -1 + Σi=1... aᵢ₊₁xⁱ
 ///
 /// Concerning two series for the gamma function, JW Wrench 1967, Eq. 22
-func inverse_gamma_p1m1(_ x: Double) -> Double {
+fileprivate func inverse_gamma_p1m1(_ x: Double) -> Double {
     switch x {
     case ..<1.5: return evaluate_polynomial(poly: C.wrench, z: x)
     case      _: return 1 / tgamma(x + 1) - 1
