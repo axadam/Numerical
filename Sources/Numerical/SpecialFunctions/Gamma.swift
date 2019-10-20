@@ -134,7 +134,7 @@ public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
         let x = rootSecondOrder(guess: guess,
                         xmin: 0,
                         maxIter: 11,
-                        f: { x in gamma_reg(a, x) - pq },
+                        f: { x in gamma_reg(a, x).difference(pq) },
                         f1: { x in
                             switch a {
                             case ...1:
