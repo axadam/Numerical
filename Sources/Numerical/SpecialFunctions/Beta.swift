@@ -34,14 +34,14 @@ public func lbeta(a: Double, b: Double) -> Double {
 /// to use quadrature but we haven't implemented yet.
 ///
 /// Numerical Receipes §6.4
-public func beta_reg(x: Double, a: Double, b: Double) -> Double {
+public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
     switch (x,a,b) {
         // handle domain edges
     case (_,...0,_): return .nan
     case (_,_,...0): return .nan
     case (..<0,_,_): return .nan
-    case (0,_,_): return 0
-    case (1,_,_): return 1
+    case (0,_,_): return .p(0)
+    case (1,_,_): return .q(0)
     case (1...,_,_): return .nan
         
         // FIXME: NR recommends quadrature due to slow convergence
@@ -49,11 +49,13 @@ public func beta_reg(x: Double, a: Double, b: Double) -> Double {
         
         // normal case
     case (..<((a + 1.0) / (a + b + 2.0)),_,_):
-        return beta_reg_frac(x: x, a: a, b: b)
+        let p = beta_reg_frac(x: x, a: a, b: b)
+        return .p(p)
         
         // x above threshold due the flip
     case (_,_,_):
-        return 1.0 - beta_reg_frac(x: 1.0 - x, a: b, b: a)
+        let q = beta_reg_frac(x: 1.0 - x, a: b, b: a)
+        return .q(q)
     }
 }
 
@@ -118,32 +120,30 @@ public func beta_reg_deriv(x: Double, a: Double, b: Double) -> Double {
 /// followed by Halley's method on I(x, a, b) - p
 ///
 /// Numerical Receipes §6.4
-public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
-    let q = 1 - p
-    
+public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
     // Cases we can handle directly in closed form
-    switch (p,a,b) {
+    switch (p.p,p.q,a,b) {
     // handle domain edges
-    case (_,...0,_): return .nan
-    case (_,_,...0): return .nan
-    case (..<0,_,_): return .nan
-    case (0,_,_): return 0
-    case (1,_,_): return 1
-    case (1...,_,_): return .nan
+    case (_,_,...0,_): return .nan
+    case (_,_,_,...0): return .nan
+    case (..<0,_,_,_): return .nan
+    case (0,_,_,_): return 0
+    case (_,0,_,_): return 1
+    case (1...,_,_,_): return .nan
         
     // a and b both 1 function is identity. I(x,1,1) = x
-    case (_,1,1): return p
+    case (_,_,1,1): return p.p
         
     // If only one is 1 we make it be b and I⁻¹(p,a,1) = p^(1/a)
-    case (_,1,_): return 1 - inv_beta_reg(p: q, a: b, b: a)
-    case (..<0.5,_,1): return pow(p, 1 / a)
-    case (_,_,1): return exp(log1p(-q) / a)
+    case (_,_,1,_): return 1 - inv_beta_reg(p: .p(p.q), a: b, b: a)
+    case (..<0.5,_,_,1): return pow(p.p, 1 / a)
+    case (_,_,_,1): return exp(log1p(-p.q) / a)
         
     // Both one half, I⁻¹(p,1/2,1/2) = sin(p π / 2)²
-    case (_,0.5,0.5): return sin(p * Double.pi/2)^^2
+    case (_,_,0.5,0.5): return sin(p.p * Double.pi/2)^^2
 
     // Otherwise we continue
-    case (_,_,_): break
+    case (_,_,_,_): break
     }
     
     // Get our initial guess for root finding
@@ -153,7 +153,7 @@ public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
         // approximation from HMF §26.5.22
         case (1...,1...):
             // inverse normal approximation
-            let yp = p < 0.5 ? qapprox(p: p) : -qapprox(p: 1 - p)
+            let yp = p.p < 0.5 ? qapprox(p: p.p) : -qapprox(p: p.q)
             
             let λ = (yp^^2 - 3.0) / 6.0
             let h = 2 / (1 / (2 * a - 1) + 1 / (2 * b - 1))
@@ -166,8 +166,8 @@ public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
             let t = exp(a * lna) / a
             let u = exp(b * lnb) / b
             let w = t + u
-            if p < t / w { return pow(a * w * p, 1 / a) }
-            return 1 - pow(b * w * q, 1 / b)
+            if p.p < t / w { return pow(a * w * p.p, 1 / a) }
+            return 1 - pow(b * w * p.q, 1 / b)
         }
     }()
     
@@ -186,7 +186,7 @@ public func inv_beta_reg(p: Double, a: Double, b: Double) -> Double {
                     xmin: 0,
                     xmax: 1,
                     maxIter: 10,
-                    f: { x in beta_reg(x: x, a: a, b: b) - p },
+                    f: { x in beta_reg(x: x, a: a, b: b).difference(p) },
                     f1: { x in exp(a1 * log(x) + b1 * log(1 - x) + afac) },
                     f2f1: { x in a1 / x - b1 / (1 - x) })
     return x

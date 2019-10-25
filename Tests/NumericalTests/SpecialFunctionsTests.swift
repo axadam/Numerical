@@ -62,13 +62,13 @@ final class SpecialFunctionsTests: XCTestCase {
     }
     
     func testIncompleteBeta() {
-        let a = beta_reg(x: 0.4, a: 3, b: 5)
+        let a = beta_reg(x: 0.4, a: 3, b: 5).p
         // I₀ٖ₄(3,5) = 0.580096, exact
         AssertLRE(a, "0.580096", exact: true, digits: 14.8, resultStore: rs, table: tb, testCase: "(a:3,b:5,x:0.4)", field: f)
     }
     
     func testInverseIncompleteBeta() {
-        let a = inv_beta_reg(p: 0.580096, a: 3, b: 5)
+        let a = inv_beta_reg(p: .p(0.580096), a: 3, b: 5)
         AssertLRE(a, "0.4", exact: true, resultStore: rs, table: tb, testCase: "(a:3,b:5,x:0.4)", field: f1)
     }
 
