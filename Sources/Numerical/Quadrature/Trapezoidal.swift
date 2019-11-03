@@ -54,7 +54,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
         let seq = sequence(first: a + 0.5 * Δxⱼ₋₁, next: { $0 + Δxⱼ₋₁ }).prefix(nⱼ₋₁)
         
         // sum up evaluations of the function at each point in the sequence
-        let sum = seq.reduce(0.0) { $0 + f($1) }
+        let sum = seq.map { f($0) }.sum_naive()
         
         // new estimate is half the previous (since now intervals are half as wide)
         // plus ∆x/2 Σf(xᵢ), i odd

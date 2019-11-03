@@ -2,15 +2,35 @@
 
 Numerical computing tools and functions in Swift.
 
+### Basic functions
+
+Fills in a few missing basic functions.
+
+* `expm1mx(_:)` - Calculate e^x - 1 - x with precision even when x is small
+
+* `log1pmx(_:)` - Calculate log(1 + x) - x with precision even when x is small
+
+* `xmsin(_:)` - Calculate x - sin(x) with precision even when x is small
+
+* Summation
+
+  * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
+  
+  * `sum_pairwise()` - Pairwise summation. As fast as naive sum but accumulates error much more slowly. Implemented as extension on Collection where Element is FloatingPoint and Index is Int.
+  
+  * `sum_kahan()` - Kahan's compensated sum. Estimates the error after adding each term and tries to correct for it. More accurate in many cases than pairwise but slower. Implemented as extension on Sequence where Element is FloatingPoint.
+  
+  * `sum_kbn()` - Kahan-Babuška-Neumaier sum. Improves on Kahan by compensating for rounding error in either the sum or the addend. The same number of operations as Kahan sum and more accurate so KBN should be preferred. Implemented as extension on Sequence where Element is FloatingPoint.
+  
 ### Special functions
 
 A collection of functions with many applications in stats/ml and the sciences.
 
 * Error Function
 
-  * `invErf()` - Inverse of the Error function (`erf`)
+  * `invErf(_:)` - Inverse of the Error function (`erf`)
 
-  * `invErfC()` - Inverse of the complement of the Error function (`erfc`)
+  * `invErfC(_:)` - Inverse of the complement of the Error function (`erfc`)
 
 * Gamma Function
 
@@ -69,6 +89,15 @@ Functions to find the root of a function of interest.
 ### Accuracy
 
 Extensive accuracy measurement and testing to make sure accuracy doesn't change from the expected levels. Accuracy is measured in terms of Log Relative Error.
+
+#### Summation
+| Case | Kahan | Kahan-Babuška-Neumaier | Naive | Pairwise |
+| --- | ---: | ---: | ---: | ---: |
+| Easy | 15.0 | 15.0 | 12.9 | 15.0 |
+| Hard | 5.6 | 15.0 | 4.1 | 4.2 |
+| Peters | -0.0 | 15.0 | -0.0 | -0.0 |
+
+Easy is 10k random doubles from [0,1] and their negatives shuffled into an array. Hard is 10k random doubles drawn from [0,1] multiplied by random powers of ten between -10 and 10. Peters is the small pathological case [1.0,1e100,1.0,-1e100].
 
 #### Root Finding
 | Case | ln 5 | ∛3647963 |

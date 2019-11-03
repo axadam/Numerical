@@ -101,7 +101,7 @@ public func beta_reg_deriv(x: Double, a: Double, b: Double) -> Double {
     case (_,...0,_): return .nan
     case (_,_,...0): return .nan
     case (..<0,_,_): return .nan
-    case (_,_,_) where x > 1: return .nan
+    case (1.0.nextUp...,_,_): return .nan
     case (0,..<1,_): return .nan
     case (0,1,_): return 1 / beta(a: a,b: b)
     case (0,_,_): return 0
