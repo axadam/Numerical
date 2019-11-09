@@ -27,7 +27,7 @@ func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
 
 /// Secant Method of root finding
 ///
-/// Uses linear interpolation to find root in a <= x <= b. a and b must bracket a root.
+/// Uses linear interpolation to find root in a ≤ x ≤ b. a and b must bracket a root.
 /// This method can fail in some pathological cases where f is flat near root.
 ///
 /// Numerical Recipes §9.2
