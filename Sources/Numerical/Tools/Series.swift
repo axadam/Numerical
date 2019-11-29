@@ -8,35 +8,13 @@
 import Foundation
 import Scan
 
-public extension Sequence {
-    func converge(max_iter: Int = 100, until f: (Element,Element) -> Bool) -> Element? {
-        var g = makeIterator()
-        var count = 0
-        var last: Element? = nil
-        while let e = g.next() {
-            if let lasty = last, f(lasty,e) {
-                return e
-            }
-            last = e
-            if count >= max_iter { break }
-            count += 1
-        }
-        if count >= max_iter {
-            print("Did not converge in \(count) iterations")
-        } else {
-            print("Did not converge before end of sequence")
-        }
-        return last
-    }
-}
-
 public func recursiveSequence<Indices: Sequence, State>(indices: Indices, initialState: State, maxIter: Int, update: (Int, State) -> State, until: (State, State) -> Bool) -> State? where Indices.Element == Int {
     let result = withoutActuallyEscaping(update) { u in
         indices.lazy.scan( initialState ) { state0, index in
             return u(index, state0)
             }.converge(max_iter: maxIter, until: until)
     }
-    return result
+    return result?.result
 }
 
 public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: (Double,Double) -> Double, update: (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
@@ -50,8 +28,8 @@ public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, 
                 }.converge(max_iter: max_iter) { a, b in until((a.0,a.1),(b.0,b.1)) }
         }
     }
-    guard let res = result?.0 else {
-        return 0
+    guard let res = result?.result.0 else {
+        return .nan
     }
     return res
 }

@@ -68,7 +68,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
         
         return (Iⱼ,Δxⱼ,nⱼ)
         }.converge(max_iter: 10, until: { a, b in abs(b.I / a.I - 1) < 1e-10 })
-    guard let quad = q else {
+    guard let quad = q?.result else {
         return .nan
     }
     return quad.I

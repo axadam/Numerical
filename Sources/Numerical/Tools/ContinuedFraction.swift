@@ -32,7 +32,7 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S) -> Double whe
         let fracᵢ = fracᵢ₋₁ * delta
         return (cᵢ₋₁: cᵢ, dᵢ₋₁: dᵢ, fracᵢ₋₁: fracᵢ)
         }.converge(until: { a, b in abs(b.cᵢ₋₁ * b.dᵢ₋₁ - 1) < 1e-15 })
-    guard let cfrac = cf else {
+    guard let cfrac = cf?.result else {
         return .nan
     }
     return cfrac.fracᵢ₋₁
