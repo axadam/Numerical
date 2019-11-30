@@ -31,7 +31,7 @@ public func invErfC(_ p: Double) -> Double {
         // erf''(x) / erf'(x) = -2 x
         // h = 2 f / (-4/√π e^-x² + f 2 x)
         //   = -f / (2/√π e^-x² - f x)
-        let x = rootSecondOrder(guess: guess,
+        let x = root(guess: guess,
                         maxIter: 2,
                         f: { x in erfc(x) - pp },
                         f1: { x in -1.12837916709551257 * exp(-x * x) },

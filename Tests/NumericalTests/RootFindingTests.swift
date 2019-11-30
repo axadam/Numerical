@@ -47,10 +47,10 @@ final class RootFindingTests: XCTestCase {
     }
     
     func testHalley() {
-        let a = rootSecondOrder(guess: guessA, f: f, f1: f1, f2f1: f2f1)
+        let a = root(guess: guessA, f: f, f1: f1, f2f1: f2f1)
         AssertLRE(a,c,resultStore: rs, table: t, testCase: "Halley", field: fl)
         
-        let b = rootSecondOrder(guess: guessB, f: g, f1: gʹ, f2: gʺ)
+        let b = root(guess: guessB, f: g, f1: gʹ, f2: gʺ)
         AssertLRE(b,d,resultStore: rs, table: t, testCase: "Halley", field: fc)
     }
     

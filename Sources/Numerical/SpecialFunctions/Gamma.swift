@@ -131,7 +131,7 @@ public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
         let lna1 = log(a1)
         let gln: Double = lgamma(a)
         let afac = exp(a1 * (lna1 - 1) - gln)
-        let x = rootSecondOrder(guess: guess,
+        let x = root(guess: guess,
                         xmin: 0,
                         maxIter: 11,
                         f: { x in gamma_reg(a, x).difference(pq) },
