@@ -57,7 +57,7 @@ public func invErf(_ p: Double) -> Double {
 ///
 /// b₁ = 0.99229, b₂ = 0.04481
 ///
-/// 0 < p <= 1/2, accuracy ~ 1e-3
+/// 0 `<` p ≤ 1/2, accuracy ~ 1e-3
 ///
 /// Handbook of Mathematical Functions, §26.2.22
 func qapprox(p: Double) -> Double {
