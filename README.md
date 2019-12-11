@@ -141,8 +141,8 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | --- | ---: | ---: |
 | µ:11.5,x:15.3,y:23 | 13.3 | 14.0 |
 | µ:11.5,x:15.3,y:29 | 11.0 | 11.4 |
-| µ:25,x:35,y:49 | 13.8 | 15.0 |
-| µ:25,x:35,y:65 | 14.0 | 14.5 |
+| µ:25,x:35,y:49 | 13.8 | 14.6 |
+| µ:25,x:35,y:65 | 14.0 | 14.7 |
 
 #### Marcum Q large µ. µ = 8192, y = 1.05µ, and x is a fraction of µ. 'Computation of the Marcum Q-function', Gil, Segura, Temme 2013, Table 6.1
 | Case | f | f⁻¹ |
