@@ -36,8 +36,8 @@ public typealias bracketedRoot = ((Double) -> Double, Double, Double, Double, Do
 ///     - xmax: Maximum allowed value for root. Optional.
 ///     - epsilon: Convergence criteria in terms of how close to zero we need to get. Default 1e-10.
 ///     - method: Root finding method. Defaults to Brent's method.
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolerance: Double = 10e-15, method: bracketedRoot = brentRoot, f: (Double) -> Double) -> Double {
-    guard let (a, b, fa, fb) = bracket(f: f, guess: guess, xmin: xmin, xmax: xmax) else { return .nan }
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolerance: Double = 10e-15, bracketFactor: Double = 1.6, method: bracketedRoot = brentRoot, f: (Double) -> Double) -> Double {
+    guard let (a, b, fa, fb) = bracket(f: f, guess: guess, xmin: xmin, xmax: xmax, factor: bracketFactor) else { return .nan }
     let r = root(f: f, a: a, b: b, fa: fa, fb: fb, tolerance: tolerance, method: method)
     return r
 }

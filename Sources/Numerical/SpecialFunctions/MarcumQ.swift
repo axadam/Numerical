@@ -128,7 +128,7 @@ public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
     
     // root finding to get final answer
     // FIXME: default bracketing goes wayy too wide here, wasting work
-    let r = root(guess: guess, tolerance: 1e-15 * prob) { marcum(µ: µ, x: µx, y: $0).difference(p) }
+    let r = root(guess: guess, tolerance: 1e-15 * prob, bracketFactor: 1.001) { marcum(µ: µ, x: µx, y: $0).difference(p) }
     return r
 }
 
