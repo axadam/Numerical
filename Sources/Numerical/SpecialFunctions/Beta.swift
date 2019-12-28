@@ -182,7 +182,7 @@ public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
     let afac = -lbeta(a: a, b: b)
     let a1 = a - 1
     let b1 = b - 1
-    let x = rootSecondOrder(guess: guess,
+    let x = root(guess: guess,
                     xmin: 0,
                     xmax: 1,
                     maxIter: 10,
