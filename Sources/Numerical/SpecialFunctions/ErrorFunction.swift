@@ -9,7 +9,13 @@ import Foundation
 
 /// Inverse error function complement
 ///
-/// from Numerical Recipes 3rd edition, §6.2.2
+/// We use the relation with the quantile of the Normal distribution and a fast
+/// approximation thereof to get a guess. We then use Halley's method to get
+/// our final value.
+///
+/// 𝚽⁻¹(p) = √2 erf⁻¹(2p - 1), where 𝚽⁻¹(p) is the inverse Normal CDF
+///
+/// Numerical Recipes 3rd edition, §6.2.2
 public func invErfC(_ p: Double) -> Double {
     switch p {
         // handle domain limits
@@ -22,7 +28,8 @@ public func invErfC(_ p: Double) -> Double {
     case _:
         let pp = p < 1 ? p : 2 - p
 
-        // sin(π/4) = 0.70711
+        // erfc⁻¹(p) = 1/√2 𝚽⁻¹(p/2)
+        // 1 / √2 = 0.70711
         let guess = 0.70711 * qapprox(p: 0.5 * pp)
 
         // Halley method.

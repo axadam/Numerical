@@ -30,67 +30,146 @@ public func lbeta(a: Double, b: Double) -> Double {
 ///
 /// B(x, a, b) = ∫0..x t^(a - 1) (1 - t)^(b - 1) dt where a, b > 0
 ///
-/// Evaluated using a continuous fraction. NR recommends for large a, b
-/// to use quadrature but we haven't implemented yet.
+/// We follow the approach advised by Temme in the Numerical Aspects part of
+/// his chapter (§11.3.4), however the continued fraction is currently used everywhere.
 ///
-/// Numerical Receipes §6.4
-public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
-    switch (x,a,b) {
+/// Special Functions, N.M. Temme, 1996, §11.3
+public func beta_reg(xy: Probability, a: Double, b: Double) -> Probability {
+    let x = xy.p
+    let y = xy.q
+    
+    // Inflection point x₀ = a / (a + b)
+    let x₀ = a / (a + b)
+    switch (x,y,a,b) {
         // handle domain edges
-    case (_,...0,_): return .nan
-    case (_,_,...0): return .nan
-    case (..<0,_,_): return .nan
-    case (0,_,_): return .p(0)
-    case (1,_,_): return .q(0)
-    case (1...,_,_): return .nan
+    case (_,_,...0,_): return .nan
+    case (_,_,_,...0): return .nan
+    case (..<0,_,_,_): return .nan
+    case (1.nextUp...,_,_,_): return .nan
+    case (0,_,_,_): return .p(0)
+    case (_,0,_,_): return .q(0)
         
-        // FIXME: NR recommends quadrature due to slow convergence
-//        case (_,3000...,3000...):
+        // for x > x₀ we use I(1 - x,a,b) = 1 - I(x,b,a), Eq. 11.30
+    case (x₀.nextUp...,_,_,_): return beta_reg(xy: xy.complement, a: b, b: a).complement
         
-        // normal case
-    case (..<((a + 1.0) / (a + b + 2.0)),_,_):
-        let p = beta_reg_frac(x: x, a: a, b: b)
-        return .p(p)
-        
-        // x above threshold due the flip
-    case (_,_,_):
-        let q = beta_reg_frac(x: 1.0 - x, a: b, b: a)
-        return .q(q)
+        // for most of the domain we can use the continued fraction
+    case (_,_,_,_): return beta_reg_frac(xy: xy, a: a, b: b)
     }
 }
 
-/// Continued fraction approximation of I(x, a, b)
+public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
+    return beta_reg(xy: .p(x), a: a, b: b)
+}
+
+/// Continued Fraction estimate of Regularized Incomplete Beta Function
 ///
-/// I(x, a, b) = prefix 1 / (1 +) d1 / (1 +) d2 / (1 +)
+/// A continued fraction representation of the regularized incomplete beta function:
 ///
-/// prefix = x^a (1 - x)^b / (a B(a, b))
+/// Iₓ(a,b) = x^a (1 - x)^b / (a B(a,b) ) (1 / (1 +) d₁ / (1 +) d₂ / (1 +) d₃ / (1 +) ), Eq. 8.17.22
 ///
-/// d_(2m+1) = (a + m) (a + b + m) x / (a + 2m) / (a + 2m + 1)
+/// d₂ᵢ = i (b - i) x / (a + 2i - 1) / (a + 2i)
 ///
-/// d_(2m) = m (b - m) x / (a + 2m - 1) / (a + 2m)
+/// d₂ᵢ₊₁ = -(a + i) (a + b + i) x / (a + 2i) / (a + 2i - 1), Eq. 8.17.23
 ///
-/// Numerical Receipes §6.4
-public func beta_reg_frac(x: Double, a: Double, b: Double) -> Double {
-    let prefix = exp(a * log(x) + b * log(1 - x) - log(a) - lbeta(a: a, b: b))
-    let qab = a + b
-    let qap = a + 1
-    let qam = a - 1
-    let c = 1.0
-    let d = 1 / absmax(1 - qab * x / qap)
-    let frac = recursiveProduct(indices: 1..., product0: d, state0: (c: c, d: d), update: { i, state in
-        let (c0, d0) = state
-        let m = Double(i)
-        let m2 = m * 2
-        let aeven = m * (b - m) * x / ((qam + m2) * (a + m2))
-        let d1 = 1 / absmax(1 + aeven * d0)
-        let c1 = absmax(1 + aeven / c0)
-        let aodd = -((a + m) * (qab + m) * x) / ((a + (m2)) * (qap + (m2)))
-        let d2 = 1 / absmax(1 + aodd * d1)
-        let c2 = absmax(1 + aodd / c1)
-        return (d1 * c1 * d2 * c2, (c: c2, d: d2))
-    }, until: { a, b in abs(b.1 - 1) < 1e-15 })
-    let result = frac * prefix
-    return result
+/// This continued fraction works well for a wide range of values. Avoid when x is close to x₀ = a / (a + b).
+///
+/// NIST Handbook of Mathematical Functions, 2010
+public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability {
+    let x = xy.p
+    let y = xy.q
+    let prefix = pow(x,a) * pow(y,b) / (a * beta(a: a, b: b))
+    let cf = continued_fraction(b0: 0, a: { i in
+        let n = i / 2
+        let ndbl = Double(n)
+        switch i {
+        case 0:
+            return 1
+        case 2 * n + 1:
+            return -(a + ndbl) * (a + b + ndbl) / (a + 2 * ndbl) / (a + 2 * ndbl + 1) * x
+        case _:
+            return ndbl * (b - ndbl) / (a + 2 * ndbl - 1) / (a + 2 * ndbl) * x
+        }
+    }, b: { _ in 1 })
+    return Probability(p: prefix * cf)
+}
+
+/// Asymptotic expansion of Incomplete Beta Function when `a` is large and a ≫ b
+///
+/// As a → ∞ with b and x fixed we have the following expansion (originally from Temme):
+///
+/// I(x, a, b) = 𝛤(a + b) / 𝛤(a) Σi=0... dᵢFᵢ, Eq. 2
+///
+/// Where the Fᵢ have the following recurrence relationship:
+///
+/// aFᵢ₊₁ = (i + b - aξ)Fᵢ + iξFᵢ₋₁, Eq. 3
+///
+/// F₀ = a^(-b) Q(b,aξ),
+///
+/// F₁ = (b - aξ) F₀ / a + ξ^b e^(-aξ) / (a𝛤(b))
+///
+/// The coefficients dᵢ have the generating function:
+///
+/// ((1 - e^(-t)) / t) ^ (b - 1) = Σi=0... dᵢ(t - ξ)ⁱ
+///
+/// "Uniform Asymptotic Expansion for the Incomplete Beta Function", Nemes & Olde Daalhius, 2016
+///
+/// Special Functions, N. M. Temme, 1996, §11.3.3.1
+public func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
+    let ξ = -log(x)
+    
+    /// 𝛤(a + b) / 𝛤(a), Eq. 2
+    let prefix = exp(lgamma(a + b) - lgamma(a))
+    
+    let F₀ = pow(a, -b) * gamma_reg(b, a * ξ).q
+    let F₁ = (b - a * ξ) / a * F₀ + pow(ξ, b) * exp(-a * ξ) / (a * tgamma(b))
+    let Fᵢ₊₁ = { (n: Double, Fn: Double, Fnm1: Double) -> Double in
+        return 1 / a * ((n + b - a * ξ) * Fn + n * ξ * Fnm1)
+    }
+    
+    /// d₀ = ((1 - x) / ξ)^(b - 1), Eq. 4
+    let d₀ = pow((1 - x) / ξ, b - 1)
+    /// d₁ = (xξ + x - 1) (b - 1) d₀ / ((1 - x)ξ), Eq. 4
+    let d₁ = (x * ξ + x - 1) * (b - 1) * d₀ / (1 - x) / ξ
+    /// ξ(i + 1)(i + 2)d₀ dᵢ₊₂ = s₁ + s₂ + s₃, Eq. 5
+    let dᵢ₊₂ = { (d: [Double]) -> Double in
+        /// if b = 1 all terms after the first are zero
+        if b == 1 { return 0 }
+        
+        /// infer i from number of previous terms. e.g. when computing d₂ we have |(d₀,d₁)| = 2 and i = 0.
+        /// here we use the m and n terminology from Nemes.
+        let nint = d.count - 2
+        if nint < 0 { return .nan }
+        let n = Double(nint)
+        
+        /// prefix = 1 / (ξ(i + 1)(i + 2)d₀)
+        let prefix = 1 / ξ / (n + 1) / (n + 2) / d[0]
+        
+        /// s₁ = ξ Σm=0...i (m + 1)(n - 2m + 1 + (m - n - 1)/(b - 1)) d_(m+1) d_(n - m + 1)
+        let s₁ = ξ * (0...nint).map { mint in
+            let m = Double(mint)
+            return (m + 1) * (n - 2 * m + 1 + (m - n - 1) / (b - 1)) * d[mint + 1] * d[nint - mint + 1]
+        }.sum_naive()
+        /// s₂ = Σm=0...i (m + 1)(n - 2m - 2 - ξ + (m - n) / (b - 1)) d_(m+1) d_(n - m)
+        let s₂ = (0...nint).map { mint -> (Double) in
+            let m = Double(mint)
+            return (m + 1) * (n - 2 * m - 2 - ξ + (m - n) / (b - 1)) * d[mint + 1] * d[nint - mint]
+        }.sum_naive()
+        /// s₃ = Σm=0...i (1 - m - b) d_m d_(n - m)
+        let s₃ = (0...nint).map { mint -> (Double) in
+            let m = Double(mint)
+            return (1 - m - b) * d[mint] * d[nint - mint]
+        }.sum_naive()
+        return prefix * (s₁ + s₂ + s₃)
+    }
+    
+    let r = recursiveSum(indices: 1..., sum0: d₀ * F₀ + d₁ * F₁, state0: (Fᵢ₋₁: F₀, Fᵢ: F₁, d:[d₀,d₁]), update: { i, previous in
+        let (Fᵢ₋₁,Fᵢ,d) = previous
+        let F = Fᵢ₊₁(Double(i), Fᵢ, Fᵢ₋₁)
+        let dnew = dᵢ₊₂(d)
+        return (dnew * F, (Fᵢ₋₁: Fᵢ, Fᵢ: F, d:d + [dnew]))
+    }, until: { a, b in print(prefix * b.0); return abs(b.0 - a.0) < 1e-12 * a.0 })
+    
+    return prefix * r
 }
 
 /// Derivative of Regularized Incomplete Beta function

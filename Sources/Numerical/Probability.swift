@@ -35,6 +35,9 @@ public extension Probability {
     /// The complementary probability, q
     var q: Double { return isComplement ? value : 1 - value }
     
+    /// The complement as a new Probability
+    var complement: Probability { return Probability(value: value, isComplement: !isComplement) }
+    
     init(p: Double) {
         self.init(value: p, isComplement: false)
     }
