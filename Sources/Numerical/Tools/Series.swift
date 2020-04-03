@@ -12,7 +12,7 @@ public func recursiveSequence<Indices: Sequence, State>(indices: Indices, initia
     let result = withoutActuallyEscaping(update) { u in
         indices.lazy.scan( initialState ) { state0, index in
             return u(index, state0)
-            }.converge(max_iter: maxIter, until: until)
+            }.until(maxIter: maxIter, until)
     }
     return result?.result
 }
@@ -25,7 +25,7 @@ public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, 
                 let (term, state) = u(i, statePrev)
                 let accum = a(accumPrev,term)
                 return (accum, term, state)
-                }.converge(max_iter: max_iter) { a, b in until((a.0,a.1),(b.0,b.1)) }
+                }.until(maxIter: max_iter) { a, b in until((a.0,a.1),(b.0,b.1)) }
         }
     }
     guard let res = result?.result.0 else {
