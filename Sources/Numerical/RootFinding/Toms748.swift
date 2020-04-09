@@ -13,8 +13,7 @@ import Foundation
 /// interpolation and bracketing to keep the process safe.
 ///
 /// TOMS Algorithm 748 (1995), Section 4, Algorithm 4.2
-public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
-    let maxIter = 30
+public func toms748Root(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
     // factor by which we must shrink interval each iteration or we choose bisection
     // usually chosen as 0.5
     let µ = 0.5
@@ -25,10 +24,8 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
     // 4.1.2 Bracket
     let (a₂, b₂, d₂, fa₂, fb₂, fd₂) = bracket(f: f, a: a, b: b, c: c₁, fa: fa, fb: fb, tolerance: tolerance)
     
-    let r = recursiveSequence(indices: 2...,
-                              initialState: (a: a₂, b: b₂, d: d₂, e: 1.0, fa: fa₂, fb: fb₂, fd: fd₂, fe: 1e5),
-                              maxIter: maxIter,
-                              update: { i, state in
+    typealias Toms748State = (a: Double, b: Double, d: Double, e: Double, fa: Double, fb: Double, fd: Double, fe: Double)
+    let r: IterativeResult<Toms748State,ConvergenceState>? = (2...).lazy.scan((a: a₂, b: b₂, d: d₂, e: 1.0, fa: fa₂, fb: fb₂, fd: fd₂, fe: 1e5)) { (state: Toms748State, i: Int) -> Toms748State in
         let (aᵢ, bᵢ, dᵢ, eᵢ, faᵢ, fbᵢ, fdᵢ, feᵢ) = state
         
         // 4.2.3 First guess for the iteration is Inverse Cubic Interpolation if
@@ -91,8 +88,8 @@ public func toms748Root(f: (Double) -> Double, a: Double, b: Double, fa: Double,
         let (eᵢ₊₁,feᵢ₊₁) = (d̂ᵢ,fd̂ᵢ)
         let (aᵢ₊₁,bᵢ₊₁,dᵢ₊₁,faᵢ₊₁,fbᵢ₊₁,fdᵢ₊₁) = bracket(f: f, a: âᵢ, b: b̂ᵢ, c: 0.5 * (âᵢ + b̂ᵢ), fa: fâᵢ, fb: fb̂ᵢ, tolerance: tolerance)
         return (aᵢ₊₁,bᵢ₊₁,dᵢ₊₁,eᵢ₊₁,faᵢ₊₁,fbᵢ₊₁,fdᵢ₊₁,feᵢ₊₁)
-    }, until: { s1, s2 in s2.fa == 0 || s2.b - s2.a <= 2 * tole(a: s2.a, b: s2.b, fa: s2.fa, fb: s2.fb, tolerance: tolerance) })
-    guard let res = r else { return .nan }
+    }.until(maxIter: 30) { s1, s2 in s2.fa == 0 || s2.b - s2.a <= 2 * tole(a: s2.a, b: s2.b, fa: s2.fa, fb: s2.fb, tolerance: tolerance) }
+    guard let res = r?.result else { return .nan }
     return abs(res.fa) < abs(res.fb) ? res.a : res.b
 }
 

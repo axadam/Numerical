@@ -8,15 +8,6 @@
 import Foundation
 import Scan
 
-public func recursiveSequence<Indices: Sequence, State>(indices: Indices, initialState: State, maxIter: Int, update: (Int, State) -> State, until: (State, State) -> Bool) -> State? where Indices.Element == Int {
-    let result = withoutActuallyEscaping(update) { u in
-        indices.lazy.scan( initialState ) { state0, index in
-            return u(index, state0)
-            }.until(maxIter: maxIter, until)
-    }
-    return result?.result
-}
-
 public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: (Double,Double) -> Double, update: (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
     let result = withoutActuallyEscaping(accumulate) { a in
         withoutActuallyEscaping(update) { u in

@@ -564,11 +564,11 @@ fileprivate func lambda(_ η: Double) -> Double {
     // λ₁ = λ₀ (η² / 2 + log(λ₀)) / (λ₀ - 1)
     switch η {
     case (-3.5...(-0.03)),(0.03...40):
-        let λʹ = recursiveSequence(indices: 1..., initialState: λ, maxIter: 100, update: { i, λ₀ in
+        let λʹ = sequence(first: λ) { λ₀ in
             let λ₁ = λ₀ * (s + log(λ₀)) / (λ₀ - 1)
             return λ₁
-        }, until: { a, b in b / a - 1 < 1e-8 })
-        return λʹ ?? λ
+        }.until(maxIter: 100) { a, b in b / a - 1 < 1e08 }
+        return λʹ?.result ?? λ
     case _:
         return λ
     }

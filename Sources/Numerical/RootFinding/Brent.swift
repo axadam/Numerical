@@ -13,9 +13,7 @@ import Foundation
 /// step, but if that goes beyond the brackets it falls back on bisection.
 ///
 /// Numerical Recipes §9.3
-public func brentRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
-    let maxIter = 50
-    
+public func brentRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
     // start out c equal to b
     let c = b
     let fc = fb
@@ -23,14 +21,13 @@ public func brentRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, f
     // initial run of bookkeeping
     let (a0,b0,c0,fa0,fb0,fc0,d0,e0,xm,tol1) = brentBookkeeping(a: a, b: b, c: c, fa: fa, fb: fb, fc: fc, d: 0, e: 9999, tol: tolerance)
 
-    let r = recursiveSequence(indices: 0..<maxIter, initialState: (state: (a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1), guess: fb0), maxIter: maxIter, update: { i, arg0 in
-        let (a0,b0,c0,fa0,fb0,fc0,d0,e0,xm,tol1) = arg0.state
+    let r = sequence(first: (a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1)) { arg0 in
+        let (a0,b0,c0,fa0,fb0,fc0,d0,e0,xm,tol1) = arg0
         let (a1,b1,c1,fa1,fb1,fc1,d1,e1) = brentStep(f: f, a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1)
-        let state1 = brentBookkeeping(a: a1, b: b1, c: c1, fa: fa1, fb: fb1, fc: fc1, d: d1, e: e1, tol: tolerance)
-        return (state: state1, guess: state1.b)
-    }, until: { s1, s2 in abs(s2.state.xm) <= s2.state.tol1 || abs(s2.state.fb) <= tolerance })
-    guard let res = r else { return .nan }
-    return res.guess
+        return brentBookkeeping(a: a1, b: b1, c: c1, fa: fa1, fb: fb1, fc: fc1, d: d1, e: e1, tol: tolerance)
+    }.until(maxIter: 50) { s2 in abs(s2.xm) <= s2.tol1 || abs(s2.fb) <= tolerance }
+    guard let res = r?.result else { return .nan }
+    return res.b
 }
 
 func brentBookkeeping(a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, tol: Double) -> (a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, xm: Double, tol1: Double) {

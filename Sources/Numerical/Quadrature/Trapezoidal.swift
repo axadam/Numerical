@@ -46,7 +46,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
     let I₀ = 0.5 * Δx₀ * (f(a) + f(b))
     
     // iteratively bisect the interval until we get desired convergence
-    let q = (1...).lazy.scan((I: I₀, Δx: Δx₀, n: 1)) { accum, jInt in
+    let q = sequence(first: (I: I₀, Δx: Δx₀, n: 1)) { accum in
         let (Iⱼ₋₁,Δxⱼ₋₁,nⱼ₋₁) = accum
         
         // find the sequence of xᵢ (i odd), starting at half the previous interval
@@ -67,7 +67,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
         let nⱼ = nⱼ₋₁ * 2
         
         return (Iⱼ,Δxⱼ,nⱼ)
-        }.until(maxIter: 10) { a, b in abs(b.I / a.I - 1) < 1e-10 }
+    }.until(maxIter: 10) { a, b in abs(b.I / a.I - 1) < 1e-10 }
     guard let quad = q?.result else {
         return .nan
     }

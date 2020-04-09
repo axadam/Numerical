@@ -44,14 +44,12 @@ func riddersStep(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Do
 ///
 /// Approximates the functions curve with an exponential instead of a
 /// polynomial. Robust.
-public func riddersRoot(f: (Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
-    let maxIter = 30
-    
-    let r = recursiveSequence(indices: 0..<maxIter, initialState: (state: (x0: a, x1: b, y0: fa, y1: fb), guess: b), maxIter: maxIter, update: { i, arg0 in
-        let (x0, x1, y0, y1) = arg0.state
-        let state1 = riddersStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
-        return (state: state1, guess: state1.x1)
-    }, until: { s1, s2 in abs(s2.state.y1) < tolerance })
-    guard let res = r else { return .nan }
-    return res.guess
+public func riddersRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
+    let r = sequence(first: (x0: a, x1: b, y0: fa, y1: fb)) { arg0 in
+        let (x0, x1, y0, y1) = arg0
+        return riddersStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
+    }.until(maxIter: 30) { s2 in abs(s2.y1) < tolerance }
+
+    guard let res = r?.result else { return .nan }
+    return res.x1
 }
