@@ -134,7 +134,7 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Regularized Incomplete Beta Function
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
-| (a:3,b:5,x:0.4) | 14.8 | 15.0 |
+| (a:3,b:5,x:0.4) | 15.0 | 15.0 |
 
 #### Marcum Q Function, reference values from Mathematica
 | Case | f | f⁻¹ |
@@ -175,6 +175,13 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | q:1e-10 | 6.0 |
 | q:1e-20 | 6.0 |
 | q:1e-30 | 5.4 |
+
+#### Continued Fraction
+| Case | LRE |
+| --- | ---: |
+| e | 15.0 |
+| π | 13.1 |
+| √2 | 15.0 |
 
 ### Notes
 
