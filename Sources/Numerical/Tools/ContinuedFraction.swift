@@ -51,7 +51,7 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S) -> Double whe
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
 public func continued_fraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double) -> Double {
-    let seq = (0...).lazy.map { return (a: a($0), b: b($0)) }
+    let seq = (1...).lazy.map { return (a: a($0), b: b($0)) }
     return continued_fraction(b0: b0, coeffs: seq)
 }
 

@@ -67,9 +67,9 @@ public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
 ///
 /// Iₓ(a,b) = x^a (1 - x)^b / (a B(a,b) ) (1 / (1 +) d₁ / (1 +) d₂ / (1 +) d₃ / (1 +) ), Eq. 8.17.22
 ///
-/// d₂ᵢ = i (b - i) x / (a + 2i - 1) / (a + 2i)
+/// d_{2m} = m (b - m) x / (a + 2m - 1) / (a + 2m)
 ///
-/// d₂ᵢ₊₁ = -(a + i) (a + b + i) x / (a + 2i) / (a + 2i - 1), Eq. 8.17.23
+/// d_{2m+1} = -(a + m) (a + b + m) x / (a + 2m) / (a + 2m - 1), Eq. 8.17.23
 ///
 /// This continued fraction works well for a wide range of values. Avoid when x is close to x₀ = a / (a + b).
 ///
@@ -79,15 +79,15 @@ public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability 
     let y = xy.q
     let prefix = pow(x,a) * pow(y,b) / (a * beta(a: a, b: b))
     let cf = continued_fraction(b0: 0, a: { i in
-        let n = i / 2
-        let ndbl = Double(n)
-        switch i {
+        let mInt = (i - 1) / 2
+        let m = Double(mInt)
+        switch (i - 1) {
         case 0:
             return 1
-        case 2 * n + 1:
-            return -(a + ndbl) * (a + b + ndbl) / (a + 2 * ndbl) / (a + 2 * ndbl + 1) * x
+        case 2 * mInt + 1:
+            return -(a + m) * (a + b + m) / (a + 2 * m) / (a + 2 * m + 1) * x
         case _:
-            return ndbl * (b - ndbl) / (a + 2 * ndbl - 1) / (a + 2 * ndbl) * x
+            return m * (b - m) / (a + 2 * m - 1) / (a + 2 * m) * x
         }
     }, b: { _ in 1 })
     return Probability(p: prefix * cf)

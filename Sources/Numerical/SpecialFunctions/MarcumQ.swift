@@ -387,7 +387,7 @@ fileprivate func q_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
-    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
+    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0 - 1)) / ξ })
     
     // recurse back up to the original µ
     let recurse = (0..<n).reduce((qᵢ₋₁: q₋₁, qᵢ: q₀, cᵢ: cµ̃)) { stateᵢ, iInt in
@@ -449,7 +449,7 @@ fileprivate func p_recursion(µ: Double, x: Double, y: Double) -> Double {
     
     // find the coefficient for the first step
     let ξ = 2 * sqrt(x * y)
-    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0)) / ξ })
+    let cµ̃ = sqrt(y / x) * continued_fraction(b0: 0, a: { _ in 1.0 }, b: { 2 * (µ̃ + Double($0 - 1)) / ξ })
     
     // recurse back up to the original µ
     let recurse = (0..<n).reduce((pᵢ₊₁: p₊₁, pᵢ: p₀, cᵢ: cµ̃)) { stateᵢ, iInt in
