@@ -183,6 +183,12 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | π | 13.1 |
 | √2 | 15.0 |
 
+#### Chebyshev, e^x test case from Approximation Theory Approximation Practice, Trefethen
+| Case | exp(x) |
+| --- | ---: |
+| -0.5 | 14.8 |
+| 0.5 | 15.0 |
+
 ### Notes
 
 Care is taken to cite sources for algorithms and also to spell out derivations in the comments. While the source algorithms
