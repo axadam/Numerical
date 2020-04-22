@@ -30,7 +30,34 @@ final class ToolsTests: XCTestCase {
         let e  = continued_fraction(b0: 2, a: { $0 == 1 ? 1.0 : Double($0 - 1) }, b: { Double($0) })
         AssertLRE(e,  "2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e", field: f)
 
-        let pi = continued_fraction(b0: 3, a: { pow(2 * Double($0) - 1,2) }, b: { _ in 6 }, maxIter: 35000)
+        let pi = continued_fraction(b0: 3, a: { pow(Double(2 * $0 - 1),2) }, b: { _ in 6 }, maxIter: 35000)
         AssertLRE(pi, "3.141592653589793238462643383279502884197169399375105820974", digits: 13.0, resultStore: rs, table: t, testCase: "π", field: f)
+    }
+    
+    func testChebyshev() {
+        let t = "Chebyshev, e^x test case from Approximation Theory Approximation Practice, Trefethen"
+        let f = "exp(x)"
+        let coeffsExp = [
+        1.266065877752008,
+        1.130318207984970,
+        0.271495339534077,
+        0.044336849848664,
+        0.005474240442094,
+        0.000542926311914,
+        0.000044977322954,
+        0.000003198436462,
+        0.000000199212481,
+        0.000000011036772,
+        0.000000000550590,
+        0.000000000024980,
+        0.000000000001039,
+        0.000000000000040,
+        0.000000000000001
+        ]
+        let e = { (x: Double) -> Double in
+            chebyshev(poly: coeffsExp, z: x)
+        }
+        AssertLRE(e(0.5), "\(exp(0.5))", digits: 14.9, resultStore: rs, table: t, testCase: "0.5", field: f)
+        AssertLRE(e(-0.5), "\(exp(-0.5))", digits: 14.7, resultStore: rs, table: t, testCase: "-0.5", field: f)
     }
 }

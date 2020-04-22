@@ -10,21 +10,23 @@
 /// Evaluates a Chebyshev polynomial approximation of function f at a specified
 /// point x.
 ///
-/// f(x) = c₀ / 2 + Σ i=1...N-1 cᵢTᵢ(x),
+/// f(x) ≈ p_n(x) = a₀ + a₁T₁(x) + a₂T₂(x) + ... + a_n T_n(x),
 ///
 /// T₀(x) = 1, T₁(x) = x, Tᵢ₊₁(x) = 2x Tᵢ(x) - Tᵢ₋₁(x)
 ///
 /// Using Clenshaw recursion:
 ///
-/// f(x) = c₀ / 2 + x d₁ - d₂,
+/// p_n(x) = a₀ + x b₁ - b₂,
 ///
-/// dᵢ = 2x dᵢ₊₁ - dᵢ₊₂ + cᵢ,
+/// bᵢ = 2x bᵢ₊₁ - bᵢ₊₂ + aᵢ,
 ///
-/// d_n = d_n+1 = 0
+/// b_n = b_{n+1} = 0
 ///
 /// Operates on interval [-1,1] but can be shifted to any other interval [a,b]:
 ///
 /// y = (2x - (b + a)) / (b - a)
+///
+/// https://en.wikipedia.org/wiki/Clenshaw_algorithm
 public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> = -1...1, m: Int? = nil) -> Double {
     // extract bounds of interval
     let a = interval.lowerBound
@@ -34,7 +36,7 @@ public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> =
     let mm = min(m ?? poly.count, poly.count)
     
     // Hold aside the first coefficient
-    guard let c₀ = poly.first else {
+    guard let a₀ = poly.first else {
         // we have no coefficients
         return 0
     }
@@ -46,16 +48,16 @@ public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> =
     }
     
     // Map point in specified interval to a point in [-1,1]
-    let y = a == -1 && b == 1 ? z : (2 * z - b - a) / (b - a)
+    let x = a == -1 && b == 1 ? z : (2 * z - b - a) / (b - a)
     
     // Go through Clenshaw recursion
-    let (d₁,d₂) = poly.prefix(mm).dropFirst().reversed().reduce((0.0,0.0)) { accum, cᵢ in
-        let (dᵢ₊₁,dᵢ₊₂) = accum
-        let dᵢ = 2 * y * dᵢ₊₁ - dᵢ₊₂ + cᵢ
-        return (dᵢ,dᵢ₊₁)
+    let (b₁,b₂) = poly.prefix(mm).dropFirst().reversed().reduce((0.0,0.0)) { accum, aᵢ in
+        let (bᵢ₊₁,bᵢ₊₂) = accum
+        let bᵢ = 2 * x * bᵢ₊₁ - bᵢ₊₂ + aᵢ
+        return (bᵢ,bᵢ₊₁)
     }
     
-    // Evaluate
-    let f = c₀ / 2 + y * d₁ - d₂
-    return f
+    // Final step to evalute polynomial
+    let p = a₀ + x * b₁ - b₂
+    return p
 }
