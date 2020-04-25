@@ -12,7 +12,7 @@ Fills in a few missing basic functions.
 
 * `xmsin(_:)` - Calculate x - sin(x) with precision even when x is small
 
-* Summation
+Provides some standard summation methods
 
   * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
   
@@ -188,9 +188,3 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | --- | ---: |
 | -0.5 | 14.8 |
 | 0.5 | 15.0 |
-
-### Notes
-
-Care is taken to cite sources for algorithms and also to spell out derivations in the comments. While the source algorithms
-are generally performant this code has not been optimized for performance.
-
