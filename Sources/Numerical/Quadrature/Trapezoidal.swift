@@ -33,7 +33,7 @@ import Foundation
 /// concave down ones.
 ///
 /// https://en.wikipedia.org/wiki/Trapezoidal_rule
-public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Double) -> Double) -> Double {
+public func trapezoidalQuadrature(range: ClosedRange<Double>, maxIter: Int = 10, f: @escaping (Double) -> Double) -> Double {
     
     // extract end points from Range
     let a = range.lowerBound
@@ -67,7 +67,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, f: @escaping (Doub
         let nⱼ = nⱼ₋₁ * 2
         
         return (Iⱼ,Δxⱼ,nⱼ)
-    }.until(maxIter: 10) { a, b in abs(b.I / a.I - 1) < 1e-10 }
+    }.until(maxIter: maxIter) { a, b in abs(b.I / a.I - 1) < 1e-10 }
     guard let quad = q?.result else {
         return .nan
     }
