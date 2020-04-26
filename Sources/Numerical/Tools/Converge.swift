@@ -7,12 +7,12 @@
 
 public extension Sequence {
     
-    func until(maxIter: Int = 100, _ predicate: (Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
+    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
         var g = makeIterator()
         var count = 0
         var last: Element? = nil
         while let e = g.next() {
-            if predicate(e) {
+            if predicate(e) && count >= minIter {
                 return IterativeResult(iterations: count, exitState: .converged, result: e)
             }
             last = e
@@ -34,12 +34,12 @@ public extension Sequence {
     ///
     /// Returns nil for the empty sequence.
     @inlinable
-    func until(maxIter: Int = 100, _ predicate: (Element,Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
+    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element,Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
         var g = makeIterator()
         var count = 0
         var last: Element? = nil
         while let e = g.next() {
-            if let lasty = last, predicate(lasty,e) {
+            if let lasty = last, predicate(lasty,e) && count >= minIter {
                 return IterativeResult(iterations: count + 1, exitState: .converged, result: e)
             }
             last = e

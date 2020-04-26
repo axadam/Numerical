@@ -67,7 +67,7 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, maxIter: Int = 10,
         let nⱼ = nⱼ₋₁ * 2
         
         return (Iⱼ,Δxⱼ,nⱼ)
-    }.until(maxIter: maxIter) { a, b in abs(b.I / a.I - 1) < 1e-10 }
+    }.until(minIter: 3, maxIter: maxIter) { a, b in abs(b.I / a.I - 1) < 1e-10 }
     guard let quad = q?.result else {
         return .nan
     }
