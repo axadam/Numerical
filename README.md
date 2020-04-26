@@ -195,6 +195,6 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | -19 + 7x - 4x² + 6x³; x=3 | 15.0 |
 
 #### Quadrature
-| Case | 1/x, [1,100] | x, [0,5000] | x³, [0,1] |
-| --- | ---: | ---: | ---: |
-| Trapezoidal | 11.0 | 15.0 | 10.8 |
+| Case | 1/x, [1,100] | x, [0,5000] | x³, [0,1] | √(1 - 0.36sin²θ), [0,2π] |
+| --- | ---: | ---: | ---: | ---: |
+| Trapezoidal | 11.0 | 15.0 | 10.8 | 15.0 |

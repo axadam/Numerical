@@ -37,7 +37,7 @@ final class Quadrature: XCTestCase {
     let vcube = "0.25"
     let vrecip = "4.605170185988091368035982909368728415202202977257545952066"
     let viden = "12500000"
-    let vpois = "0.90277992777219"
+    let vpois = "0.902779927772193884716139509461678950653101811833151562088"
     
     func testTrapezoidal() {
         let tc = "Trapezoidal"
