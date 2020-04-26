@@ -26,18 +26,24 @@ final class Quadrature: XCTestCase {
     let iden = { (x: Double) in x }
     // Poisson's example: perimeter of ellipse of 1/π by 0.6/π
     let pois = { (x: Double) in sqrt(1 - 0.36 * sin(x) * sin(x)) / (2 * Double.pi) }
+    let ecos = { (x: Double) in exp(cos(x)) }
+    let ex2  = { (x: Double) in exp(-x * x) / Double.pi.squareRoot() }
     
     let t = "Quadrature"
     
     let fcube = "x³, [0,1]"
     let frecip = "1/x, [1,100]"
     let fiden = "x, [0,5000]"
-    let fpois = "√(1 - 0.36sin²θ), [0,2π]"
+    let fpois = "√(1 - 0.36sin²θ) / √(2π), [0,2π]"
+    let fecos = "e^cos(θ), [0,2π]"
+    let fex2  = "e^(-x²) / √π, [-10,10]" // truncating [-∞,∞] which would be 1
     
-    let vcube = "0.25"
+    let vcube = "0.25" // exact
     let vrecip = "4.605170185988091368035982909368728415202202977257545952066"
-    let viden = "12500000"
+    let viden = "12500000" // exact
     let vpois = "0.902779927772193884716139509461678950653101811833151562088"
+    let vecos = "7.95492652101284"
+    let vex2  = "0.999999999999999999999999999999999999999999997911512416237"
     
     func testTrapezoidal() {
         let tc = "Trapezoidal"
@@ -46,10 +52,14 @@ final class Quadrature: XCTestCase {
         let r = trapezoidalQuadrature(range: 1...100, maxIter: 1000, f: recip)
         let i = trapezoidalQuadrature(range: 0...5000, f: iden)
         let p = trapezoidalQuadrature(range: 0...(2 * Double.pi), f: pois)
+        let e = trapezoidalQuadrature(range: 0...(2 * Double.pi), f: ecos)
+        let x = trapezoidalQuadrature(range: -10...10, f: ex2)
         
         AssertLRE(c, vcube, exact: true, digits: 10.8, resultStore: rs, table: t, testCase: tc, field: fcube)
         AssertLRE(r, vrecip, digits: 10.9, resultStore: rs, table: t, testCase: tc, field: frecip)
         AssertLRE(i, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
         AssertLRE(p, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
+        AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
+        AssertLRE(x, vex2, resultStore: rs, table: t, testCase: tc, field: fex2)
     }
 }
