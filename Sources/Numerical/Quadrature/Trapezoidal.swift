@@ -49,23 +49,23 @@ public func trapezoidalQuadrature(range: ClosedRange<Double>, maxIter: Int = 10,
     let q = sequence(first: (I: I₀, Δx: Δx₀, n: 1)) { accum in
         let (Iⱼ₋₁,Δxⱼ₋₁,nⱼ₋₁) = accum
         
-        // find the sequence of xᵢ (i odd), starting at half the previous interval
-        // and going until one half the previous short of the end of the range
-        let seq = sequence(first: a + 0.5 * Δxⱼ₋₁, next: { $0 + Δxⱼ₋₁ }).prefix(nⱼ₋₁)
-        
-        // sum up evaluations of the function at each point in the sequence
-        let sum = seq.map { f($0) }.sum_naive()
-        
-        // new estimate is half the previous (since now intervals are half as wide)
-        // plus ∆x/2 Σf(xᵢ), i odd
-        let Iⱼ = 0.5 * (Iⱼ₋₁ + sum * Δxⱼ₋₁)
-
         // bisect the interval
         let Δxⱼ = 0.5 * Δxⱼ₋₁
         
         // double the number of intervals
         let nⱼ = nⱼ₋₁ * 2
         
+        // find the sequence of xᵢ (i odd), starting at half the previous interval
+        // and going until one half the previous short of the end of the range
+        let seq = sequence(first: a + Δxⱼ, next: { $0 + Δxⱼ₋₁ }).prefix(nⱼ₋₁)
+        
+        // sum up evaluations of the function at each point in the sequence
+        let sum = seq.map { f($0) }.sum_naive()
+        
+        // new estimate is half the previous (since now intervals are half as wide)
+        // plus ∆x/2 Σf(xᵢ), i odd
+        let Iⱼ = 0.5 * Iⱼ₋₁ + sum * Δxⱼ
+
         return (Iⱼ,Δxⱼ,nⱼ)
     }.until(minIter: 3, maxIter: maxIter) { a, b in abs(b.I / a.I - 1) < 1e-10 }
     guard let quad = q?.result else {

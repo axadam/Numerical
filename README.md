@@ -74,6 +74,14 @@ Functions to find the root of a function of interest.
 
 * `root(guess:xmin?:xmax?:xtol:f:f1:f2f1)` - Same as above but takes the ratio of the second derivative to the first. For use in cases where the ratio is cheaper to calculate.
 
+### Quadrature
+
+Functions to numerically integrate a function on a closed interval.
+
+* `trapezoidalQuadrature(range:maxIter:f:)` - Integrates the function f on the specified range using the Trapezoidal Rule. It is especially accurate when integrating a periodic function over its period or when integrating a peak function.
+
+* `romberg(range:maxIter:f:)` - Integrates the function f on the specified range using Romberg's Method. This method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations (but more other calculations).
+
 ### Tools
 
 * Series - Some tools around evaluating convergent series. Included is a general way to test if a sequence is converging and then functions specifically for sums and product series where the terms are recursively defined.
@@ -83,8 +91,6 @@ Functions to find the root of a function of interest.
 * Chebyshev polynomials - Evaluation of Chebyshev polynomials, including rescaling the interval.
 
 * Continued Fractions - Evaluation of continued fractions using the modified Lentz method.
-
-* Quadrature - Numerical integration of functions by quadrature. Currently only implements the Trapezoidal Rule.
 
 ### Accuracy
 
@@ -197,4 +203,5 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Quadrature
 | Case | 1/x, [1,100] | e^(-x²) / √π, [-10,10] | e^cos(θ), [0,2π] | x, [0,5000] | x³, [0,1] | √(1 - 0.36sin²θ) / √(2π), [0,2π] |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Romberg | 14.9 | 14.7 | 15.0 | 15.0 | 15.0 | 15.0 |
 | Trapezoidal | 11.0 | 15.0 | 15.0 | 15.0 | 10.8 | 15.0 |

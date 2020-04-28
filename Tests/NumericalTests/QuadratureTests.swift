@@ -62,4 +62,22 @@ final class Quadrature: XCTestCase {
         AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
         AssertLRE(x, vex2, resultStore: rs, table: t, testCase: tc, field: fex2)
     }
+    
+    func testRomberg() {
+        let tc = "Romberg"
+        
+        let c = romberg(range: 0...1, maxIter: 100, f: cube)
+        let r = romberg(range: 1...100, maxIter: 1000, f: recip)
+        let i = romberg(range: 0...5000, f: iden)
+        let p = romberg(range: 0...(2 * Double.pi), f: pois)
+        let e = romberg(range: 0...(2 * Double.pi), f: ecos)
+        let x = romberg(range: -10...10, f: ex2)
+        
+        AssertLRE(c, vcube, exact: true, resultStore: rs, table: t, testCase: tc, field: fcube)
+        AssertLRE(r, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: tc, field: frecip)
+        AssertLRE(i, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
+        AssertLRE(p, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
+        AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
+        AssertLRE(x, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tc, field: fex2)
+    }
 }
