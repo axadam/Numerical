@@ -497,7 +497,7 @@ fileprivate func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probabi
     let sq1pξ² = sqrt(1 + ξ²)
     
     // integrate over the half interval (0...π)
-    let integral = trapezoidalQuadrature(range: 0...(Double.pi)) { integrand(θ: $0, µ: µ, y: y, ξ²: ξ², sq1pξ²: sq1pξ²)}
+    let integral = integrate(range: 0...(Double.pi), method:trapezoidal) { integrand(θ: $0, µ: µ, y: y, ξ²: ξ², sq1pξ²: sq1pξ²)}
     
     // multiply by prefix to get result
     let ζ = zeta(x: x, y: y)

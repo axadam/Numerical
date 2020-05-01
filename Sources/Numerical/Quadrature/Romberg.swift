@@ -21,7 +21,7 @@ import Foundation
 /// Rⱼᵢ = (4ⁱ Rⱼᵢ₋₁ - Rⱼ₋₁ ᵢ₋₁) / (4ⁱ - 1)
 ///
 /// https://en.wikipedia.org/wiki/Romberg%27s_method
-public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f: @escaping (Double) -> Double) -> Double {
+public func romberg(f: CountedFunction<Double,Double>, range: ClosedRange<Double>, maxIter: Int = 10) -> QuadratureResult {
 
     // extract end points from Range
     let a = range.lowerBound
@@ -61,8 +61,12 @@ public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f: @escaping 
         
         return (Δxⱼ,Rⱼ,nⱼ)
     }.until(minIter: 3, maxIter: maxIter) { a, b in abs(b.R.last! / a.R.last! - 1) < 1e-15 }
-    guard let quad = q?.result else {
-        return .nan
+    guard let quad = q else {
+        return .error
     }
-    return quad.R.last!
+    switch quad.exitState {
+    case .exhaustedInput: return .error
+    case .exceededMax: return .noConverge(evals: f.count, estimate: quad.result.R.last!)
+    case .converged: return .success(evals: f.count, estimate: quad.result.R.last!)
+    }
 }

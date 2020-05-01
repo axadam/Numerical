@@ -48,12 +48,12 @@ final class Quadrature: XCTestCase {
     func testTrapezoidal() {
         let tc = "Trapezoidal"
         
-        let c = trapezoidalQuadrature(range: 0...1, maxIter: 100, f: cube)
-        let r = trapezoidalQuadrature(range: 1...100, maxIter: 1000, f: recip)
-        let i = trapezoidalQuadrature(range: 0...5000, f: iden)
-        let p = trapezoidalQuadrature(range: 0...(2 * Double.pi), f: pois)
-        let e = trapezoidalQuadrature(range: 0...(2 * Double.pi), f: ecos)
-        let x = trapezoidalQuadrature(range: -10...10, f: ex2)
+        let c = integrate(range: 0...1, maxIter: 100, method: trapezoidal, f: cube)
+        let r = integrate(range: 1...100, maxIter: 1000, method: trapezoidal, f: recip)
+        let i = integrate(range: 0...5000, method: trapezoidal, f: iden)
+        let p = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: pois)
+        let e = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: ecos)
+        let x = integrate(range: -10...10, method: trapezoidal, f: ex2)
         
         AssertLRE(c, vcube, exact: true, digits: 10.8, resultStore: rs, table: t, testCase: tc, field: fcube)
         AssertLRE(r, vrecip, digits: 10.9, resultStore: rs, table: t, testCase: tc, field: frecip)
@@ -66,12 +66,12 @@ final class Quadrature: XCTestCase {
     func testRomberg() {
         let tc = "Romberg"
         
-        let c = romberg(range: 0...1, maxIter: 100, f: cube)
-        let r = romberg(range: 1...100, maxIter: 1000, f: recip)
-        let i = romberg(range: 0...5000, f: iden)
-        let p = romberg(range: 0...(2 * Double.pi), f: pois)
-        let e = romberg(range: 0...(2 * Double.pi), f: ecos)
-        let x = romberg(range: -10...10, f: ex2)
+        let c = integrate(range: 0...1, maxIter: 100, method: romberg, f: cube)
+        let r = integrate(range: 1...100, maxIter: 1000, method: romberg, f: recip)
+        let i = integrate(range: 0...5000, method: romberg, f: iden)
+        let p = integrate(range: 0...(2 * Double.pi), method: romberg, f: pois)
+        let e = integrate(range: 0...(2 * Double.pi), method: romberg, f: ecos)
+        let x = integrate(range: -10...10, method: romberg, f: ex2)
         
         AssertLRE(c, vcube, exact: true, resultStore: rs, table: t, testCase: tc, field: fcube)
         AssertLRE(r, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: tc, field: frecip)
