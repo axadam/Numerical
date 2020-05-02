@@ -82,7 +82,8 @@ Numerically integrate a function on a closed interval.
 
   * `trapezoidal` - Trapezoidal Rule: a simple method that is is especially efficient when integrating a periodic function over its period or when integrating a peak function. In other cases it will usually not be the most efficient method.
 
-  * `romberg` - Romberg's Method: this method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations in many cases.
+  * `romberg` - (default) Romberg's Method: this method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations in many cases.
+
 
 ### Tools
 
