@@ -48,15 +48,15 @@ final class Quadrature: XCTestCase {
     func testTrapezoidal() {
         let tc = "Trapezoidal"
         
-        let c = integrate(range: 0...1, maxIter: 100, method: trapezoidal, f: cube)
-        let r = integrate(range: 1...100, maxIter: 1000, method: trapezoidal, f: recip)
+        let c = integrate(range: 0...1, method: trapezoidal, f: cube)
+        let r = integrate(range: 1...100, maxIter: 20, method: trapezoidal, f: recip)
         let i = integrate(range: 0...5000, method: trapezoidal, f: iden)
         let p = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: pois)
         let e = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: ecos)
         let x = integrate(range: -10...10, method: trapezoidal, f: ex2)
         
-        AssertLRE(c, vcube, exact: true, digits: 10.8, resultStore: rs, table: t, testCase: tc, field: fcube)
-        AssertLRE(r, vrecip, digits: 10.9, resultStore: rs, table: t, testCase: tc, field: frecip)
+        AssertLRE(c, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tc, field: fcube)
+        AssertLRE(r, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: tc, field: frecip)
         AssertLRE(i, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
         AssertLRE(p, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
         AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
@@ -66,8 +66,8 @@ final class Quadrature: XCTestCase {
     func testRomberg() {
         let tc = "Romberg"
         
-        let c = integrate(range: 0...1, maxIter: 100, method: romberg, f: cube)
-        let r = integrate(range: 1...100, maxIter: 1000, method: romberg, f: recip)
+        let c = integrate(range: 0...1, method: romberg, f: cube)
+        let r = integrate(range: 1...100, maxIter: 20, method: romberg, f: recip)
         let i = integrate(range: 0...5000, method: romberg, f: iden)
         let p = integrate(range: 0...(2 * Double.pi), method: romberg, f: pois)
         let e = integrate(range: 0...(2 * Double.pi), method: romberg, f: ecos)

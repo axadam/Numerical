@@ -26,6 +26,5 @@ public enum QuadratureResult {
 public func integrate(range: ClosedRange<Double>, maxIter: Int = 10, method: UnivariateQuadrature = romberg, f: @escaping (Double) -> Double) -> Double {
     let countedF = CountedFunction(f: f)
     let b = method(countedF,range,maxIter)
-    print("result: \(b)")
     return b.value
 }

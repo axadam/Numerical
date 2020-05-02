@@ -76,11 +76,13 @@ Functions to find the root of a function of interest.
 
 ### Quadrature
 
-Functions to numerically integrate a function on a closed interval.
+Numerically integrate a function on a closed interval.
 
-* `trapezoidalQuadrature(range:maxIter:f:)` - Integrates the function f on the specified range using the Trapezoidal Rule. It is especially accurate when integrating a periodic function over its period or when integrating a peak function.
+* `integrate(range:maxIter:method:f:)` - Integrates the function f on the specified range using the specified method.
 
-* `romberg(range:maxIter:f:)` - Integrates the function f on the specified range using Romberg's Method. This method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations (but more other calculations).
+  * `trapezoidal` - Trapezoidal Rule: a simple method that is is especially efficient when integrating a periodic function over its period or when integrating a peak function. In other cases it will usually not be the most efficient method.
+
+  * `romberg` - Romberg's Method: this method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations in many cases.
 
 ### Tools
 
@@ -203,5 +205,7 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Quadrature
 | Case | 1/x, [1,100] | e^(-x²) / √π, [-10,10] | e^cos(θ), [0,2π] | x, [0,5000] | x³, [0,1] | √(1 - 0.36sin²θ) / √(2π), [0,2π] |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Romberg | 14.9 | 14.7 | 15.0 | 15.0 | 15.0 | 15.0 |
-| Trapezoidal | 11.0 | 15.0 | 15.0 | 15.0 | 10.8 | 15.0 |
+| Romberg | 14.9 (16385) | 14.7 (1025) | 15.0 (1025) | 15.0 (9) | 15.0 (9) | 15.0 (1025) |
+| Trapezoidal | 9.8 (1048577) | 15.0 (65) | 15.0 (33) | 15.0 (9) | 6.0 (1025) | 15.0 (65) |
+
+(number of function evaluations in parentheses)
