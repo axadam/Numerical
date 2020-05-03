@@ -31,12 +31,12 @@ final class Quadrature: XCTestCase {
     
     let t = "Quadrature"
     
-    let fcube = "x³, [0,1]"
-    let frecip = "1/x, [1,100]"
-    let fiden = "x, [0,5000]"
-    let fpois = "√(1 - 0.36sin²θ) / √(2π), [0,2π]"
-    let fecos = "e^cos(θ), [0,2π]"
-    let fex2  = "e^(-x²) / √π, [-10,10]" // truncating [-∞,∞] which would be 1
+    let tcube = "x³; [0,1]"
+    let trecip = "1/x; [1,100]"
+    let tiden = "x; [0,5000]"
+    let tpois = "√(1 - 0.36sin²θ) / √(2π); [0,2π]"
+    let tecos = "e^cos(θ); [0,2π]"
+    let tex2  = "e^(-x²) / √π; [-10,10]" // truncating [-∞,∞] which would be 1
     
     let vcube = "0.25" // exact
     let vrecip = "4.605170185988091368035982909368728415202202977257545952066"
@@ -46,7 +46,7 @@ final class Quadrature: XCTestCase {
     let vex2  = "0.999999999999999999999999999999999999999999997911512416237"
     
     func testTrapezoidal() {
-        let tc = "Trapezoidal"
+        let f = "Trapezoidal"
         
         let c = integrate(range: 0...1, method: trapezoidal, f: cube)
         let r = integrate(range: 1...100, maxIter: 20, method: trapezoidal, f: recip)
@@ -55,16 +55,16 @@ final class Quadrature: XCTestCase {
         let e = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: ecos)
         let x = integrate(range: -10...10, method: trapezoidal, f: ex2)
         
-        AssertLRE(c.value, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tc, field: fcube)
-        AssertLRE(r.value, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: tc, field: frecip)
-        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
-        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
-        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
-        AssertLRE(x.value, vex2, resultStore: rs, table: t, testCase: tc, field: fex2)
+        AssertLRE(c.value, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.evals)")
+        AssertLRE(r.value, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)")
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.evals)")
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.evals)")
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.evals)")
+        AssertLRE(x.value, vex2, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.evals)")
     }
     
     func testRomberg() {
-        let tc = "Romberg"
+        let f = "Romberg"
         
         let c = integrate(range: 0...1, method: romberg, f: cube)
         let r = integrate(range: 1...100, maxIter: 20, method: romberg, f: recip)
@@ -73,11 +73,11 @@ final class Quadrature: XCTestCase {
         let e = integrate(range: 0...(2 * Double.pi), method: romberg, f: ecos)
         let x = integrate(range: -10...10, method: romberg, f: ex2)
         
-        AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tc, field: fcube)
-        AssertLRE(r.value, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: tc, field: frecip)
-        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
-        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
-        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
-        AssertLRE(x.value, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tc, field: fex2)
+        AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.evals)")
+        AssertLRE(r.value, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)")
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.evals)")
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.evals)")
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.evals)")
+        AssertLRE(x.value, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.evals)")
     }
 }

@@ -33,6 +33,17 @@ public enum QuadratureResult {
         case .success(_, let est): return est
         }
     }
+    
+    /// Number of evaluations for this result
+    ///
+    /// Gives the number of evaluations or zero if there was an error
+    var evals: Int {
+        switch self {
+        case .error: return 0
+        case .noConverge(let n, _): return n
+        case .success(let n, _): return n
+        }
+    }
 }
 
 /// Numerical integration of a function on a closed range
