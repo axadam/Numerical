@@ -55,12 +55,12 @@ final class Quadrature: XCTestCase {
         let e = integrate(range: 0...(2 * Double.pi), method: trapezoidal, f: ecos)
         let x = integrate(range: -10...10, method: trapezoidal, f: ex2)
         
-        AssertLRE(c, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tc, field: fcube)
-        AssertLRE(r, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: tc, field: frecip)
-        AssertLRE(i, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
-        AssertLRE(p, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
-        AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
-        AssertLRE(x, vex2, resultStore: rs, table: t, testCase: tc, field: fex2)
+        AssertLRE(c.value, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tc, field: fcube)
+        AssertLRE(r.value, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: tc, field: frecip)
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
+        AssertLRE(x.value, vex2, resultStore: rs, table: t, testCase: tc, field: fex2)
     }
     
     func testRomberg() {
@@ -73,11 +73,11 @@ final class Quadrature: XCTestCase {
         let e = integrate(range: 0...(2 * Double.pi), method: romberg, f: ecos)
         let x = integrate(range: -10...10, method: romberg, f: ex2)
         
-        AssertLRE(c, vcube, exact: true, resultStore: rs, table: t, testCase: tc, field: fcube)
-        AssertLRE(r, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: tc, field: frecip)
-        AssertLRE(i, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
-        AssertLRE(p, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
-        AssertLRE(e, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
-        AssertLRE(x, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tc, field: fex2)
+        AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tc, field: fcube)
+        AssertLRE(r.value, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: tc, field: frecip)
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tc, field: fiden)
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tc, field: fpois)
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tc, field: fecos)
+        AssertLRE(x.value, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tc, field: fex2)
     }
 }

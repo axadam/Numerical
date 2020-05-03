@@ -501,7 +501,7 @@ fileprivate func quadrature(µ: Double, x µx: Double, y µy: Double) -> Probabi
     
     // multiply by prefix to get result
     let ζ = zeta(x: x, y: y)
-    let pq = exp(-0.5 * µ * ζ^^2) * integral / .pi
+    let pq = exp(-0.5 * µ * ζ^^2) * integral.value / .pi
     
     // sign of ζ determines if we've got p or q
     return ζ < 0 ? Probability(q: pq) : Probability(p: -pq)
