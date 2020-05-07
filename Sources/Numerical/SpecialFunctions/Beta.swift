@@ -90,7 +90,7 @@ public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability 
             return m * (b - m) / (a + 2 * m - 1) / (a + 2 * m) * x
         }
     }, b: { _ in 1 })
-    return Probability(p: prefix * cf)
+    return Probability(p: prefix * cf.value)
 }
 
 /// Asymptotic expansion of Incomplete Beta Function when `a` is large and a ≫ b

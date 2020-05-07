@@ -72,6 +72,13 @@ public func xmsin(_ x: Double) -> Double {
     }
 }
 
+/// Returns the argument with the largest absolute value
+///
+/// absmax(x, y) = abs(x) < abs(y) ? y : x
+func absmax(_ x: Double, _ y: Double = Double.leastNormalMagnitude) -> Double {
+    return abs(x) < abs(y) ? y : x
+}
+
 public extension Sequence where Element: FloatingPoint {
     /// Sum a sequence of numbers
     ///

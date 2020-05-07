@@ -22,7 +22,9 @@ public enum QuadratureResult {
     
     /// Method converged successfully. Includes number of evaluations and the estimate
     case success(evals: Int, estimate: Double)
-    
+}
+
+public extension QuadratureResult {
     /// Numeric value
     ///
     /// Gives the best estimate available if we have one. Otherwise returns NaN.
@@ -42,6 +44,14 @@ public enum QuadratureResult {
         case .error: return 0
         case .noConverge(let n, _): return n
         case .success(let n, _): return n
+        }
+    }
+    
+    /// Whether the quadrature converged or not
+    var converged: Bool {
+        switch self {
+        case .error, .noConverge: return false
+        case .success: return true
         }
     }
 }

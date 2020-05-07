@@ -188,9 +188,11 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Continued Fraction
 | Case | LRE |
 | --- | ---: |
-| e | 15.0 |
-| π | 13.1 |
-| √2 | 15.0 |
+| e | 15.0  (16) |
+| π | 10.1  (1000*) |
+| √2 | 15.0  (20) |
+
+(number of terms in parentheses. * indicates method didn't converge.)
 
 #### Chebyshev, e^x test case from Approximation Theory Approximation Practice, Trefethen
 | Case | exp(x) |
@@ -206,11 +208,12 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Quadrature
 | Case | Romberg | Trapezoidal |
 | --- | ---: | ---: |
-| 1/x; [1,100] | 14.9  (16385) | 9.8  (1048577) |
-| e^(-x²) / √π; [-10,10] | 14.7  (1025) | 15.0  (65) |
+| 1/x; [1,100] | 14.9  (16385) | 9.8  (1048577*) |
+| e^(-x²) / √π; [-10,10] | 14.7  (1025*) | 15.0  (65) |
 | e^cos(θ); [0,2π] | 15.0  (1025) | 15.0  (33) |
 | x; [0,5000] | 15.0  (9) | 15.0  (9) |
-| x³; [0,1] | 15.0  (9) | 6.0  (1025) |
+| x³; [0,1] | 15.0  (9) | 6.0  (1025*) |
+| π = 4 ∫0...1 1 / (1 + t²) dt; [0,1] | 15.0  (257) | 7.3  (1025*) |
 | √(1 - 0.36sin²θ) / √(2π); [0,2π] | 15.0  (1025) | 15.0  (65) |
 
-(number of function evaluations in parentheses)
+(number of function evaluations in parentheses. * indicates method didn't converge.)

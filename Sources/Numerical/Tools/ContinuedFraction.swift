@@ -18,7 +18,7 @@ import Foundation
 ///   - coeffs: A sequence of tuple pairs of (aᵢ,bᵢ)
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> Double where S.Element == (a: Double, b: Double){
+public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> ContinuedFractionResult where S.Element == (a: Double, b: Double){
     let small = Double.leastNormalMagnitude * 10
     let h₀ = max(small, b0)
     let d₀ = 0.0
@@ -32,10 +32,13 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int 
         let fracᵢ = fracᵢ₋₁ * delta
         return (cᵢ₋₁: cᵢ, dᵢ₋₁: dᵢ, fracᵢ₋₁: fracᵢ)
     }.until(maxIter: maxIter) { b in abs(b.cᵢ₋₁ * b.dᵢ₋₁ - 1) < 1e-15 }
-    guard let cfrac = cf?.result else {
-        return .nan
+    guard let cfrac = cf else {
+        return .error
     }
-    return cfrac.fracᵢ₋₁
+    switch cfrac.exitState {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: cfrac.iterations, estimate: cfrac.result.fracᵢ₋₁)
+    case .converged: return .success(terms: cfrac.iterations, estimate: cfrac.result.fracᵢ₋₁)
+    }
 }
 
 /// Evaluate a continued fraction of the form b₀ + a₁ / (b₁ +) a₂ / (b₂ +) ...
@@ -50,17 +53,38 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int 
 ///   - b: The ith denominator term, bᵢ, as a function of i = 1,2,3...
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continued_fraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> Double {
+public func continued_fraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> ContinuedFractionResult {
     let seq = (1...).lazy.map { return (a: a($0), b: b($0)) }
     return continued_fraction(b0: b0, coeffs: seq, maxIter: maxIter)
 }
 
-/// Returns the argument with the largest absolute value
-///
-/// absmax(x, y) = abs(x) < abs(y) ? y : x
-///
-/// Convenience function frequently used in Lentz form
-/// of continued fractions.
-func absmax(_ x: Double, _ y: Double = Double.leastNormalMagnitude) -> Double {
-    return abs(x) < abs(y) ? y : x
+public enum ContinuedFractionResult {
+    case error
+    case noConverge(terms: Int, estimate: Double)
+    case success(terms: Int, estimate: Double)
+}
+
+public extension ContinuedFractionResult {
+    var value: Double {
+        switch self {
+        case .error: return .nan
+        case .noConverge(_, let e): return e
+        case .success(_, let e): return e
+        }
+    }
+    
+    var iterations: Int {
+        switch self {
+        case .error: return 0
+        case .noConverge(let n, _): return n
+        case .success(let n, _): return n
+        }
+    }
+    
+    var converged: Bool {
+        switch self {
+        case .error, .noConverge: return false
+        case .success: return true
+        }
+    }
 }

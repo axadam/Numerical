@@ -257,7 +257,7 @@ fileprivate func q_gamma_frac(a: Double, x: Double) -> Double {
         b0: 0,
         a: { iInt in let i = Double(iInt); return iInt == 1 ? 1 : (i - 1) * (a - (i - 1)) },
         b: { 1 + x - a + 2 * Double($0 - 1) })
-    return prefix * frac
+    return prefix * frac.value
 }
 
 /// Series repesentation of Q(a,x) or P(a,x) when a and x are large
