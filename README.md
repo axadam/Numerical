@@ -100,11 +100,12 @@ Numerically integrate a function on a closed interval.
 Extensive accuracy measurement and testing to make sure accuracy doesn't change from the expected levels. Accuracy is measured in terms of Log Relative Error.
 
 #### Summation
-| Case | Kahan | Kahan-Babuška-Neumaier | Naive | Pairwise |
-| --- | ---: | ---: | ---: | ---: |
-| Easy | 15.0 | 15.0 | 12.9 | 15.0 |
-| Hard | 5.6 | 15.0 | 4.1 | 4.2 |
-| Peters | -0.0 | 15.0 | -0.0 | -0.0 |
+| Case | Easy | Hard | Peters |
+| --- | ---: | ---: | ---: |
+| Kahan | 15.0 | 5.6 | -0.0 |
+| Kahan-Babuška-Neumaier | 15.0 | 15.0 | 15.0 |
+| Naive | 12.9 | 4.1 | -0.0 |
+| Pairwise | 15.0 | 4.2 | -0.0 |
 
 Easy is 10k random doubles from [0,1] and their negatives shuffled into an array. Hard is 10k random doubles drawn from [0,1] multiplied by random powers of ten between -10 and 10. Peters is the small pathological case [1.0,1e100,1.0,-1e100].
 

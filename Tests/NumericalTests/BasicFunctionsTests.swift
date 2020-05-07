@@ -36,29 +36,29 @@ final class BasicFunctionsTests: XCTestCase {
 
     func testNaive() {
         let f = "Naive"
-        AssertLRE(easySum.sum_naive(), "1.0", exact: true, digits: 12.9, resultStore: rs, table: tSum, testCase: "Easy", field: f)
-        AssertLRE(hardSum.sum_naive(), "1.0", exact: true, digits: 4.1, resultStore: rs, table: tSum, testCase: "Hard", field: f)
-        AssertLRE(petersSum.sum_naive(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: "Peters", field: f)
+        AssertLRE(easySum.sum_naive(), "1.0", exact: true, digits: 12.9, resultStore: rs, table: tSum, testCase: f, field: "Easy")
+        AssertLRE(hardSum.sum_naive(), "1.0", exact: true, digits: 4.1, resultStore: rs, table: tSum, testCase: f, field: "Hard")
+        AssertLRE(petersSum.sum_naive(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: f, field: "Peters")
     }
     
     func testPairwise() {
         let f = "Pairwise"
-        AssertLRE(easySum.sum_pairwise(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: "Easy", field: f)
-        AssertLRE(hardSum.sum_pairwise(), "1.0", exact: true, digits: 4.2, resultStore: rs, table: tSum, testCase: "Hard", field: f)
-        AssertLRE(petersSum.sum_pairwise(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: "Peters", field: f)
+        AssertLRE(easySum.sum_pairwise(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Easy")
+        AssertLRE(hardSum.sum_pairwise(), "1.0", exact: true, digits: 4.2, resultStore: rs, table: tSum, testCase: f, field: "Hard")
+        AssertLRE(petersSum.sum_pairwise(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: f, field: "Peters")
     }
     
     func testKahan() {
         let f = "Kahan"
-        AssertLRE(easySum.sum_kahan(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: "Easy", field: f)
-        AssertLRE(hardSum.sum_kahan(), "1.0", exact: true, digits: 5.5, resultStore: rs, table: tSum, testCase: "Hard", field: f)
-        AssertLRE(petersSum.sum_kahan(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: "Peters", field: f)
+        AssertLRE(easySum.sum_kahan(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Easy")
+        AssertLRE(hardSum.sum_kahan(), "1.0", exact: true, digits: 5.5, resultStore: rs, table: tSum, testCase: f, field: "Hard")
+        AssertLRE(petersSum.sum_kahan(), "2.0", exact: true, digits: 0.0, resultStore: rs, table: tSum, testCase: f, field: "Peters")
     }
 
     func testKBN() {
         let f = "Kahan-Babuška-Neumaier"
-        AssertLRE(easySum.sum_kbn(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: "Easy", field: f)
-        AssertLRE(hardSum.sum_kbn(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: "Hard", field: f)
-        AssertLRE(petersSum.sum_kbn(), "2.0", exact: true, resultStore: rs, table: tSum, testCase: "Peters", field: f)
+        AssertLRE(easySum.sum_kbn(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Easy")
+        AssertLRE(hardSum.sum_kbn(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Hard")
+        AssertLRE(petersSum.sum_kbn(), "2.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Peters")
     }
 }
