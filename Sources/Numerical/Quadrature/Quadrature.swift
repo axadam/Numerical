@@ -7,7 +7,7 @@
 
 import Foundation
 
-public typealias UnivariateQuadrature = (CountedFunction<Double,Double>,ClosedRange<Double>,Int) -> QuadratureResult
+public typealias UnivariateQuadrature = (ClosedRange<Double>,Int, @escaping (Double) -> Double) -> QuadratureResult
 
 /// The result of a numerical integration
 ///
@@ -68,7 +68,6 @@ public extension QuadratureResult {
 /// information about whether the method converged and how many function evaluations
 /// were required.
 public func integrate(range: ClosedRange<Double>, maxIter: Int = 10, method: UnivariateQuadrature = romberg, f: @escaping (Double) -> Double) -> QuadratureResult {
-    let countedF = CountedFunction(f: f)
-    let b = method(countedF,range,maxIter)
+    let b = method(range,maxIter,f)
     return b
 }

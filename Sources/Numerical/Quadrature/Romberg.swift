@@ -21,8 +21,9 @@ import Foundation
 /// Rⱼᵢ = (4ⁱ Rⱼᵢ₋₁ - Rⱼ₋₁ ᵢ₋₁) / (4ⁱ - 1)
 ///
 /// https://en.wikipedia.org/wiki/Romberg%27s_method
-public func romberg(f: CountedFunction<Double,Double>, range: ClosedRange<Double>, maxIter: Int = 10) -> QuadratureResult {
-
+public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @escaping (Double) -> Double) -> QuadratureResult {
+    let f = CountedFunction(f: rawF)
+    
     // extract end points from Range
     let a = range.lowerBound
     let b = range.upperBound

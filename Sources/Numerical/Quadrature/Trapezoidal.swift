@@ -33,8 +33,9 @@ import Foundation
 /// concave down ones.
 ///
 /// https://en.wikipedia.org/wiki/Trapezoidal_rule
-public func trapezoidal(f: CountedFunction<Double,Double>, range: ClosedRange<Double>, maxIter: Int = 10) -> QuadratureResult {
-    
+public func trapezoidal(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @escaping (Double) -> Double) -> QuadratureResult {
+    let f = CountedFunction(f: rawF)
+
     // extract end points from Range
     let a = range.lowerBound
     let b = range.upperBound
