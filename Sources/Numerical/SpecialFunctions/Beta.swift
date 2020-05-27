@@ -267,7 +267,7 @@ public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
                     maxIter: 10,
                     f: { x in beta_reg(x: x, a: a, b: b).difference(p) },
                     f1: { x in exp(a1 * log(x) + b1 * log(1 - x) + afac) },
-                    f2f1: { x in a1 / x - b1 / (1 - x) })
+                    f2f1: { x in a1 / x - b1 / (1 - x) }).value
     return x
 }
 

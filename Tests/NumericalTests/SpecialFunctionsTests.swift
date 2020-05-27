@@ -144,11 +144,11 @@ final class SpecialFunctionsTests: XCTestCase {
 
         // p recursion
         AssertLRE(marcum(µ: 25, x: 35, y: 49).p, "0.1258610027087132", digits: 13.7, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:49", field: f)
-        AssertLRE(inv_marcum(µ: 25, x: 35, p: .p(0.1258610027087132)), "49", exact: true, digits: 14.6, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:49", field: f1)
+        AssertLRE(inv_marcum(µ: 25, x: 35, p: .p(0.1258610027087132)), "49", exact: true, digits: 14.5, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:49", field: f1)
 
         // q recursion
         AssertLRE(marcum(µ: 25, x: 35, y: 65).p, "0.7079055833201373", digits: 14.0, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:65", field: f)
-        AssertLRE(inv_marcum(µ: 25, x: 35, p: .p(0.7079055833201373)), "65", exact: true, digits: 14.7, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:65", field: f1)
+        AssertLRE(inv_marcum(µ: 25, x: 35, p: .p(0.7079055833201373)), "65", exact: true, digits: 14.5, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:65", field: f1)
     }
     
     /// More inverse Marcum Q cases on the tails

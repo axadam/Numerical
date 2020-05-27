@@ -44,8 +44,10 @@ func halleyStep(x0: Double, f: (Double) -> Double, f1: (Double) -> Double, f2f1:
 /// Builds on Newton's method by adding the second term of the Taylor
 /// series.
 ///
+/// https://en.wikipedia.org/wiki/Halley%27s_method
+///
 /// Numerical Recipes §9.4.2
-public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> Double {
+public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> RootResult {
     return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol) { x0 in
         halleyStep(x0: x0, f: f, f1: f1, f2: f2)
     }
@@ -57,8 +59,10 @@ public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, 
 /// series. This version takes the ratio of the second derivative to the
 /// first as an argument.
 ///
+/// https://en.wikipedia.org/wiki/Halley%27s_method
+///
 /// Numerical Recipes §9.4.2
-public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> Double {
+public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> RootResult {
     return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol) { x0 in
         halleyStep(x0: x0, f: f, f1: f1, f2f1: f2f1)
     }

@@ -128,7 +128,7 @@ public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
     
     // root finding to get final answer
     let r = root(guess: guess, tolerance: 1e-15 * prob, bracketFactor: 1.001) { marcum(µ: µ, x: µx, y: $0).difference(p) }
-    return r
+    return r.value
 }
 
 // MARK: Implementation
@@ -186,7 +186,7 @@ fileprivate func y(_ ζ: Double, _ x: Double) -> Double {
                      f1: { y in
                         let sq = sqrt(1 + 4 * x * y)
                         return (y - 2 * x * y - 1 + (y - 1) * sq) / (y * (1 + sq))
-        })
+        }).value
         return r
     }
 }
@@ -308,7 +308,7 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     let guess = 1 + (-µ + sqrt(µ^^2 + 4 * x * y)) / 2
     
     // newton's method
-    let n̂ = root(guess: guess, f: f, f1: fʹ)
+    let n̂ = root(guess: guess, f: f, f1: fʹ).value
     let n₀ = ceil(n̂)
     let n₀Int = Int(n₀)
     

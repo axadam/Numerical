@@ -33,6 +33,6 @@ func newtonQuadtraticStep(a: Double,
     let r0 = fa * fabd > 0 ? a : b
     let r = root(guess: r0, maxIter: k,
                  f: { x in fa + (x - a) * (fab + (x - b) * fabd)},
-                 f1: { x in fab + fabd * (2 * x - a - b) })
+                 f1: { x in fab + fabd * (2 * x - a - b) }).value
     return r
 }

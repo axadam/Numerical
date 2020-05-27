@@ -42,7 +42,7 @@ public func invErfC(_ p: Double) -> Double {
                         maxIter: 2,
                         f: { x in erfc(x) - pp },
                         f1: { x in -1.12837916709551257 * exp(-x * x) },
-                        f2f1: { x in -2 * x })
+                        f2f1: { x in -2 * x }).value
         return p < 1 ? x : -x
     }
 }

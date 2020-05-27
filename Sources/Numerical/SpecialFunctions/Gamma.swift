@@ -143,7 +143,7 @@ public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
                                 return afac * exp( -(x - a1) + a1 * (log(x) - lna1))
                             }
                         },
-                        f2f1: { x in a1 / x - 1 })
+                        f2f1: { x in a1 / x - 1 }).value
         return x
     }
 

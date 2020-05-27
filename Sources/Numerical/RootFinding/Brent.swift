@@ -12,8 +12,15 @@ import Foundation
 /// This method attempts to use inverse quadratic interpolation on each
 /// step, but if that goes beyond the brackets it falls back on bisection.
 ///
+/// "Chapter 4: An algorithm with guaranteed convergence for finding a zero of a function", R. P. Brent, The Computer Journal, 1971
+///
+/// https://en.wikipedia.org/wiki/Brent%27s_method
+///
 /// Numerical Recipes §9.3
-public func brentRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
+public func brentRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = CountedFunction(f: rawF)
+    let (a,b,fa,fb) = (bracket.a,bracket.b,bracket.fa,bracket.fb)
+
     // start out c equal to b
     let c = b
     let fc = fb
@@ -26,8 +33,16 @@ public func brentRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: 
         let (a1,b1,c1,fa1,fb1,fc1,d1,e1) = brentStep(f: f, a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1)
         return brentBookkeeping(a: a1, b: b1, c: c1, fa: fa1, fb: fb1, fc: fc1, d: d1, e: e1, tol: tolerance)
     }.until(maxIter: 50) { s2 in abs(s2.xm) <= s2.tol1 || abs(s2.fb) <= tolerance }
-    guard let res = r?.result else { return .nan }
-    return res.b
+
+    guard let res = r else { return .error } // shouldn't happen
+    
+    let e = BracketedRootEstimate(a: res.result.a, b: res.result.b, fa: res.result.fa, fb: res.result.fb)
+    
+    switch res.exitState {
+    case .exhaustedInput: return .error // shouldn't happen
+    case .exceededMax: return .noConverge(evals: f.count, estimate: e)
+    case .converged: return .success(evals: f.count, estimate: e)
+    }
 }
 
 func brentBookkeeping(a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, tol: Double) -> (a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, xm: Double, tol1: Double) {
@@ -38,7 +53,7 @@ func brentBookkeeping(a: Double, b: Double, c: Double, fa: Double, fb: Double, f
     return (a0,b0,c0,fa0,fb0,fc0,d_,e_,xm,tol1)
 }
 
-func brentStep(f: (Double) -> Double, a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, xm: Double, tol1: Double) -> (a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double) {
+func brentStep(f: CountedFunction<Double,Double>, a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double, xm: Double, tol1: Double) -> (a: Double, b: Double, c: Double, fa: Double, fb: Double, fc: Double, d: Double, e: Double) {
     let (d1,e1): (Double, Double) = {
         // Check if last step moved enough and that it moved closer
         if abs(e) >= tol1 && abs(fa) > abs(fb) {

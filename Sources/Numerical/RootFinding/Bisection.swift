@@ -7,12 +7,22 @@
 
 import Foundation
 
-/// Bisection root finding step
-///
-/// The next step is simply the mid-point
-func bisectionStep(a: Double, b: Double) -> Double {
+/// Bisect the distance between two points
+func bisect(a: Double, b: Double) -> Double {
     let c = (a + b) / 2
     return c
+}
+
+extension BracketedRootEstimate {
+    /// Bisection root finding step
+    ///
+    /// We find the midpoint and then pivot so that we still bracket the root
+    func bisectionStep(f: CountedFunction<Double,Double>) -> BracketedRootEstimate {
+        let xnew = bisect(a: a, b: b)
+        let ynew = f(xnew)
+        let (a1,b1,fa1,fb1) = ynew.sign == fa.sign ? (xnew, b, ynew, fb) : (a, xnew, fa, ynew)
+        return BracketedRootEstimate(a: a1, b: b1, fa: fa1, fb: fb1)
+    }
 }
 
 /// Bisection method of root finding
@@ -20,16 +30,20 @@ func bisectionStep(a: Double, b: Double) -> Double {
 /// Starting with two points bracketing a root, keep stepping to the mid-point
 /// while keeping the root bracketed. Slow but guaranteed to get there.
 ///
-/// Numerical Recipes §9.1.1
-public func bisectionRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
-    let q = sequence(first: (x0: a, x1: b, y0: fa, y1: fb)) { state0 in
-        let (x0, x1, y0, y1) = state0
-        let xnew = bisectionStep(a: x0, b: x1)
-        let ynew = f(xnew)
-        return ynew.sign == y0.sign ? (xnew, x1, ynew, y1) : (x0, xnew, y0, ynew)
-    }.until(maxIter: 50) { s2 in abs(s2.x1 - s2.x0) < tolerance || abs(s2.y1) < tolerance }
+/// https://en.wikipedia.org/wiki/Bisection_method
+public func bisectionRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = CountedFunction(f: rawF)
+    let r = sequence(first: bracket) { state0 in
+        return state0.bisectionStep(f: f)
+    }.until(maxIter: 50) { s2 in abs(s2.b - s2.a) < tolerance || abs(s2.fb) < tolerance }
     
-    guard let res = q?.result else { return .nan }
+    guard let res = r else { return .error } // shouldn't happen
     
-    return res.x1    
+    let e = res.result
+    
+    switch res.exitState {
+    case .exhaustedInput: return .error // shouldn't happen
+    case .exceededMax: return .noConverge(evals: f.count, estimate: e)
+    case .converged: return .success(evals: f.count, estimate: e)
+    }
 }

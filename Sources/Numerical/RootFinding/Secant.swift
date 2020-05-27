@@ -19,6 +19,8 @@ import Foundation
 ///
 /// x = x₀ - y₀ (x₁ - x₀) / (y₁ - y₀)
 ///
+/// https://en.wikipedia.org/wiki/Secant_method
+///
 /// Numerical Recipes §9.2
 func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
     let x = x0 - y0 * (x1 - x0) / (y1 - y0)
@@ -30,8 +32,13 @@ func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
 /// Uses linear interpolation to find root in a ≤ x ≤ b. a and b must bracket a root.
 /// This method can fail in some pathological cases where f is flat near root.
 ///
+/// https://en.wikipedia.org/wiki/Secant_method
+///
 /// Numerical Recipes §9.2
-public func secantRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa: Double, fb: Double, tolerance: Double) -> Double {
+public func secantRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = CountedFunction(f: rawF)
+    let (a,b,fa,fb) = (bracket.a,bracket.b,bracket.fa,bracket.fb)
+
     // for initial state make the bound that is a better estimate our last guess
     let (x0, x1, y0, y1) = abs(fa) < abs(fb) ? (b, a, fb, fa) : (a, b, fa, fb)
     
@@ -42,7 +49,14 @@ public func secantRoot(f: @escaping(Double) -> Double, a: Double, b: Double, fa:
         return (x0: x1, x1: xnew, y0: y1, y1: ynew)
     }.until(maxIter: 30) { s1, s2 in abs(s2.x1 - s1.x1) < tolerance || abs(s2.y1) < tolerance }
 
-    guard let res = r?.result else { return .nan }
-    return res.x1
+    guard let res = r else { return .error } // shouldn't happen
+    
+    let e = BracketedRootEstimate(a: res.result.x0, b: res.result.x1, fa: res.result.y0, fb: res.result.y1)
+
+    switch res.exitState {
+    case .exhaustedInput: return .error // shouldn't happen
+    case .exceededMax: return .noConverge(evals: f.count, estimate: e)
+    case .converged: return .success(evals: f.count, estimate: e)
+    }
 }
 
