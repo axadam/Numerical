@@ -61,4 +61,12 @@ final class BasicFunctionsTests: XCTestCase {
         AssertLRE(hardSum.sum_kbn(), "1.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Hard")
         AssertLRE(petersSum.sum_kbn(), "2.0", exact: true, resultStore: rs, table: tSum, testCase: f, field: "Peters")
     }
+    
+    func testXMSinX() {
+        AssertLRE(xmsin(9e-1) , "1.16673090372516611538617684286451376859e-1", digits: 14.3)
+        AssertLRE(xmsin(3e-1) , "4.47979333866042489467925431497262632217e-3", digits: 14.2)
+        AssertLRE(xmsin(1e-1) , "1.66583353171847693185801589377973010085e-4", digits: 14.9)
+        AssertLRE(xmsin(3e-10), "4.499999999999999999979750000000000000000e-30")
+        AssertLRE(xmsin(1e-10), "1.66666666666666666666583333333333333333e-31")
+    }
 }
