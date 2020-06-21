@@ -55,7 +55,7 @@ public func riddersRoot(bracket: BracketedRootEstimate, tolerance: EqualityToler
     let r = sequence(first: (x0: a, x1: b, y0: fa, y1: fb)) { arg0 in
         let (x0, x1, y0, y1) = arg0
         return riddersStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
-    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), threshold: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
+    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), tolerance: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), tolerance: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

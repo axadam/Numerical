@@ -39,7 +39,7 @@ public func dekkerRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolera
         let fb2 = f(b2)
         let (a2,fa2) = fb2.sign != fa1.sign ? (a1,fa1) : (b1,fb1)
         return abs(fa2) < abs(fb2) ? (a1: b2, b0: b1, b1: a2, fa1: fb2, fb0: fb1, fb1: fa2) : (a1: a2, b0: b1, b1: b2, fa1: fa2, fb0: fb1, fb1: fb2)
-    }.until(maxIter: 50) { s2 in s2.a1.isApprox(.maybeZero(s2.b1, trusted: true), threshold: tolerance) || s2.fb1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
+    }.until(maxIter: 50) { s2 in s2.a1.isApprox(.maybeZero(s2.b1, trusted: true), tolerance: tolerance) || s2.fb1.isApprox(.zero(scaleRelativeTo: intercept), tolerance: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

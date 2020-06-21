@@ -62,14 +62,14 @@ public extension EqualityTolerance {
 }
 
 public extension FloatingPoint {
-    func isApprox(_ other: EqualityTarget<Self>, threshold: EqualityTolerance<Self> = .standard) -> Bool {
+    func isApprox(_ other: EqualityTarget<Self>, tolerance: EqualityTolerance<Self> = .standard) -> Bool {
         switch other {
         case .zero(scaleRelativeTo: let s):
-            let tol = s == 0 ? threshold.absoluteForZero : threshold.relative * s + threshold.absolute
+            let tol = s == 0 ? tolerance.absoluteForZero : tolerance.relative * s + tolerance.absolute
             return abs(self) < tol
         case .maybeZero(let x, trusted: let trust):
             let scale = trust ? abs(x) : max(abs(self),abs(x))
-            return abs(self - x) < threshold.relative * scale + threshold.absolute
+            return abs(self - x) < tolerance.relative * scale + tolerance.absolute
         }
     }
 }

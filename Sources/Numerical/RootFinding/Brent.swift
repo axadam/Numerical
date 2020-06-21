@@ -32,7 +32,7 @@ public func brentRoot(bracket: BracketedRootEstimate, tolerance: EqualityToleran
         let (a0,b0,c0,fa0,fb0,fc0,d0,e0,xm,tol1) = arg0
         let (a1,b1,c1,fa1,fb1,fc1,d1,e1) = brentStep(f: f, a: a0, b: b0, c: c0, fa: fa0, fb: fb0, fc: fc0, d: d0, e: e0, xm: xm, tol1: tol1)
         return brentBookkeeping(a: a1, b: b1, c: c1, fa: fa1, fb: fb1, fc: fc1, d: d1, e: e1, tol: tolerance.absolute)
-    }.until(maxIter: 50) { s2 in s2.a.isApprox(.maybeZero(s2.b, trusted: true), threshold: tolerance) || s2.fb.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
+    }.until(maxIter: 50) { s2 in s2.a.isApprox(.maybeZero(s2.b, trusted: true), tolerance: tolerance) || s2.fb.isApprox(.zero(scaleRelativeTo: intercept), tolerance: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

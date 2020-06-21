@@ -67,7 +67,7 @@ public func xmsin(_ x: Double) -> Double {
             let j = Double(2 * i + 1)
             let t = -prev * x² / (j * (j - 1))
             return (t, t)
-        }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), threshold: .strict) })
+        }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
         return s
     }
 }

@@ -47,7 +47,7 @@ public func secantRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolera
         let xnew = secantStep(x0: x0, x1: x1, y0: y0, y1: y1)
         let ynew = f(xnew)
         return (x0: x1, x1: xnew, y0: y1, y1: ynew)
-    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), threshold: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
+    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), tolerance: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), tolerance: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

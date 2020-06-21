@@ -61,7 +61,7 @@ public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @esca
         }.map { $0.Rⱼᵢ }
         
         return (Δxⱼ,Rⱼ,nⱼ)
-    }.until(minIter: 3, maxIter: maxIter) { a, b in b.R.last!.isApprox(.maybeZero(a.R.last!), threshold: .strict) }
+    }.until(minIter: 3, maxIter: maxIter) { a, b in b.R.last!.isApprox(.maybeZero(a.R.last!), tolerance: .strict) }
     guard let quad = q else {
         return .error
     }

@@ -68,7 +68,7 @@ public func trapezoidal(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @
         let Iⱼ = 0.5 * Iⱼ₋₁ + sum * Δxⱼ
 
         return (Iⱼ,Δxⱼ,nⱼ)
-    }.until(minIter: 3, maxIter: maxIter) { a, b in b.I.isApprox(.maybeZero(a.I), threshold: .strict) }
+    }.until(minIter: 3, maxIter: maxIter) { a, b in b.I.isApprox(.maybeZero(a.I), tolerance: .strict) }
     guard let quad = q else {
         return .error
     }
