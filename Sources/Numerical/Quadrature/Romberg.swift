@@ -45,7 +45,7 @@ public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @esca
         let nⱼ = nⱼ₋₁ * 2
 
         // Σf(xᵢ), i odd. Evaluate at the points nested within previous round
-        let sum = (1...nⱼ₋₁).map { f(a + (2 * Double($0) - 1) * Δxⱼ) }.sum_pairwise()
+        let sum = (1...nⱼ₋₁).map { f(a + (2 * Double($0) - 1) * Δxⱼ) }.sum_kbn()
         
         // new trapezoidal estimate is half the previous (since now
         // intervals are half as wide) plus ∆xⱼ Σf(xᵢ), i odd. The previous
