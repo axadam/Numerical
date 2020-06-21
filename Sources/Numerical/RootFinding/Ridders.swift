@@ -48,14 +48,14 @@ func riddersStep(f: CountedFunction<Double,Double>, a: Double, b: Double, fa: Do
 /// https://en.wikipedia.org/wiki/Ridders%27_method
 ///
 /// Numerical Recipes §9.2.1
-public func riddersRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping (Double) -> Double) -> BracketedRootResult {
-    let f = CountedFunction(f: rawF)
+public func riddersRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolerance<Double> = .strict, intercept: Double = 0, f rawF: @escaping (Double) -> Double) -> BracketedRootResult {
+    let f = intercept == 0 ? CountedFunction(f: rawF) : CountedFunction { rawF($0) - intercept }
     let (a,b,fa,fb) = (bracket.a,bracket.b,bracket.fa,bracket.fb)
 
     let r = sequence(first: (x0: a, x1: b, y0: fa, y1: fb)) { arg0 in
         let (x0, x1, y0, y1) = arg0
         return riddersStep(f: f, a: x0, b: x1, fa: y0, fb: y1)
-    }.until(maxIter: 30) { s2 in abs(s2.y1) < tolerance }
+    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), threshold: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

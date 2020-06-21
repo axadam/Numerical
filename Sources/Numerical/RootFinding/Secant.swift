@@ -35,8 +35,8 @@ func secantStep(x0: Double, x1: Double, y0: Double, y1: Double) -> Double {
 /// https://en.wikipedia.org/wiki/Secant_method
 ///
 /// Numerical Recipes §9.2
-public func secantRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
-    let f = CountedFunction(f: rawF)
+public func secantRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolerance<Double> = .strict, intercept: Double = 0, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = intercept == 0 ? CountedFunction(f: rawF) : CountedFunction { rawF($0) - intercept }
     let (a,b,fa,fb) = (bracket.a,bracket.b,bracket.fa,bracket.fb)
 
     // for initial state make the bound that is a better estimate our last guess
@@ -47,7 +47,7 @@ public func secantRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF
         let xnew = secantStep(x0: x0, x1: x1, y0: y0, y1: y1)
         let ynew = f(xnew)
         return (x0: x1, x1: xnew, y0: y1, y1: ynew)
-    }.until(maxIter: 30) { s1, s2 in abs(s2.x1 - s1.x1) < tolerance || abs(s2.y1) < tolerance }
+    }.until(maxIter: 30) { s2 in s2.x0.isApprox(.maybeZero(s2.x1, trusted: true), threshold: tolerance) || s2.y1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

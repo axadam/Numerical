@@ -26,8 +26,8 @@ func dekkerStep(a1: Double, b0: Double, b1: Double, fa1: Double, fb0: Double, fb
 /// "Finding a zero by means of successive linear interpolation", Th. J. Dekker, Constructive Aspects of the Fundamental Theorem of Algebra, 1969
 ///
 /// https://en.wikipedia.org/wiki/Brent%27s_method#Dekker's_method
-public func dekkerRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
-    let f = CountedFunction(f: rawF)
+public func dekkerRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolerance<Double>, intercept: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = intercept == 0 ? CountedFunction(f: rawF) : CountedFunction { rawF($0) - intercept }
     let (a,b,fa,fb) = (bracket.a,bracket.b,bracket.fa,bracket.fb)
     
     // for initial state make the bound that is a better estimate our last guess
@@ -39,7 +39,7 @@ public func dekkerRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF
         let fb2 = f(b2)
         let (a2,fa2) = fb2.sign != fa1.sign ? (a1,fa1) : (b1,fb1)
         return abs(fa2) < abs(fb2) ? (a1: b2, b0: b1, b1: a2, fa1: fb2, fb0: fb1, fb1: fa2) : (a1: a2, b0: b1, b1: b2, fa1: fa2, fb0: fb1, fb1: fb2)
-    }.until(maxIter: 50) { s2 in abs(s2.fb1) < tolerance }
+    }.until(maxIter: 50) { s2 in s2.a1.isApprox(.maybeZero(s2.b1, trusted: true), threshold: tolerance) || s2.fb1.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
 
     guard let res = r else { return .error } // shouldn't happen
     

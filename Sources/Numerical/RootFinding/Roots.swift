@@ -13,7 +13,7 @@ import Foundation
 ///     - bracket: Interval that brackets at least one root of the function
 ///     - epsilon: Convergence criteria in terms of how close to zero we need to get.
 ///     - f: function whose root we seek.
-public typealias bracketedRoot = (BracketedRootEstimate, Double, @escaping(Double) -> Double) -> BracketedRootResult
+public typealias bracketedRoot = (BracketedRootEstimate, EqualityTolerance<Double>, Double, @escaping(Double) -> Double) -> BracketedRootResult
 
 public enum BracketResult {
     case noBracket(evals: Int)
@@ -131,9 +131,9 @@ public extension BracketedRootEstimate {
 ///     - xmax: Maximum allowed value for root. Optional.
 ///     - epsilon: Convergence criteria in terms of how close to zero we need to get. Default 1e-10.
 ///     - method: Root finding method. Defaults to Brent's method.
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolerance: Double = 10e-15, bracketFactor: Double = 1.6, method: bracketedRoot = riddersRoot, f: @escaping (Double) -> Double) -> BracketAndRootResult {
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolerance: EqualityTolerance<Double> = .strict, bracketFactor: Double = 1.6, method: bracketedRoot = brentRoot, intercept: Double = 0, f: @escaping (Double) -> Double) -> BracketAndRootResult {
     // attempt to bracket the root starting from the given guess
-    let brac = bracket(f: f, guess: guess, xmin: xmin, xmax: xmax, factor: bracketFactor)
+    let brac = bracket(f: { f($0) - intercept }, guess: guess, xmin: xmin, xmax: xmax, factor: bracketFactor)
     
     // we couldn't bracket starting from this guess. give up
     guard case let .bracket(_, b) = brac else {
@@ -141,7 +141,7 @@ public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolera
     }
     
     // if we get a successful bracket then find root with specified method
-    let r = root(f: f, bracket: b, tolerance: tolerance, method: method)
+    let r = root(f: f, bracket: b, tolerance: tolerance, intercept: intercept, method: method)
     switch r {
     case .error: return .error
     case .noConverge(let n, let e): return .noConverge(bracketEvals: brac.evals, rootEvals: n, estimate: e)
@@ -149,13 +149,13 @@ public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, tolera
     }
 }
 
-func root(f: @escaping(Double) -> Double, bracket: BracketedRootEstimate, tolerance: Double, method: bracketedRoot) -> BracketedRootResult {
+func root(f: @escaping(Double) -> Double, bracket: BracketedRootEstimate, tolerance: EqualityTolerance<Double>, intercept: Double = 0, method: bracketedRoot) -> BracketedRootResult {
     switch (bracket.fa,bracket.fb) {
-    case (-tolerance...tolerance,_): return .success(evals: 0, estimate: BracketedRootEstimate(x: bracket.a, fx: bracket.fa))
-    case (_,-tolerance...tolerance): return .success(evals: 0, estimate: BracketedRootEstimate(x: bracket.b, fx: bracket.fb))
+    case (-tolerance.absolute...tolerance.absolute,_): return .success(evals: 0, estimate: BracketedRootEstimate(x: bracket.a, fx: bracket.fa))
+    case (_,-tolerance.absolute...tolerance.absolute): return .success(evals: 0, estimate: BracketedRootEstimate(x: bracket.b, fx: bracket.fb))
     case (..<0,..<0): fallthrough
     case (0...,0...): return .error
-    default: return method(bracket,tolerance,f)
+    default: return method(bracket,tolerance,intercept,f)
     }
 }
 

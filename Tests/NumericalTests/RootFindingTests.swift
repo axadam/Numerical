@@ -15,6 +15,7 @@ struct RootTC {
     let fʹ: (Double) -> Double
     let fʺ: (Double) -> Double
     let fʺfʹ: (Double) -> Double
+    let intercept: Double
     let guess: Double
     let answer: String
 }
@@ -33,20 +34,22 @@ final class RootFindingTests: XCTestCase {
     /// Calculate the natural logarithm as the inverse of the exponential function
     let ln5 = RootTC(
         name: "ln 5; x₀=2"
-        , f: { (x: Double) in exp(x) - 5 }
+        , f: { (x: Double) in exp(x) }
         , fʹ: { (x: Double) in exp(x) }
         , fʺ: { (x: Double) in exp(x) }
         , fʺfʹ: { (x: Double) in 1.0 }
+        , intercept: 5
         , guess: 2.0
         , answer: "1.609437912434100374600759333226187639525601354268517721912")
 
     /// Calculate the cube root as the inverse of x³
     let bigCube = RootTC(
         name: "∛3647963; x₀=364"
-        , f: { (x: Double) in x * x * x - 3647963.0 }
+        , f: { (x: Double) in x * x * x }
         , fʹ: { (x: Double) in 3 * x * x }
         , fʺ: { (x: Double) in 6 * x }
         , fʺfʹ: { (x: Double) in 2 / x }
+        , intercept: 3647963.0
         , guess: 364.0
         , answer: "153.9395248014257325366856084389202348736844263890449292507")
 
@@ -57,6 +60,7 @@ final class RootFindingTests: XCTestCase {
         , fʹ: { (x: Double) in 3 * x * x - 2 }
         , fʺ: { (x: Double) in 6 * x }
         , fʺfʹ: { (x: Double) in 6 * x / (3 * x * x - 2) }
+        , intercept: 0.0
         , guess: 2.0
         , answer: "2.094551481542326591482386540579303")
 
@@ -67,16 +71,17 @@ final class RootFindingTests: XCTestCase {
         , fʹ: { (x: Double) in cos(x) - 1 / 2 }
         , fʺ: { (x: Double) in -sin(x) }
         , fʺfʹ: { (x: Double) in -sin(x) / (cos(x) - 1 / 2) }
+        , intercept: 0.0
         , guess: 2.0
         , answer: "1.895494267033980947144035738093601691751")
 
     func testNewton() {
         let tc = "Newton"
         
-        let a = root(guess: ln5.guess, f: ln5.f, f1: ln5.fʹ)
+        let a = root(guess: ln5.guess, f: { self.ln5.f($0) - self.ln5.intercept }, f1: ln5.fʹ)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
         
-        let b = root(guess: bigCube.guess, f: bigCube.f, f1: bigCube.fʹ)
+        let b = root(guess: bigCube.guess, f: { self.bigCube.f($0) - self.bigCube.intercept }, f1: bigCube.fʹ)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
         
         let c = root(guess: newt.guess, f: newt.f, f1: newt.fʹ)
@@ -89,10 +94,10 @@ final class RootFindingTests: XCTestCase {
     func testHalley() {
         let tc = "Halley"
         
-        let a = root(guess: ln5.guess, f: ln5.f, f1: ln5.fʹ, f2f1: ln5.fʺfʹ)
+        let a = root(guess: ln5.guess, f: { self.ln5.f($0) - self.ln5.intercept }, f1: ln5.fʹ, f2f1: ln5.fʺfʹ)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, f: bigCube.f, f1: bigCube.fʹ, f2: bigCube.fʺ)
+        let b = root(guess: bigCube.guess, f: { self.bigCube.f($0) - self.bigCube.intercept }, f1: bigCube.fʹ, f2: bigCube.fʺ)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, f: newt.f, f1: newt.fʹ, f2: newt.fʺ)
@@ -103,10 +108,11 @@ final class RootFindingTests: XCTestCase {
     }
     
     func testBracket() {
-        let b = bracket(f: ln5.f, guess: 2)
+        let g = { self.ln5.f($0) - self.ln5.intercept }
+        let b = bracket(f: g , guess: 2)
         guard case let .bracket(_,e) = b else { XCTFail(); return }
-        let fa = ln5.f(e.a)
-        let fb = ln5.f(e.b)
+        let fa = g(e.a)
+        let fb = g(e.b)
         XCTAssert(fa * fb < 0)
     }
     
@@ -114,10 +120,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "Bisection"
         let method = bisectionRoot
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,digits: 14.9,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)
@@ -131,10 +137,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "Secant"
         let method = secantRoot
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,digits: 7.8,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)
@@ -148,10 +154,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "Dekker"
         let method = dekkerRoot
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)
@@ -165,10 +171,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "Ridders"
         let method = riddersRoot
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)
@@ -182,10 +188,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "Brent"
         let method = brentRoot
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)
@@ -199,10 +205,10 @@ final class RootFindingTests: XCTestCase {
         let tc = "TOMS 748"
         let method = toms748Root
         
-        let a = root(guess: ln5.guess, method: method, f: ln5.f)
+        let a = root(guess: ln5.guess, method: method, intercept: ln5.intercept, f: ln5.f)
         AssertLRE(a.value,ln5.answer,resultStore: rs, table: t, testCase: tc, field: ln5.name, annotation: a.note)
 
-        let b = root(guess: bigCube.guess, method: method, f: bigCube.f)
+        let b = root(guess: bigCube.guess, method: method, intercept: bigCube.intercept, f: bigCube.f)
         AssertLRE(b.value,bigCube.answer,resultStore: rs, table: t, testCase: tc, field: bigCube.name, annotation: b.note)
 
         let c = root(guess: newt.guess, method: method, f: newt.f)

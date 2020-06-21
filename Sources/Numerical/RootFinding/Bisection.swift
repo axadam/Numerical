@@ -31,11 +31,11 @@ extension BracketedRootEstimate {
 /// while keeping the root bracketed. Slow but guaranteed to get there.
 ///
 /// https://en.wikipedia.org/wiki/Bisection_method
-public func bisectionRoot(bracket: BracketedRootEstimate, tolerance: Double, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
-    let f = CountedFunction(f: rawF)
+public func bisectionRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolerance<Double> = .strict, intercept: Double = 0, f rawF: @escaping(Double) -> Double) -> BracketedRootResult {
+    let f = intercept == 0 ? CountedFunction(f: rawF) : CountedFunction { rawF($0) - intercept }
     let r = sequence(first: bracket) { state0 in
         return state0.bisectionStep(f: f)
-    }.until(maxIter: 50) { s2 in abs(s2.b - s2.a) < tolerance || abs(s2.fb) < tolerance }
+    }.until(maxIter: 50) { s2 in s2.a.isApprox(.maybeZero(s2.b), threshold: tolerance) || s2.fb.isApprox(.zero(scaleRelativeTo: intercept), threshold: tolerance) }
     
     guard let res = r else { return .error } // shouldn't happen
     
