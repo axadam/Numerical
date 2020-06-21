@@ -80,7 +80,7 @@ final class Quadrature: XCTestCase {
         let π4 = integrate(range: 0...1, method: romberg, f: pi)
 
         AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.evals)\(c.converged ? "" : "*")")
-        AssertLRE(r.value, vrecip, digits: 14.9, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)\(r.converged ? "" : "*")")
+        AssertLRE(r.value, vrecip, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)\(r.converged ? "" : "*")")
         AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.evals)\(i.converged ? "" : "*")")
         AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.evals)\(p.converged ? "" : "*")")
         AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.evals)\(e.converged ? "" : "*")")

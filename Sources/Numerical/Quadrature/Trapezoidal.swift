@@ -61,14 +61,14 @@ public func trapezoidal(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @
         let seq = sequence(first: a + Δxⱼ, next: { $0 + Δxⱼ₋₁ }).prefix(nⱼ₋₁)
         
         // sum up evaluations of the function at each point in the sequence
-        let sum = seq.map { f($0) }.sum_naive()
+        let sum = seq.map { f($0) }.sum_pairwise()
         
         // new estimate is half the previous (since now intervals are half as wide)
         // plus ∆x/2 Σf(xᵢ), i odd
         let Iⱼ = 0.5 * Iⱼ₋₁ + sum * Δxⱼ
 
         return (Iⱼ,Δxⱼ,nⱼ)
-    }.until(minIter: 3, maxIter: maxIter) { a, b in abs(b.I / a.I - 1) < 1e-10 }
+    }.until(minIter: 3, maxIter: maxIter) { a, b in b.I.isApprox(.maybeZero(a.I), threshold: .strict) }
     guard let quad = q else {
         return .error
     }
