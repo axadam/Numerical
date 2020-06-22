@@ -108,7 +108,7 @@ public extension BracketedRootEstimate {
         switch (fa,fb) {
         case (0,_): return a
         case (_,0): return b
-        case (_,_): return secantStep(x0: a, x1: b, y0: fa, y1: fb)
+        case (_,_): return fa == fb ? a : secantStep(x0: a, x1: b, y0: fa, y1: fb)
         }
     }
 }
