@@ -139,8 +139,8 @@ final class SpecialFunctionsTests: XCTestCase {
         AssertLRE(inv_marcum(µ: 11.5, x: 15.3, p: .p(0.2948691834572695)), "23", exact: true, digits: 13.9, resultStore: rs, table: tm, testCase: "µ:11.5,x:15.3,y:23", field: f1)
 
         // q series
-        AssertLRE(marcum(µ: 11.5, x: 15.3, y: 29).p, "0.6555891257392535", digits: 11.0, resultStore: rs, table: tm, testCase: "µ:11.5,x:15.3,y:29", field: f)
-        AssertLRE(inv_marcum(µ: 11.5, x: 15.3, p: .p(0.6555891257392535)), "29", exact: true, digits: 11.4, resultStore: rs, table: tm, testCase: "µ:11.5,x:15.3,y:29", field: f1)
+        AssertLRE(marcum(µ: 11.5, x: 15.3, y: 29).p, "0.6555891257392535", resultStore: rs, table: tm, testCase: "µ:11.5,x:15.3,y:29", field: f)
+        AssertLRE(inv_marcum(µ: 11.5, x: 15.3, p: .p(0.6555891257392535)), "29", exact: true, resultStore: rs, table: tm, testCase: "µ:11.5,x:15.3,y:29", field: f1)
 
         // p recursion
         AssertLRE(marcum(µ: 25, x: 35, y: 49).p, "0.1258610027087132", digits: 13.7, resultStore: rs, table: tm, testCase: "µ:25,x:35,y:49", field: f)

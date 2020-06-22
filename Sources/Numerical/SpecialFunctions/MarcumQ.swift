@@ -264,7 +264,7 @@ fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
         let tᵢ = pᵢ * Qᵤ₊ᵢ
         
         return (tᵢ,(Qᵤ₊ᵢ,dᵢ,pᵢ))
-    }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
+    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
     return exp(-x) * s
 }
 
@@ -334,7 +334,7 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
         let tᵢ = pᵢ * Pᵤ₊ᵢ
         
         return (tᵢ,(Pᵤ₊ᵢ,dᵢ,pᵢ))
-    }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
+    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
     return exp(-x) * s
 }
 
@@ -703,7 +703,7 @@ fileprivate func bigxy(µ: Double, x: Double, y: Double) -> Probability {
         // ψᵢ e^(σξ) = ρ^µ / 2√(2π) (-1)ⁱ Cᵢ(µ) ξ⁻ⁱ⁺¹/² [𝜙ᵢ e^(σξ) ξⁱ⁻¹/²]
         let ψᵢ = prefix * sgnᵢ * ξ⁻ⁱsqξ * Cᵢ * 𝜙ᵢ
         return (ψᵢ, (Aᵢ,𝜙ᵢ,ξ⁻ⁱsqξ,sgnᵢ))
-    }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
+    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
     
     // We calculated either p or q depending on whether y > x
     return Probability(value: pq, isComplement: y >= x)
@@ -773,7 +773,7 @@ fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probabi
             return accum + tⱼ
         }
         return (Bᵢ, ())
-    }, until: { a, b in abs(b.1 / b.0) < 1e-10 })
+    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
     let pq = sqrt(µ / (2 * .pi)) * s
     return Probability(value: pq, isComplement: ζ < 0)
 }

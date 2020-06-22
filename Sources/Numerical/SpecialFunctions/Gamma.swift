@@ -234,7 +234,7 @@ fileprivate func q_gamma_series(a: Double, x: Double) -> Double {
         let rᵢ = rᵢ₋₁ + 2
         let tᵢ = -pᵢ * tᵢ₋₁ / qᵢ
         return (tᵢ, (pᵢ,qᵢ,rᵢ,tᵢ))
-    }, until: { a, b in abs(b.1 / b.0) < 1e-15 })
+    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
     
     /// v = 1 / Γ(a) x^(a + 1) / (a + 1) Σtᵢ
     let v = a * Γ⁻¹a1 * exp((a + 1) * lnx) * Σtᵢ / (a + 1)
@@ -567,7 +567,7 @@ fileprivate func lambda(_ η: Double) -> Double {
         let λʹ = sequence(first: λ) { λ₀ in
             let λ₁ = λ₀ * (s + log(λ₀)) / (λ₀ - 1)
             return λ₁
-        }.until(maxIter: 100) { a, b in b / a - 1 < 1e08 }
+        }.until(maxIter: 100) { a, b in b.isApprox(.maybeZero(a), tolerance: .strict) }
         return λʹ?.result ?? λ
     case _:
         return λ
