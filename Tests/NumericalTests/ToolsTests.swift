@@ -64,7 +64,7 @@ final class ToolsTests: XCTestCase {
     func testHorners() {
         let t = "Horner's Method of polynomial evaluation"
         let coefs: [Double] = [-19,7,-4,6]
-        let r = evaluate_polynomial(poly: coefs, z: 3)
+        let r = polynomial(coeffs: coefs, z: 3)
         AssertLRE(r, "128", exact: true, resultStore: rs, table: t, testCase: "-19 + 7x - 4x² + 6x³; x=3", field: "LRE")
     }
     

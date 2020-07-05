@@ -301,7 +301,7 @@ fileprivate func pq_gamma_uniform_asymptotic(a: Double, x: Double, isLower: Bool
         }.dropFirst().dropLast().map { $0.βᵢ₊₁ }.reversed()
     
     /// S = a / (a + β₁) Σi=0... βᵢηⁱ
-    let S = a / (a + Array(β)[1]) * evaluate_polynomial(poly: Array(β), z: η)
+    let S = a / (a + Array(β)[1]) * polynomial(coeffs: Array(β), z: η)
     
     let v = sgn * Rprefix * S
     return u + v
@@ -362,7 +362,7 @@ fileprivate func invertGuess(a: Double, p: Double, q: Double) -> Double {
         let d₂ = (1.0/2.0) * (2.0 + 3.0 * b - 2.0 * b * L - 2.0 * L + L^^2)
         let d₃ = (1.0/6.0) * (24.0 * b * L - 11.0 * b^^2 - 24.0 * b - 6.0 * L^^2 + 12.0 * L - 12.0 - 9.0 * b * L^^2 + 6.0 * b^^2 * L + 2.0 * L^^3)
         let d₄ = (1.0/12.0) * (72.0 + 36.0 * L^^2 + 3.0 * L^^4 - 72.0 * L + 162.0 * b - 168.0 * b * L - 12.0 * L^^3 + 25.0 * b^^3 - 22.0 * b * L^^3 + 36.0 * b^^2 * L^^2 - 12.0 * b^^3 * L + 84.0 * b * L^^2 + 120.0 * b^^2 - 114.0 * b^^2 * L)
-        return x₀ - L + b * evaluate_polynomial(poly: [0.0,d₁,d₂,d₃,d₄], z: 1 / x₀)
+        return x₀ - L + b * polynomial(coeffs: [0.0,d₁,d₂,d₃,d₄], z: 1 / x₀)
         
     // When a < 1 the following starting point leads to inexpensive iteration
     // by Halley's method
@@ -387,7 +387,7 @@ fileprivate func invertGuess(a: Double, p: Double, q: Double) -> Double {
         // Use temme 1992 method to get epsilons
         let (ε₁,ε₂,ε₃) = epsilon(η₀: η₀)
         
-        let η = evaluate_polynomial(poly: [η₀,ε₁,ε₂,ε₃], z: 1 / a)
+        let η = polynomial(coeffs: [η₀,ε₁,ε₂,ε₃], z: 1 / a)
         let λ = lambda(η)
         
         return λ * a
@@ -413,11 +413,11 @@ fileprivate func epsilon(η₀: Double) -> (Double, Double, Double) {
     switch η₀ {
     case -0.3...0.3:
         let coef1: [Double] = [-1.0/3.0, 1.0/36.0, 1.0/1620.0, -7.0/6480.0, 5.0/18144.0, -11.0/382725.0, -101.0/16329600.0]
-        let ε₁ = evaluate_polynomial(poly: coef1, z: η₀)
+        let ε₁ = polynomial(coeffs: coef1, z: η₀)
         let coef2: [Double] = [-7.0/405.0, -7.0/2592.0, 533.0/204120.0, -1579.0/2099520.0, 109.0/1749600.0, 10217.0/251942400.0]
-        let ε₂ = evaluate_polynomial(poly: coef2, z: η₀)
+        let ε₂ = polynomial(coeffs: coef2, z: η₀)
         let coef3: [Double] = [449.0/102060.0, -63149.0/20995200.0, 29233.0/36741600.0, 346793.0/5290790400.0, -18442139.0/130947062400.0]
-        let ε₃ = evaluate_polynomial(poly: coef3, z: η₀)
+        let ε₃ = polynomial(coeffs: coef3, z: η₀)
         return (ε₁,ε₂,ε₃)
     case ..<1000:
         let λ₀ = lambda(η₀)
@@ -470,7 +470,7 @@ fileprivate func gammastar(_ a: Double) -> Double {
     case ...3:
         return tgamma(a) / ( sqrt(2 * .pi) * exp((a - 0.5) * log(a) - a))
     case    _:
-        return evaluate_polynomial(poly: C.stirling, z: 1 / a)
+        return polynomial(coeffs: C.stirling, z: 1 / a)
     }
 }
 
@@ -532,7 +532,7 @@ fileprivate func lambda(_ η: Double) -> Double {
             //
             // W(x) = x - x² + 3/2 x³ - 8/3 x⁴ + 125/24 x⁵ + ...
             let coef: [Double] = [0, 1, -1, 3.0/2, -8.0/3, 125.0/24]
-            return evaluate_polynomial(poly: coef, z: exp(-1 - s) )
+            return polynomial(coeffs: coef, z: exp(-1 - s) )
         case ..<1:
             // Expansion when η is near zero
             //
@@ -541,7 +541,7 @@ fileprivate func lambda(_ η: Double) -> Double {
             // temme 1992, below Eq. 6.1
             // This is also the expansion of the Lambert W function's W₋₁ branch
             let coef: [Double] = [1, 1, 1/3, 1/36, -1/270, 1/4320]
-            return evaluate_polynomial(poly: coef, z: η)
+            return polynomial(coeffs: coef, z: η)
         case _:
             // Expansion of the principle branch of the Lambert W function for large values
             // with argument e^(η² / 2 + 1)
@@ -553,7 +553,7 @@ fileprivate func lambda(_ η: Double) -> Double {
             let a₄ = -(-12.0 + 36.0 * L₂ - 22.0 * L₂^^2 + 3.0 * L₂^^3) / 12.0
             let a₅ = (60.0 - 300.0 * L₂ + 350.0 * L₂^^2 - 125.0 * L₂^^3 + 12.0 * L₂^^4) / 60.0
             let a₆ = -(-120.0 + 900.0 * L₂ - 1700.0 * L₂^^2 + 1125.0 * L₂^^3 - 274.0 * L₂^^4 + 20.0 * L₂^^5) / 120.0
-            return L₁ + L₂ * evaluate_polynomial(poly: [1,a₁,a₂,a₃,a₅,a₄,a₆], z: 1 / L₁)
+            return L₁ + L₂ * polynomial(coeffs: [1,a₁,a₂,a₃,a₅,a₄,a₆], z: 1 / L₁)
         }
     }()
     
@@ -605,7 +605,7 @@ fileprivate func eta(µ: Double) -> Double {
 /// Concerning two series for the gamma function, JW Wrench 1967, Eq. 22
 fileprivate func inverse_gamma_p1m1(_ x: Double) -> Double {
     switch x {
-    case ..<1.5: return evaluate_polynomial(poly: C.wrench, z: x)
+    case ..<1.5: return polynomial(coeffs: C.wrench, z: x)
     case      _: return 1 / tgamma(x + 1) - 1
     }
 }

@@ -159,7 +159,7 @@ fileprivate func y(_ ζ: Double, _ x: Double) -> Double {
         let b₁ = sqrt(x2p1)
         let b₂ = (1 + 3 * x) / (3 * x2p1)
         let b₃ = (1 + 6 * x) / (36 * pow(x2p1, 2.5))
-        let sum = evaluate_polynomial(poly: [0.0,b₁,b₂,b₃], z: ζ)
+        let sum = polynomial(coeffs: [0.0,b₁,b₂,b₃], z: ζ)
         return x + 1 + sum
         
     // Normal size ζ, use Newton's method
@@ -214,7 +214,7 @@ fileprivate func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
         let d₀ = -(3.0 * x + 1.0) / (3.0 * xx)
         let d₁ = (36.0 * x^^2 + x + 1.0) / (36.0 * xx^^2)
         let d₂ = -(2160.0 * x^^3 - 594.0 * x^^2 - 9.0 * x - 1) / (1620.0 * xx^^3)
-        let sum = evaluate_polynomial(poly: [d₀,d₁,d₂], z: ζ₀)
+        let sum = polynomial(coeffs: [d₀,d₁,d₂], z: ζ₀)
         return sum
         
     // Large |ζ₀| can directly evalute
@@ -781,7 +781,7 @@ fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probabi
 fileprivate func f(_ j: Int, _ i: Int, _ u: Double) -> Double {
     let u² = u^^2
     let coef = fjic[ji(j,i)]!
-    return u^^(j + 2 * i) * evaluate_polynomial(poly: coef, z: u²)
+    return u^^(j + 2 * i) * polynomial(coeffs: coef, z: u²)
 }
 
 /// Key for fji coefficients dictionary
@@ -813,8 +813,8 @@ fileprivate func zeta(x: Double, y: Double) -> Double {
         return -ymxm1.signum * sqrt(2 * (x + y - xy4p1 + log((1 + xy4p1) / (2 * y))))
     case      _:
         let z = ymxm1 / (2 * x + 1)^^2
-        let coef = cic.map { evaluate_polynomial(poly: $0, z: x) }
-        let s = evaluate_polynomial(poly: coef, z: z)
+        let coef = cic.map { polynomial(coeffs: $0, z: x) }
+        let s = polynomial(coeffs: coef, z: z)
         return -ymxm1 / sqrt(2 * x + 1) * s
     }
 }

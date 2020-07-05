@@ -19,17 +19,17 @@ import Foundation
 ///    - num: An array of coefficients for the polynomial in the numerator. Terms in increasing order.
 ///    - denom: An array of coefficients for the polynomial in the denominator. Terms in increasing order.
 ///    - z: the point at which to evalute
-public func evaluate_rational(num: [Double], denom: [Double], z: Double) -> Double {
+public func polynomialRatio(num: [Double], denom: [Double], z: Double) -> Double {
     let matched = num.count == denom.count
     switch (matched,z) {
     case (false,_): fallthrough
     case (true,...1):
-        let s1 = evaluate_polynomial(poly: num, z: z)
-        let s2 = evaluate_polynomial(poly: denom, z: z)
+        let s1 = polynomial(coeffs: num, z: z)
+        let s2 = polynomial(coeffs: denom, z: z)
         return s1 / s2
     case (true,_):
-        let s1 = evaluate_polynomial(poly: num.reversed(), z: 1 / z)
-        let s2 = evaluate_polynomial(poly: denom.reversed(), z: 1 / z)
+        let s1 = polynomial(coeffs: num.reversed(), z: 1 / z)
+        let s2 = polynomial(coeffs: denom.reversed(), z: 1 / z)
         return s1 / s2
     }
 }
@@ -46,9 +46,9 @@ public func evaluate_rational(num: [Double], denom: [Double], z: Double) -> Doub
 /// - Parameters:
 ///    - poly: An array of coefficients for the polynomial. Terms in increasing order.
 ///    - z: The point at which to evalute the polynomial.
-public func evaluate_polynomial(poly: [Double], z: Double) -> Double {
-    guard let sLast = poly.last else { return 0 }
-    let rest = poly.dropLast()
+public func polynomial(coeffs: [Double], z: Double) -> Double {
+    guard let sLast = coeffs.last else { return 0 }
+    let rest = coeffs.dropLast()
     let ans = rest.reversed().reduce(sLast, { $0 * z + $1 } )
     return ans
 }
