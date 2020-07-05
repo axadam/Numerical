@@ -48,11 +48,11 @@ public func indexedAccumulatingRecursiveSequence<IntSequence: Sequence, State>(i
     }
 }
 
-public func recursiveSum<IntSequence: Sequence, State>(indices: IntSequence, sum0: Double, state0: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSum: Double = 0, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
-        accum0: sum0,
-        state0: state0,
+        accum0: initialSum,
+        state0: initialState,
         accumulate: +,
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: tolerance) }
@@ -63,11 +63,11 @@ public func recursiveSum<IntSequence: Sequence, State>(indices: IntSequence, sum
     }
 }
 
-public func recursiveProduct<IntSequence: Sequence, State>(indices: IntSequence, product0: Double, state0: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+public func product<IntSequence: Sequence, State>(indices: IntSequence, initialProduct: Double = 1, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
-        accum0: product0,
-        state0: state0,
+        accum0: initialProduct,
+        state0: initialState,
         accumulate: *,
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.maybeZero(1, trusted: true), tolerance: tolerance) }

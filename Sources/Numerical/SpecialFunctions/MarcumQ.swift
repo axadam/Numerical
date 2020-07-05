@@ -248,7 +248,7 @@ fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
     let d₀ = pow(y, µ - 1) * exp(-y) / tgamma(µ)
 
     // calculate the sum deriving the terms recursively
-    let s = recursiveSum(indices: 1..., sum0: Qᵤ, state0: (Q: Qᵤ, d: d₀, p: 1.0)) { iInt, state in
+    let s = series(indices: 1..., initialSum: Qᵤ, initialState: (Q: Qᵤ, d: d₀, p: 1.0)) { iInt, state in
         let (Qᵤ₊ᵢ₋₁, dᵢ₋₁, pᵢ₋₁) = state
         let i = Double(iInt)
         
@@ -318,7 +318,7 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     let d₀ = pow(y,µ + n₀) * exp(-y) / tgamma(µ + n₀ + 1)
     let t₀ = p₀ * P₀
     
-    let s = recursiveSum(indices: (1...n₀Int).reversed(), sum0: t₀, state0: (P: P₀, d: d₀, p: p₀)) { iInt, state in
+    let s = series(indices: (1...n₀Int).reversed(), initialSum: t₀, initialState: (P: P₀, d: d₀, p: p₀)) { iInt, state in
         let (Pᵤ₊ᵢ₊₁, dᵢ₊₁, pᵢ₊₁) = state
         let i = Double(iInt)
 
@@ -666,7 +666,7 @@ fileprivate func bigxy(µ: Double, x: Double, y: Double) -> Probability {
         0.5 * ρµ / sqrt(ρ) * erfc(sqσξ) // * exp(σξ)
     
     // Now compute the sum ψ₀ + Σi=1..∞ ψᵢ
-    let pq = recursiveSum(indices: 1..., sum0: ψ₀, state0: (Aᵢ: A₀, 𝜙ᵢ: 𝜙₀, ξ⁻ⁱsqξ: sqξ, sgnᵢ: sgn₀)) { iInt, stateᵢ₋₁ in
+    let pq = series(indices: 1..., initialSum: ψ₀, initialState: (Aᵢ: A₀, 𝜙ᵢ: 𝜙₀, ξ⁻ⁱsqξ: sqξ, sgnᵢ: sgn₀)) { iInt, stateᵢ₋₁ in
         let (Aᵢ₋₁,𝜙ᵢ₋₁,ξ⁻ⁱ⁺¹sqξ,sgnᵢ₋₁) = stateᵢ₋₁
         let i = Double(iInt)
 
@@ -765,7 +765,7 @@ fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probabi
     // u = 1 / √(2x + 1) eq. 88
     let u = 1 / sqrt(2 * x + 1)
     
-    let s = recursiveSum(indices: 1...3, sum0: ψ₀, state0: ()) { i, stateᵢ₋₁ in
+    let s = series(indices: 1...3, initialSum: ψ₀, initialState: ()) { i, stateᵢ₋₁ in
         // Bᵢ = Σ j=0...i fⱼ ᵢ₋ⱼ 𝛹ⱼ(ζ) / µⁱ⁻j, eq. 71
         let Bᵢ = (0...i).reduce(0.0) { accum, j in
             let fjij = f(j,i - j,u)

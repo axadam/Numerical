@@ -63,7 +63,7 @@ public func xmsin(_ x: Double) -> Double {
         return x - sin(x)
     case _   :
         let x² = x^^2
-        let s = recursiveSum(indices: 1..., sum0: 0.0, state0: -x) { i, prev in
+        let s = series(indices: 1..., initialState: -x) { i, prev in
             let j = Double(2 * i + 1)
             let t = -prev * x² / (j * (j - 1))
             return (t, t)

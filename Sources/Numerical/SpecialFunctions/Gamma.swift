@@ -178,7 +178,7 @@ public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
 fileprivate func p_gamma_series(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
     let first = 1 / a
-    let sum = recursiveSum(indices: 1..., sum0: first, state0: first) { i, state in
+    let sum = series(indices: 1..., initialSum: first, initialState: first) { i, state in
         let ap = a + Double(i)
         let state1 = state * x / ap
         return (state1, state1)
@@ -227,7 +227,7 @@ fileprivate func q_gamma_series(a: Double, x: Double) -> Double {
     // rᵢ = a + 2i + 3 = rᵢ₋₁ + 2, r₀ = a + 3
     //
     // A Computational Procedure for Incomplete Gamma Functions, Gautschi 1979, Eq 4.10
-    let Σtᵢ = recursiveSum(indices: 1..., sum0: 1.0, state0: (a * x,a + 1,a + 3,1.0)) { i, prev in
+    let Σtᵢ = series(indices: 1..., initialSum: 1.0, initialState: (a * x,a + 1,a + 3,1.0)) { i, prev in
         let (pᵢ₋₁, qᵢ₋₁, rᵢ₋₁, tᵢ₋₁) = prev
         let pᵢ = pᵢ₋₁ + x
         let qᵢ = qᵢ₋₁ + rᵢ₋₁

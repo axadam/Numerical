@@ -162,7 +162,7 @@ public func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
         return prefix * (s₁ + s₂ + s₃)
     }
     
-    let r = recursiveSum(indices: 1..., sum0: d₀ * F₀ + d₁ * F₁, state0: (Fᵢ₋₁: F₀, Fᵢ: F₁, d:[d₀,d₁])) { i, previous in
+    let r = series(indices: 1..., initialSum: d₀ * F₀ + d₁ * F₁, initialState: (Fᵢ₋₁: F₀, Fᵢ: F₁, d:[d₀,d₁])) { i, previous in
         let (Fᵢ₋₁,Fᵢ,d) = previous
         let F = Fᵢ₊₁(Double(i), Fᵢ, Fᵢ₋₁)
         let dnew = dᵢ₊₂(d)
