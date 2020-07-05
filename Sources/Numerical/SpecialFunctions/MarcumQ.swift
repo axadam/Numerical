@@ -248,7 +248,7 @@ fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
     let d₀ = pow(y, µ - 1) * exp(-y) / tgamma(µ)
 
     // calculate the sum deriving the terms recursively
-    let s = recursiveSum(indices: 1..., sum0: Qᵤ, state0: (Q: Qᵤ, d: d₀, p: 1.0), update: { iInt, state in
+    let s = recursiveSum(indices: 1..., sum0: Qᵤ, state0: (Q: Qᵤ, d: d₀, p: 1.0)) { iInt, state in
         let (Qᵤ₊ᵢ₋₁, dᵢ₋₁, pᵢ₋₁) = state
         let i = Double(iInt)
         
@@ -264,8 +264,8 @@ fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
         let tᵢ = pᵢ * Qᵤ₊ᵢ
         
         return (tᵢ,(Qᵤ₊ᵢ,dᵢ,pᵢ))
-    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
-    return exp(-x) * s
+    }
+    return exp(-x) * s.value
 }
 
 /// Series method lower tail
@@ -318,7 +318,7 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     let d₀ = pow(y,µ + n₀) * exp(-y) / tgamma(µ + n₀ + 1)
     let t₀ = p₀ * P₀
     
-    let s = recursiveSum(indices: (1...n₀Int).reversed(), sum0: t₀, state0: (P: P₀, d: d₀, p: p₀), update: { iInt, state in
+    let s = recursiveSum(indices: (1...n₀Int).reversed(), sum0: t₀, state0: (P: P₀, d: d₀, p: p₀)) { iInt, state in
         let (Pᵤ₊ᵢ₊₁, dᵢ₊₁, pᵢ₊₁) = state
         let i = Double(iInt)
 
@@ -334,8 +334,8 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
         let tᵢ = pᵢ * Pᵤ₊ᵢ
         
         return (tᵢ,(Pᵤ₊ᵢ,dᵢ,pᵢ))
-    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
-    return exp(-x) * s
+    }
+    return exp(-x) * s.value
 }
 
 /// Use recursion to go from a point where quadrature works well to desired point
@@ -666,7 +666,7 @@ fileprivate func bigxy(µ: Double, x: Double, y: Double) -> Probability {
         0.5 * ρµ / sqrt(ρ) * erfc(sqσξ) // * exp(σξ)
     
     // Now compute the sum ψ₀ + Σi=1..∞ ψᵢ
-    let pq = recursiveSum(indices: 1..., sum0: ψ₀, state0: (Aᵢ: A₀, 𝜙ᵢ: 𝜙₀, ξ⁻ⁱsqξ: sqξ, sgnᵢ: sgn₀), update: { iInt, stateᵢ₋₁ in
+    let pq = recursiveSum(indices: 1..., sum0: ψ₀, state0: (Aᵢ: A₀, 𝜙ᵢ: 𝜙₀, ξ⁻ⁱsqξ: sqξ, sgnᵢ: sgn₀)) { iInt, stateᵢ₋₁ in
         let (Aᵢ₋₁,𝜙ᵢ₋₁,ξ⁻ⁱ⁺¹sqξ,sgnᵢ₋₁) = stateᵢ₋₁
         let i = Double(iInt)
 
@@ -703,10 +703,10 @@ fileprivate func bigxy(µ: Double, x: Double, y: Double) -> Probability {
         // ψᵢ e^(σξ) = ρ^µ / 2√(2π) (-1)ⁱ Cᵢ(µ) ξ⁻ⁱ⁺¹/² [𝜙ᵢ e^(σξ) ξⁱ⁻¹/²]
         let ψᵢ = prefix * sgnᵢ * ξ⁻ⁱsqξ * Cᵢ * 𝜙ᵢ
         return (ψᵢ, (Aᵢ,𝜙ᵢ,ξ⁻ⁱsqξ,sgnᵢ))
-    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
+    }
     
     // We calculated either p or q depending on whether y > x
-    return Probability(value: pq, isComplement: y >= x)
+    return Probability(value: pq.value, isComplement: y >= x)
 }
 
 /// Asymptotic for big µ
@@ -765,7 +765,7 @@ fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probabi
     // u = 1 / √(2x + 1) eq. 88
     let u = 1 / sqrt(2 * x + 1)
     
-    let s = recursiveSum(indices: 1...3, sum0: ψ₀, state0: (), update: { i, stateᵢ₋₁ in
+    let s = recursiveSum(indices: 1...3, sum0: ψ₀, state0: ()) { i, stateᵢ₋₁ in
         // Bᵢ = Σ j=0...i fⱼ ᵢ₋ⱼ 𝛹ⱼ(ζ) / µⁱ⁻j, eq. 71
         let Bᵢ = (0...i).reduce(0.0) { accum, j in
             let fjij = f(j,i - j,u)
@@ -773,8 +773,8 @@ fileprivate func bigmu(µ µp1: Double, x µx: Double, y µy: Double) -> Probabi
             return accum + tⱼ
         }
         return (Bᵢ, ())
-    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
-    let pq = sqrt(µ / (2 * .pi)) * s
+    }
+    let pq = sqrt(µ / (2 * .pi)) * s.value
     return Probability(value: pq, isComplement: ζ < 0)
 }
 

@@ -162,14 +162,14 @@ public func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
         return prefix * (s₁ + s₂ + s₃)
     }
     
-    let r = recursiveSum(indices: 1..., sum0: d₀ * F₀ + d₁ * F₁, state0: (Fᵢ₋₁: F₀, Fᵢ: F₁, d:[d₀,d₁]), update: { i, previous in
+    let r = recursiveSum(indices: 1..., sum0: d₀ * F₀ + d₁ * F₁, state0: (Fᵢ₋₁: F₀, Fᵢ: F₁, d:[d₀,d₁])) { i, previous in
         let (Fᵢ₋₁,Fᵢ,d) = previous
         let F = Fᵢ₊₁(Double(i), Fᵢ, Fᵢ₋₁)
         let dnew = dᵢ₊₂(d)
         return (dnew * F, (Fᵢ₋₁: Fᵢ, Fᵢ: F, d:d + [dnew]))
-    }, until: { a, b in print(prefix * b.0); return abs(b.0 - a.0) < 1e-12 * a.0 })
+    }
     
-    return prefix * r
+    return prefix * r.value
 }
 
 /// Derivative of Regularized Incomplete Beta function

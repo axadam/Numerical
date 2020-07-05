@@ -178,12 +178,12 @@ public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
 fileprivate func p_gamma_series(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
     let first = 1 / a
-    let sum = recursiveSum(indices: 1..., sum0: first, state0: first, update: { i, state in
+    let sum = recursiveSum(indices: 1..., sum0: first, state0: first) { i, state in
         let ap = a + Double(i)
         let state1 = state * x / ap
         return (state1, state1)
-    }, until: { a, b in a.0 == b.0 })
-    return prefix * sum
+    }
+    return prefix * sum.value
 }
 
 /// Taylor series approximation of Q(a,x)
@@ -227,17 +227,17 @@ fileprivate func q_gamma_series(a: Double, x: Double) -> Double {
     // rᵢ = a + 2i + 3 = rᵢ₋₁ + 2, r₀ = a + 3
     //
     // A Computational Procedure for Incomplete Gamma Functions, Gautschi 1979, Eq 4.10
-    let Σtᵢ = recursiveSum(indices: 1..., sum0: 1.0, state0: (a * x,a + 1,a + 3,1.0), update: { i, prev in
+    let Σtᵢ = recursiveSum(indices: 1..., sum0: 1.0, state0: (a * x,a + 1,a + 3,1.0)) { i, prev in
         let (pᵢ₋₁, qᵢ₋₁, rᵢ₋₁, tᵢ₋₁) = prev
         let pᵢ = pᵢ₋₁ + x
         let qᵢ = qᵢ₋₁ + rᵢ₋₁
         let rᵢ = rᵢ₋₁ + 2
         let tᵢ = -pᵢ * tᵢ₋₁ / qᵢ
         return (tᵢ, (pᵢ,qᵢ,rᵢ,tᵢ))
-    }, until: { a, b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: .strict) })
+    }
     
     /// v = 1 / Γ(a) x^(a + 1) / (a + 1) Σtᵢ
-    let v = a * Γ⁻¹a1 * exp((a + 1) * lnx) * Σtᵢ / (a + 1)
+    let v = a * Γ⁻¹a1 * exp((a + 1) * lnx) * Σtᵢ.value / (a + 1)
     
     return u + v
 }

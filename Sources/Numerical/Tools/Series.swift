@@ -8,39 +8,72 @@
 import Foundation
 import Scan
 
-public func recursiveSeries<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: (Double,Double) -> Double, update: (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
-    let result = withoutActuallyEscaping(accumulate) { a in
-        withoutActuallyEscaping(update) { u in
-            indices.lazy.scan( (accum0,0,state0)) { arg0, i -> (Double,Double,State) in
-                let (accumPrev,_,statePrev) = arg0
-                let (term, state) = u(i, statePrev)
-                let accum = a(accumPrev,term)
-                return (accum, term, state)
-                }.until(maxIter: max_iter) { a, b in until((a.0,a.1),(b.0,b.1)) }
+public enum SeriesResult {
+    case error
+    case noConverge(terms: Int, estimate: Double)
+    case success(terms: Int, estimate: Double)
+}
+
+public extension SeriesResult {
+    var value: Double {
+        switch self {
+        case .error: return .nan
+        case .noConverge(_, let e): return e
+        case .success(_, let e): return e
         }
     }
-    guard let res = result?.result.0 else {
-        return .nan
+    
+    var iterations: Int {
+        switch self {
+        case .error: return 0
+        case .noConverge(let n, _): return n
+        case .success(let n, _): return n
+        }
     }
-    return res
+    
+    var converged: Bool {
+        switch self {
+        case .error, .noConverge: return false
+        case .success: return true
+        }
+    }
 }
 
-public func recursiveSum<IntSequence: Sequence, State>(indices: IntSequence, sum0: Double, state0: State, update: (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
-    return recursiveSeries(indices: indices,
-                           accum0: sum0,
-                           state0: state0,
-                           accumulate: { sumPrev, term in sumPrev + term },
-                           update: update,
-                           until: until,
-                           max_iter: max_iter)
+public func indexedAccumulatingRecursiveSequence<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: @escaping (Double,Double) -> Double, update: @escaping (Int,State) -> (Double,State) ) -> LazyScanSequence<LazySequence<IntSequence>, (Double, Double, State)> where IntSequence.Element == Int {
+    return indices.lazy.scan( (accum0,.nan,state0)) { arg0, i -> (Double,Double,State) in
+        let (accumPrev,_,statePrev) = arg0
+        let (term, state) = update(i, statePrev)
+        let accum = accumulate(accumPrev,term)
+        return (accum, term, state)
+    }
 }
 
-public func recursiveProduct<IntSequence: Sequence, State>(indices: IntSequence, product0: Double, state0: State, update: (Int,State) -> (Double,State), until: ((Double, Double), (Double, Double)) -> Bool, max_iter: Int = 100 ) -> Double where IntSequence.Element == Int {
-    return recursiveSeries(indices: indices,
-                           accum0: product0,
-                           state0: state0,
-                           accumulate: { productPrev, term in productPrev * term },
-                           update: update,
-                           until: until,
-                           max_iter: max_iter)
+public func recursiveSum<IntSequence: Sequence, State>(indices: IntSequence, sum0: Double, state0: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+    let r = indexedAccumulatingRecursiveSequence(
+        indices: indices,
+        accum0: sum0,
+        state0: state0,
+        accumulate: +,
+        update: update
+    ).until(maxIter: maxIter) { b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: tolerance) }
+    guard let res = r else { return .error }
+    switch res.exitState {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.iterations, estimate: res.result.0)
+    case .converged: return .success(terms: res.iterations, estimate: res.result.0)
+    }
+}
+
+public func recursiveProduct<IntSequence: Sequence, State>(indices: IntSequence, product0: Double, state0: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+    let r = indexedAccumulatingRecursiveSequence(
+        indices: indices,
+        accum0: product0,
+        state0: state0,
+        accumulate: *,
+        update: update
+    ).until(maxIter: maxIter) { b in b.1.isApprox(.maybeZero(1, trusted: true), tolerance: tolerance) }
+    guard let res = r else { return .error }
+    switch res.exitState {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.iterations, estimate: res.result.0)
+    case .converged: return .success(terms: res.iterations, estimate: res.result.0)
+    }
 }

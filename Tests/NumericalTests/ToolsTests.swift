@@ -67,4 +67,73 @@ final class ToolsTests: XCTestCase {
         let r = evaluate_polynomial(poly: coefs, z: 3)
         AssertLRE(r, "128", exact: true, resultStore: rs, table: t, testCase: "-19 + 7x - 4x² + 6x³; x=3", field: "LRE")
     }
+    
+    func testProduct() {
+        let t = "Infinite Product"
+        let f = "LRE"
+        
+        // Viète's formula: 2 / π = √2/2 √(2 + √2)/2 √(2 + √(2 + √2)) / 2 ...
+        let v = recursiveProduct(indices: 1..., product0: 1, state0: 2.0.squareRoot()) { i, prev in
+            return (prev / 2,(2 + prev).squareRoot())
+        }
+        AssertLRE(v.value, "0.636619772367581343075535053490057448137838582961825794990", resultStore: rs, table: t, testCase: "Viète's formula for 2/π", field: f, annotation: "\(v.iterations)\(v.converged ? "" : "*")")
+        
+        // Wallis product: π / 2 = ∏ n=1... 4n² / (4n² - 1)
+        let w = recursiveProduct(indices: 1..., product0: 1, state0: ()) { i, _ in
+            let t = Double(4 * i * i) / Double(4 * i * i - 1)
+            return (t,())
+        }
+        AssertLRE(w.value, "1.570796326794896619231321691639751442098584699687552910487", digits: 2.6, resultStore: rs, table: t, testCase: "Wallis product for π/2", field: f, annotation: "\(w.iterations)\(w.converged ? "" : "*")")
+
+        // Verification of Wallis product truncated at n=100 since it is so slow
+        // "An investigation of the comparative efficiency of the different methods in which π is calculated", Nouri Al-Othman, 2013, §8.1, Table 1, n=100
+        AssertLRE(w.value, "1.566893745314081", resultStore: rs, table: t, testCase: "Wallis product truncated at n=100", field: f, annotation: "\(w.iterations)\(w.converged ? "" : "*")")
+    }
+    
+    func testSeries() {
+        let t = "Infinite Series"
+        let f = "LRE"
+        
+        // ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1)
+        let l = recursiveSum(indices: 0..., sum0: 0.0, state0: ()) { i, _ in
+            let j = 2 * i + 1
+            let t = 1 / (3.0^^j * Double(j))
+            return (t, ())
+        }
+        AssertLRE(2 * l.value, "0.693147180559945309417232121458176568075500134360255254120", resultStore: rs, table: t, testCase: "ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1)", field: f, annotation: "\(l.iterations)\(l.converged ? "" : "*")")
+        
+        // Newton's arcsin series to find pi
+        // π = 6 sin⁻¹ 1/2 = Σ i=0... 3 C(2i, i) / (16ⁱ (2i + 1))
+        let p = recursiveSum(indices: 0..., sum0: 0, state0: ()) { i, _ in
+            let c = i == 0 ? 1 : zip((1...i),((i+1)...(2*i))).reduce(1) { $0 * Double($1.1) / Double($1.0) }
+            let t = 3 * c / 16.0^^i / Double(2 * i + 1)
+            return (t,())
+        }
+        AssertLRE(p.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Newton's arcsin series for π", field: f, annotation: "\(p.iterations)\(p.converged ? "" : "*")")
+        
+        // Chudnovsky algorithm for pi
+        // 426880 √10005 / π = Σ i=0... Mᵢ Lᵢ / Xᵢ,
+        // Mᵢ₊₁ = Mᵢ (Kᵢ^3 - 16Kᵢ) / (i + 1)^3, M₀ = 1
+        // Lᵢ₊₁ = Lᵢ + 545140134, L₀ = 13591409
+        // Kᵢ₊₁ = Kᵢ + 12, K₀ = 6
+        // Xᵢ₊₁ = Xᵢ (-262537412640768000), X₀ = 1
+        let c = recursiveSum(indices: 0..., sum0: 0, state0: (Kᵢ: 6.0, Lᵢ: 13591409.0, Mᵢ: 1.0, Xᵢ: 1.0)) { i, prev in
+            let (Kᵢ,Lᵢ,Mᵢ,Xᵢ) = prev
+            let t = Mᵢ * Lᵢ / Xᵢ
+            let Kᵢ₊₁ = Kᵢ + 12
+            let Lᵢ₊₁ = Lᵢ + 545140134
+            let Mᵢ₊₁ = Mᵢ * (Kᵢ^^3 - 16.0 * Kᵢ) / Double(i + 1)^^3
+            let Xᵢ₊₁ = Xᵢ * (-262537412640768000)
+            return (t, (Kᵢ₊₁,Lᵢ₊₁,Mᵢ₊₁,Xᵢ₊₁))
+        }
+        AssertLRE(426880 * 10005.0.squareRoot() / c.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Chudnovsky algorithm for π", field: f, annotation: "\(c.iterations)\(c.converged ? "" : "*")")
+        
+        // e = Σ i=0... 1 / i!
+        let e = recursiveSum(indices: 0..., sum0: 0, state0: 1.0) { i, prev in
+            let fac = i == 0 ? 1 : prev * Double(i)
+            return (1 / fac, fac)
+        }
+        AssertLRE(e.value,"2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e = Σ i=0... 1 / i!", field: f, annotation: "\(e.iterations)\(e.converged ? "" : "*")")
+    }
+
 }
