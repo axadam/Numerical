@@ -48,6 +48,20 @@ public func indexedAccumulatingRecursiveSequence<IntSequence: Sequence, State>(i
     }
 }
 
+/// Compute a truncated infinite series with terms defined in terms of an index and optionally some additional state
+///
+/// Computes S = Σ i ∈ `indices` { aᵢ } where `indices` is any sequence of Ints. Truncation happens at the earlier of
+/// when the specified tolerance is reached for nearness between adjacent terms or when the number of terms reaches `maxiter`.
+///
+/// - Parameters:
+///    - indices: Any sequence of integers. Can be an infinite sequence (e.g. 1...)
+///    - initialSum: Initial value for the sum. Default is 0
+///    - initialState: Initial values for any state that is used in calculating terms
+///    - maxIter: Maximum number of terms to calculate before truncating. Default is 100
+///    - tolerance: Allowable tolerance for deciding the series has converged and truncating. Default is fairly strict
+///    - update: Closure defining the ith term of the sequence. Has access to the index, i, and any state as of the previous term
+///
+/// - Returns: A `SeriesResult` that encodes whether the series converged or not and how many terms were calculated
 public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSum: Double = 0, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
@@ -63,6 +77,20 @@ public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSu
     }
 }
 
+/// Compute a truncated infinite product with terms defined in terms of an index and optionally some additional state
+///
+/// Computes S = ∏ i ∈ `indices` { aᵢ } where `indices` is any sequence of Ints. Truncation happens at the earlier of
+/// when the specified tolerance is reached for nearness between adjacent terms or when the number of terms reaches `maxiter`.
+///
+/// - Parameters:
+///    - indices: Any sequence of integers. Can be an infinite sequence (e.g. 1...)
+///    - initialProduct: Initial value for the product. Default is 1
+///    - initialState: Initial values for any state that is used in calculating terms
+///    - maxIter: Maximum number of terms to calculate before truncating. Default is 100
+///    - tolerance: Allowable tolerance for deciding the series has converged and truncating. Default is fairly strict
+///    - update: Closure defining the ith term of the sequence. Has access to the index, i, and any state as of the previous term
+///
+/// - Returns: A `SeriesResult` that encodes whether the product converged or not and how many terms were calculated
 public func product<IntSequence: Sequence, State>(indices: IntSequence, initialProduct: Double = 1, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
