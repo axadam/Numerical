@@ -76,7 +76,7 @@ public func xmsin(_ x: Double) -> Double {
 ///
 /// absmax(x, y) = abs(x) < abs(y) ? y : x
 func absmax(_ x: Double, _ y: Double = Double.leastNormalMagnitude) -> Double {
-    return abs(x) < abs(y) ? y : x
+    return Double.maximumMagnitude(x, y)
 }
 
 public extension Sequence where Element: FloatingPoint {
