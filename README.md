@@ -136,16 +136,18 @@ Extensive accuracy measurement and testing to make sure accuracy doesn't change 
 Easy is 10k random doubles from [0,1] and their negatives shuffled into an array. Hard is 10k random doubles drawn from [0,1] multiplied by random powers of ten between -10 and 10. Peters is the small pathological case [1.0,1e100,1.0,-1e100].
 
 #### Root Finding
-| Case | ln 5 | ∛3647963 |
-| --- | ---: | ---: |
-| Bisection | 15.0 | 14.5 |
-| Brent | 15.0 | 15.0 |
-| Dekker | 15.0 | 15.0 |
-| Halley | 15.0 | 15.0 |
-| Newton | 15.0 | 15.0 |
-| Ridder | 15.0 | 15.0 |
-| Secant | 15.0 | 4.8 |
-| TOMS 748 | 15.0 | 15.0 |
+| Case | ln 5; x₀=2 | sin(x) - x/2; x₀=2 | x³ - 2x - 5; x₀=2 | ∛3647963; x₀=364 |
+| --- | ---: | ---: | ---: | ---: |
+| Bisection | 15.0  (3/50*) | 15.0  (3/49) | 15.0  (2/50) | 15.0  (3/50*) |
+| Brent | 15.0  (3/8) | 15.0  (3/9) | 15.0  (2/6) | 15.0  (3/11) |
+| Dekker | 15.0  (3/9) | 15.0  (3/10) | 15.0  (2/6) | 15.0  (3/10) |
+| Halley | 15.0  (5) | 15.0  (4) | 15.0  (4) | 15.0  (6) |
+| Newton | 15.0  (6) | 15.0  (6) | 15.0  (6) | 15.0  (9) |
+| Ridders | 15.0  (3/8) | 15.0  (3/12) | 15.0  (2/16) | 15.0  (3/14) |
+| Secant | 15.0  (3/11) | 0.0  (3/5†) | 15.0  (2/6) | 7.8  (3/30*) |
+| TOMS 748 | 15.0  (3/11) | 15.0  (3/8) | 15.0  (2/7) | 15.0  (3/11) |
+
+(number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many function iterations to bracket. * indicates method didn't converge.)
 
 #### Error Function
 | Case | f | f⁻¹ |
@@ -176,9 +178,9 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
 | µ:11.5,x:15.3,y:23 | 13.3 | 14.0 |
-| µ:11.5,x:15.3,y:29 | 11.0 | 11.4 |
-| µ:25,x:35,y:49 | 13.8 | 14.6 |
-| µ:25,x:35,y:65 | 14.0 | 14.7 |
+| µ:11.5,x:15.3,y:29 | 15.0 | 15.0 |
+| µ:25,x:35,y:49 | 13.8 | 15.0 |
+| µ:25,x:35,y:65 | 13.9 | 15.0 |
 
 #### Marcum Q large µ. µ = 8192, y = 1.05µ, and x is a fraction of µ. 'Computation of the Marcum Q-function', Gil, Segura, Temme 2013, Table 6.1
 | Case | f | f⁻¹ |
@@ -232,11 +234,30 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | --- | ---: |
 | -19 + 7x - 4x² + 6x³; x=3 | 15.0 |
 
+#### Infinite Series
+| Case | LRE |
+| --- | ---: |
+| Chudnovsky algorithm for π | 15.0  (3) |
+| Newton's arcsin series for π | 15.0  (23) |
+| e = Σ i=0... 1 / i! | 15.0  (19) |
+| ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1) | 15.0  (16) |
+
+(number of terms in parentheses. * indicates method didn't converge.)
+
+#### Infinite Product
+| Case | LRE |
+| --- | ---: |
+| Viète's formula for 2/π | 15.0  (26) |
+| Wallis product for π/2 | 2.6  (100*) |
+| Wallis product truncated at n=100 | 15.0  (100*) |
+
+(number of terms in parentheses. * indicates method didn't converge.)
+
 #### Quadrature
 | Case | Romberg | Trapezoidal |
 | --- | ---: | ---: |
-| 1/x; [1,100] | 14.9  (16385) | 9.8  (1048577*) |
-| e^(-x²) / √π; [-10,10] | 14.7  (1025*) | 15.0  (65) |
+| 1/x; [1,100] | 15.0  (16385) | 9.8  (1048577*) |
+| e^(-x²) / √π; [-10,10] | 14.7  (1025*) | 15.0  (129) |
 | e^cos(θ); [0,2π] | 15.0  (1025) | 15.0  (33) |
 | x; [0,5000] | 15.0  (9) | 15.0  (9) |
 | x³; [0,1] | 15.0  (9) | 6.0  (1025*) |
