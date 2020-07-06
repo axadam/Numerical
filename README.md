@@ -147,7 +147,7 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | Secant | 15.0  (3/11) | 0.0  (3/5†) | 15.0  (2/6) | 7.8  (3/30*) |
 | TOMS 748 | 15.0  (3/11) | 15.0  (3/8) | 15.0  (2/7) | 15.0  (3/11) |
 
-(number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many function iterations to bracket. * indicates method didn't converge.)
+(number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many function iterations to bracket. * indicates method didn't converge. † indicates converged to a different root.)
 
 #### Error Function
 | Case | f | f⁻¹ |
