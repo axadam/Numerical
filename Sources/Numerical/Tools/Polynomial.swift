@@ -44,7 +44,7 @@ public func polynomialRatio(num: [Double], denom: [Double], z: Double) -> Double
 /// = a₀ + x (a₁ + x(a₂ + x(a₃ + ... + x(a_n-1 + x a_n)...)))
 ///
 /// - Parameters:
-///    - poly: An array of coefficients for the polynomial. Terms in increasing order.
+///    - coeffs: An array of coefficients for the polynomial. Terms in increasing order.
 ///    - z: The point at which to evalute the polynomial.
 public func polynomial(coeffs: [Double], z: Double) -> Double {
     guard let sLast = coeffs.last else { return 0 }

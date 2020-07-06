@@ -27,16 +27,16 @@
 /// y = (2x - (b + a)) / (b - a)
 ///
 /// https://en.wikipedia.org/wiki/Clenshaw_algorithm
-public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> = -1...1, m: Int? = nil) -> Double {
+public func chebyshev(coeffs: [Double], z: Double, interval: ClosedRange<Double> = -1...1, maxTerms: Int? = nil) -> Double {
     // extract bounds of interval
     let a = interval.lowerBound
     let b = interval.upperBound
     
     // if we have an m argument and it is not more than our number of coefficients
-    let mm = min(m ?? poly.count, poly.count)
+    let mm = min(maxTerms ?? coeffs.count, coeffs.count)
     
     // Hold aside the first coefficient
-    guard let a₀ = poly.first else {
+    guard let a₀ = coeffs.first else {
         // we have no coefficients
         return 0
     }
@@ -51,7 +51,7 @@ public func chebyshev(poly: [Double], z: Double, interval: ClosedRange<Double> =
     let x = a == -1 && b == 1 ? z : (2 * z - b - a) / (b - a)
     
     // Go through Clenshaw recursion
-    let (b₁,b₂) = poly.prefix(mm).dropFirst().reversed().reduce((0.0,0.0)) { accum, aᵢ in
+    let (b₁,b₂) = coeffs.prefix(mm).dropFirst().reversed().reduce((0.0,0.0)) { accum, aᵢ in
         let (bᵢ₊₁,bᵢ₊₂) = accum
         let bᵢ = 2 * x * bᵢ₊₁ - bᵢ₊₂ + aᵢ
         return (bᵢ,bᵢ₊₁)

@@ -55,7 +55,7 @@ final class ToolsTests: XCTestCase {
         0.000000000000001
         ]
         let e = { (x: Double) -> Double in
-            chebyshev(poly: coeffsExp, z: x)
+            chebyshev(coeffs: coeffsExp, z: x)
         }
         AssertLRE(e(0.5), "\(exp(0.5))", digits: 14.9, resultStore: rs, table: t, testCase: "0.5", field: f)
         AssertLRE(e(-0.5), "\(exp(-0.5))", digits: 14.7, resultStore: rs, table: t, testCase: "-0.5", field: f)
