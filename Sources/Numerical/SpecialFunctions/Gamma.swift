@@ -253,7 +253,7 @@ fileprivate func q_gamma_series(a: Double, x: Double) -> Double {
 /// Numerical Receipes §6.2
 fileprivate func q_gamma_frac(a: Double, x: Double) -> Double {
     let prefix = exp(a * log(x) - x - lgamma(a))
-    let frac = continued_fraction(
+    let frac = continuedFraction(
         b0: 0,
         a: { iInt in let i = Double(iInt); return iInt == 1 ? 1 : (i - 1) * (a - (i - 1)) },
         b: { 1 + x - a + 2 * Double($0 - 1) })

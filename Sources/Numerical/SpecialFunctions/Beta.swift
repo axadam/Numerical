@@ -78,7 +78,7 @@ public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability 
     let x = xy.p
     let y = xy.q
     let prefix = pow(x,a) * pow(y,b) / (a * beta(a: a, b: b))
-    let cf = continued_fraction(b0: 0, a: { i in
+    let cf = continuedFraction(b0: 0, a: { i in
         let mInt = (i - 1) / 2
         let m = Double(mInt)
         switch (i - 1) {

@@ -18,7 +18,7 @@ import Foundation
 ///   - coeffs: A sequence of tuple pairs of (aᵢ,bᵢ)
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> ContinuedFractionResult where S.Element == (a: Double, b: Double){
+public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> ContinuedFractionResult where S.Element == (a: Double, b: Double){
     let small = Double.leastNormalMagnitude * 10
     let h₀ = max(small, b0)
     let d₀ = 0.0
@@ -53,9 +53,9 @@ public func continued_fraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int 
 ///   - b: The ith denominator term, bᵢ, as a function of i = 1,2,3...
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continued_fraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> ContinuedFractionResult {
+public func continuedFraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> ContinuedFractionResult {
     let seq = (1...).lazy.map { return (a: a($0), b: b($0)) }
-    return continued_fraction(b0: b0, coeffs: seq, maxIter: maxIter)
+    return continuedFraction(b0: b0, coeffs: seq, maxIter: maxIter)
 }
 
 public enum ContinuedFractionResult {
