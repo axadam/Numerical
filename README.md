@@ -12,6 +12,8 @@ Fills in a few missing basic functions.
 
 * `xmsin(_:)` - Calculate x - sin(x) with precision even when x is small
 
+### Summation
+
 Provides some standard summation methods
 
   * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
@@ -66,7 +68,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 Functions to find the root of a function of interest.
 
-* `root(guess:xmin?:xmax?:tolerance:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Brent's (default), Dekker's, Ridders', and TOMS Algo 748.
+* `root(guess:xmin?:xmax?:tolerance:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Secant, Brent's (default), Dekker's, Ridders', and TOMS Algo 748.
 
 * `root(guess:xmin?:xmax?:xtol:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
 
@@ -87,13 +89,37 @@ Numerically integrate a function on a closed interval.
 
 ### Tools
 
-* Series - Some tools around evaluating convergent series. Included is a general way to test if a sequence is converging and then functions specifically for sums and product series where the terms are recursively defined.
+* More flexible stopping criteria for sequences - extensions on Sequence that can prove powerful for defining converence and other stopping criteria for numerical methods
+
+  * `first(where:)` - a variant of the Standard Library function where the closure also has access to the preceding element.
+  
+  * `until(minIter:maxIter:_)` - finds the first element after minIter and before maxIter satisfying the predicate, or the last element it processed otherwise. It returns an `IterativeResult` value that tells how many elements it saw and how it exited. Available with the closure seeing only the last element or also seeing the preceding element.
+
+* Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which let's you specify if the number you are comparing to is known to be zero or only might be zero, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. Several preset tolerances are provided as static members to represent best practices of different strictness.
+
+  * `isApprox(_:tolerance:)` - extension on `FloatingPoint` that takes an `EqualityTarget` and an `EqualityTolerance`. Default tolerance is matching about half the digits supported by your type.
+  
+  * `isWithinULP(of:n:)` - extension on `BinaryFloatingPoint` that lets you specify tolerance as the number of discrete floating point values away another number is. This one has no special handling for zero and should not be used there.
+
+* Series - Some tools around evaluating convergent series.
+
+  * `series(indices:initialSum:initialState:maxIter:tolerance:update:)` - Evaluates the potentially infinite series truncated either at its `maxIter` term or when it converges within `tolerance`. Terms are defined by the closure `update` which has access to the index and optionally some State as of the previous term.
+
+  * `product(indices:initialProduct:initialState:maxIter:tolerance:update:)` - Evaluates the potentially infinite product truncated either at its `maxIter` term or when it converges within `tolerance`. Terms are defined by the closure `update` which has access to the index and optionally some State as of the previous term.
 
 * Polynomials - Evaluation of polynomials using Horner's method. Also includes ratios of polynomials.
 
+  * `polynomial(coeffs:z:)` - evaluate the polynomial with coefficients `coeffs` at point `z`
+  
+  * `polynomialRatio(num:denom:z:)` - evaluate the ratio of polynomials defined by `num` and `denom` at point `z`
+
 * Chebyshev polynomials - Evaluation of Chebyshev polynomials, including rescaling the interval.
 
+  * `chebyshev(coeffs:z:interval:maxTerms:)` - evaluates the Chebyshev polynomial defined by `coeffs` at point `z`. Optionally an interval other than [-1,1] can be specified and/or a maximum number of terms.
+
 * Continued Fractions - Evaluation of continued fractions using the modified Lentz method.
+
+  * `continuedFraction(b0:a:b:maxIter:)` - evaluate a continued fraction of the form b₀ + a₁ / (b₁ +) a₂ / (b₂ +) ... The terms aᵢ are defined by the closure `a` and the terms bᵢ by the closure `b` for i>0. The initial term b₀ is specified by `b0`. A maximum number of levels may be set by `maxIter`.
 
 ### Accuracy
 
