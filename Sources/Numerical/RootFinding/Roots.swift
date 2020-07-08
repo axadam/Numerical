@@ -205,8 +205,8 @@ public extension RootResult {
 ///     - xtol: Convergence criteria in terms how small a step we've made. Default 1e-10.
 ///     - f: Function in which to find root
 ///     - f1: First derivative of f, f'
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 10, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double) -> RootResult {
-    return newtonRoot(f: f, f1: f1, guess: guess, xmin: xmin, xmax: xmax, max_iter: maxIter, xtol: xtol)
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 10, tolerance: EqualityTolerance<Double> = .strict, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double) -> RootResult {
+    return newtonRoot(f: f, f1: f1, guess: guess, xmin: xmin, xmax: xmax, max_iter: maxIter, tolerance: tolerance)
 }
 
 /// Root finder for univariate function with two derivatives
@@ -227,8 +227,8 @@ public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIte
 ///     - f: Function in which to find root
 ///     - f1: First derivative of f, f'
 ///     - f2: Second derivative of f, f"
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> RootResult {
-    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol, f: f, f1: f1, f2: f2)
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> RootResult {
+    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, tolerance: tolerance, f: f, f1: f1, f2: f2)
 }
 
 /// Root finder for univariate function with two derivatives
@@ -246,20 +246,20 @@ public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIte
 ///     - f: Function in which to find root
 ///     - f1: First derivative of f, f'
 ///     - f2f1: Ratio of second derivative of f to the first, f" / f'
-public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> RootResult {
-    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol, f: f, f1: f1, f2f1: f2f1)
+public func root(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> RootResult {
+    return halleyRoot(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, tolerance: tolerance, f: f, f1: f1, f2f1: f2f1)
 }
 
 /// Helper function for root finding
 ///
 /// Provides bounds with bisection if your step goes out of bounds
-func rootHelper(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, step: @escaping(Double) -> Double) -> RootResult {
+func rootHelper(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, tolerance: EqualityTolerance<Double>, step: @escaping(Double) -> Double) -> RootResult {
     let r = sequence(first: guess) { x0 in
         let x1 = step(x0)
         if let xmin = xmin, x1 < xmin { return bisect(a: x0, b: xmin) }
         if let xmax = xmax, x1 > xmax { return bisect(a: x0, b: xmax) }
         return x1
-    }.until(maxIter: maxIter) { s1, s2 in abs(s2 - s1) < xtol }
+    }.until(maxIter: maxIter) { s1, s2 in s2.isApprox(.maybeZero(s1), tolerance: tolerance) }
     
     guard let res = r else { return .error }
     

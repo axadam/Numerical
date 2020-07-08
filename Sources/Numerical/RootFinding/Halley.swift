@@ -47,8 +47,8 @@ func halleyStep(x0: Double, f: (Double) -> Double, f1: (Double) -> Double, f2f1:
 /// https://en.wikipedia.org/wiki/Halley%27s_method
 ///
 /// Numerical Recipes §9.4.2
-public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> RootResult {
-    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol) { x0 in
+public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, tolerance: EqualityTolerance<Double>, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2: @escaping(Double) -> Double) -> RootResult {
+    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, tolerance: tolerance) { x0 in
         halleyStep(x0: x0, f: f, f1: f1, f2: f2)
     }
 }
@@ -62,8 +62,8 @@ public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, 
 /// https://en.wikipedia.org/wiki/Halley%27s_method
 ///
 /// Numerical Recipes §9.4.2
-public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, xtol: Double = 1e-10, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> RootResult {
-    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, xtol: xtol) { x0 in
+public func halleyRoot(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter: Int = 100, tolerance: EqualityTolerance<Double>, f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, f2f1: @escaping(Double) -> Double) -> RootResult {
+    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: maxIter, tolerance: tolerance) { x0 in
         halleyStep(x0: x0, f: f, f1: f1, f2f1: f2f1)
     }
 }

@@ -23,8 +23,8 @@ func newtonStep(x0: Double, f: (Double) -> Double, f1: (Double) -> Double) -> Do
 /// https://en.wikipedia.org/wiki/Newton%27s_method
 ///
 /// Numerical Recipes §9.4
-public func newtonRoot(f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, guess: Double, xmin: Double? = nil, xmax: Double? = nil, max_iter: Int = 10, xtol: Double = 1e-10) -> RootResult {
-    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: max_iter, xtol: xtol) { x0 in
+public func newtonRoot(f: @escaping(Double) -> Double, f1: @escaping(Double) -> Double, guess: Double, xmin: Double? = nil, xmax: Double? = nil, max_iter: Int = 10, tolerance: EqualityTolerance<Double>) -> RootResult {
+    return rootHelper(guess: guess, xmin: xmin, xmax: xmax, maxIter: max_iter, tolerance: tolerance) { x0 in
         return newtonStep(x0: x0, f: f, f1: f1)
     }
 }
