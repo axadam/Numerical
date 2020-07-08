@@ -34,7 +34,7 @@ public func lbeta(a: Double, b: Double) -> Double {
 /// his chapter (§11.3.4), however the continued fraction is currently used everywhere.
 ///
 /// Special Functions, N.M. Temme, 1996, §11.3
-public func beta_reg(xy: Probability, a: Double, b: Double) -> Probability {
+public func betaReg(xy: Probability, a: Double, b: Double) -> Probability {
     let x = xy.p
     let y = xy.q
     
@@ -50,15 +50,15 @@ public func beta_reg(xy: Probability, a: Double, b: Double) -> Probability {
     case (_,0,_,_): return .q(0)
         
         // for x > x₀ we use I(1 - x,a,b) = 1 - I(x,b,a), Eq. 11.30
-    case (x₀.nextUp...,_,_,_): return beta_reg(xy: xy.complement, a: b, b: a).complement
+    case (x₀.nextUp...,_,_,_): return betaReg(xy: xy.complement, a: b, b: a).complement
         
         // for most of the domain we can use the continued fraction
     case (_,_,_,_): return beta_reg_frac(xy: xy, a: a, b: b)
     }
 }
 
-public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
-    return beta_reg(xy: .p(x), a: a, b: b)
+public func betaReg(x: Double, a: Double, b: Double) -> Probability {
+    return betaReg(xy: .p(x), a: a, b: b)
 }
 
 /// Continued Fraction estimate of Regularized Incomplete Beta Function
@@ -74,7 +74,7 @@ public func beta_reg(x: Double, a: Double, b: Double) -> Probability {
 /// This continued fraction works well for a wide range of values. Avoid when x is close to x₀ = a / (a + b).
 ///
 /// NIST Handbook of Mathematical Functions, 2010
-public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability {
+fileprivate func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability {
     let x = xy.p
     let y = xy.q
     let prefix = pow(x,a) * pow(y,b) / (a * beta(a: a, b: b))
@@ -114,13 +114,13 @@ public func beta_reg_frac(xy: Probability, a: Double, b: Double) -> Probability 
 /// "Uniform Asymptotic Expansion for the Incomplete Beta Function", Nemes & Olde Daalhius, 2016
 ///
 /// Special Functions, N. M. Temme, 1996, §11.3.3.1
-public func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
+fileprivate func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
     let ξ = -log(x)
     
     /// 𝛤(a + b) / 𝛤(a), Eq. 2
     let prefix = exp(lgamma(a + b) - lgamma(a))
     
-    let F₀ = pow(a, -b) * gamma_reg(b, a * ξ).q
+    let F₀ = pow(a, -b) * gammaReg(b, a * ξ).q
     let F₁ = (b - a * ξ) / a * F₀ + pow(ξ, b) * exp(-a * ξ) / (a * tgamma(b))
     let Fᵢ₊₁ = { (n: Double, Fn: Double, Fnm1: Double) -> Double in
         return 1 / a * ((n + b - a * ξ) * Fn + n * ξ * Fnm1)
@@ -175,7 +175,7 @@ public func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
 /// Derivative of Regularized Incomplete Beta function
 ///
 /// I'(x, a, b) = x^(a - 1) (1 - x)^(b - 1) / B(a, b)
-public func beta_reg_deriv(x: Double, a: Double, b: Double) -> Double {
+public func betaRegDeriv(x: Double, a: Double, b: Double) -> Double {
     switch (x,a,b) {
     case (_,...0,_): return .nan
     case (_,_,...0): return .nan
@@ -199,7 +199,7 @@ public func beta_reg_deriv(x: Double, a: Double, b: Double) -> Double {
 /// followed by Halley's method on I(x, a, b) - p
 ///
 /// Numerical Receipes §6.4
-public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
+public func invBetaReg(p: Probability, a: Double, b: Double) -> Double {
     // Cases we can handle directly in closed form
     switch (p.p,p.q,a,b) {
     // handle domain edges
@@ -214,7 +214,7 @@ public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
     case (_,_,1,1): return p.p
         
     // If only one is 1 we make it be b and I⁻¹(p,a,1) = p^(1/a)
-    case (_,_,1,_): return 1 - inv_beta_reg(p: .p(p.q), a: b, b: a)
+    case (_,_,1,_): return 1 - invBetaReg(p: .p(p.q), a: b, b: a)
     case (..<0.5,_,_,1): return pow(p.p, 1 / a)
     case (_,_,_,1): return exp(log1p(-p.q) / a)
         
@@ -265,7 +265,7 @@ public func inv_beta_reg(p: Probability, a: Double, b: Double) -> Double {
                     xmin: 0,
                     xmax: 1,
                     maxIter: 10,
-                    f: { x in beta_reg(x: x, a: a, b: b).difference(p) },
+                    f: { x in betaReg(x: x, a: a, b: b).difference(p) },
                     f1: { x in exp(a1 * log(x) + b1 * log(1 - x) + afac) },
                     f2f1: { x in a1 / x - b1 / (1 - x) }).value
     return x

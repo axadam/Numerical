@@ -30,7 +30,7 @@ import Foundation
 ///
 /// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
-public func gamma_reg(_ a: Double, _ x: Double) -> Probability {
+public func gammaReg(_ a: Double, _ x: Double) -> Probability {
     let α = x >= 0.5 ? x : log(0.5) / log(0.5 * x)
     switch (a,x) {
     case (...0,_): return .nan
@@ -60,8 +60,8 @@ public func gamma_reg(_ a: Double, _ x: Double) -> Probability {
 ///
 /// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
-public func p_gamma(_ a: Double, _ x: Double) -> Double {
-    return gamma_reg(a,x).p
+public func pGamma(_ a: Double, _ x: Double) -> Double {
+    return gammaReg(a,x).p
 }
 
 /// Regularized Incomplete Gamma Function (upper), Q(a,x)
@@ -74,8 +74,8 @@ public func p_gamma(_ a: Double, _ x: Double) -> Double {
 ///
 /// EFFICIENT AND ACCURATE ALGORITHMS FOR THE COMPUTATION AND INVERSION OF THE INCOMPLETE
 /// GAMMA FUNCTION RATIOS, Gil, Segura, Temme 2013, Section 2
-public func q_gamma(_ a: Double, _ x: Double) -> Double {
-    return gamma_reg(a,x).q
+public func qGamma(_ a: Double, _ x: Double) -> Double {
+    return gammaReg(a,x).q
 }
 
 // MARK: Derivative
@@ -83,7 +83,7 @@ public func q_gamma(_ a: Double, _ x: Double) -> Double {
 /// Derivative of regularized lower incomplete gamma function, P
 ///
 /// e^-x * x^(a-1) / Γ(a) = e^(-x + (a-1) * log(x) - logΓ(a))
-public func p_gamma_deriv(a: Double, x: Double) -> Double {
+public func pGammaDeriv(a: Double, x: Double) -> Double {
     switch a {
     case 0.5:
         return exp(-x) / (sqrt(x) * sqrt(.pi))
@@ -103,7 +103,7 @@ public func p_gamma_deriv(a: Double, x: Double) -> Double {
 /// Takes a `Probability` value as argument allowing either very small p or q.
 ///
 /// Start with an approximation and then use Halley's method to find the exact value.
-public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
+public func invGammaReg(_ a: Double, _ pq: Probability) -> Double {
     switch (a, pq.p, pq.q) {
     // handle domain edges
     case (...0,_,_): return .nan
@@ -134,7 +134,7 @@ public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
         let x = root(guess: guess,
                         xmin: 0,
                         maxIter: 11,
-                        f: { x in gamma_reg(a, x).difference(pq) },
+                        f: { x in gammaReg(a, x).difference(pq) },
                         f1: { x in
                             switch a {
                             case ...1:
@@ -152,16 +152,16 @@ public func inv_gamma_reg(_ a: Double, _ pq: Probability) -> Double {
 /// Gives x such that P(a,x) = p.
 ///
 /// Start with approximation and then use Halley's method to find root of P(a,x) - p.
-public func inv_p_gamma(_ a: Double, _ p: Double) -> Double {
-    return inv_gamma_reg(a, .p(p))
+public func invPGamma(_ a: Double, _ p: Double) -> Double {
+    return invGammaReg(a, .p(p))
 }
 
 /// Inverse of the upper regularized incomplete gamma Q(a,x) function.
 /// Gives x such that Q(a,x) = q.
 ///
 /// Start with approximation and then use Halley's method to find root of Q(a,x) - q.
-public func inv_q_gamma(_ a: Double, _ q: Double) -> Double {
-    return inv_gamma_reg(a, .q(q))
+public func invQGamma(_ a: Double, _ q: Double) -> Double {
+    return invGammaReg(a, .q(q))
 }
 
 // MARK: Implementation

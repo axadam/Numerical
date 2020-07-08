@@ -35,7 +35,7 @@ import Scan
 ///   - y: the point at which to evaluate
 ///
 /// - Returns: A tuple of the lower (p) and upper (q) CDF tails of the distribution
-public func marcum(µ: Double, x: Double, y: Double) -> Probability {
+public func marcum(mu µ: Double, x: Double, y: Double) -> Probability {
     let ξ = 2 * sqrt(x * y)
     
     // these two functions draw a parabola outside of which quadrature
@@ -86,9 +86,9 @@ public func marcum(µ: Double, x: Double, y: Double) -> Probability {
 /// then you must negate.
 ///
 /// "Computation of the Marcum Q Function", Gil, Segura, Temme 2013, §2.3
-public func marcum_deriv(µ: Double, x: Double, y: Double) -> Double {
+public func marcumDeriv(mu µ: Double, x: Double, y: Double) -> Double {
     // FIXME: use the recurrence relation instead of doing two full calculations
-    return marcum(µ: µ - 1, x: x, y: y).q - marcum(µ: µ, x: x, y: y).q
+    return marcum(mu: µ - 1, x: x, y: y).q - marcum(mu: µ, x: x, y: y).q
 }
 
 // MARK: Inverse Marcum Q
@@ -103,7 +103,7 @@ public func marcum_deriv(µ: Double, x: Double, y: Double) -> Double {
 /// ζ ~ ζ₀ + Σi=1... ζ ᵢ / µⁱ, Eq. 5.23
 ///
 /// "The asymptotic and numerical inversion of the Marcum Q−function", Gil, Segura, Temme, 2014, §5.2
-public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
+public func invMarcum(mu µ: Double, x µx: Double, p: Probability) -> Double {
     // this asymptotic method works on x normalized for µ
     let x = µx / µ
         
@@ -127,7 +127,7 @@ public func inv_marcum(µ: Double, x µx: Double, p: Probability) -> Double {
     let guess = µ * y(ζ,x)
     
     // root finding to get final answer
-    let r = root(guess: guess, tolerance: EqualityTolerance(relative: 0, absolute: 0, absoluteForZero: 1e-15 * prob), bracketFactor: 1.001) { marcum(µ: µ, x: µx, y: $0).difference(p) }
+    let r = root(guess: guess, tolerance: EqualityTolerance(relative: 0, absolute: 0, absoluteForZero: 1e-15 * prob), bracketFactor: 1.001) { marcum(mu: µ, x: µx, y: $0).difference(p) }
     return r.value
 }
 
@@ -242,7 +242,7 @@ fileprivate func zeta1(_ ζ₀: Double, _ x: Double, _ y: Double) -> Double {
 fileprivate func q_series(µ: Double, x: Double, y: Double) -> Double {
     // central gamma
     // FIXME: handle underflow of initial terms
-    let Qᵤ = q_gamma(µ, y)
+    let Qᵤ = qGamma(µ, y)
     
     // seed the modifier term: y^(µ-1) e^(-y) / 𝛤(µ)
     let d₀ = pow(y, µ - 1) * exp(-y) / tgamma(µ)
@@ -313,7 +313,7 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     let n₀Int = Int(n₀)
     
     // first term of the sum is xⁱ / i! Pᵤ₊ᵢ(y), i = n₀
-    let P₀ = p_gamma(µ + n₀, y)
+    let P₀ = pGamma(µ + n₀, y)
     let p₀ = x^^n₀Int / tgamma(n₀ + 1)
     let d₀ = pow(y,µ + n₀) * exp(-y) / tgamma(µ + n₀ + 1)
     let t₀ = p₀ * P₀

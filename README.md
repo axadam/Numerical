@@ -36,19 +36,19 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 * Gamma Function
 
-  * `gamma_reg(a:x:)` - The regularized incomplete gamma function. This return a `Probability` value that can store values close to 0 or 1 with precision.
+  * `gammaReg(a:x:)` - The regularized incomplete gamma function. This return a `Probability` value that can store values close to 0 or 1 with precision.
   
-  * `p_gamma(a:x:)` - The regularized lower incomplete gamma function Pₐ(x) = γ(a,x) / Γ(a). This is the lower tail of `gamma_reg(a:x:)`.
+  * `pGamma(a:x:)` - The regularized lower incomplete gamma function Pₐ(x) = γ(a,x) / Γ(a). This is the lower tail of `gammaReg(a:x:)`.
 
-  * `q_gamma(a:x:)` - The regularized upper incomplete gamma function Qₐ(x) = Γ(a,x) / Γ(a). This is the upper tail of `gamma_reg(a:x:)`.
+  * `qGamma(a:x:)` - The regularized upper incomplete gamma function Qₐ(x) = Γ(a,x) / Γ(a). This is the upper tail of `gammaReg(a:x:)`.
 
-  * `p_gamma_deriv(a:x:)` - The derivative of P(a,x), P'(a,x)
+  * `pGammaDeriv(a:x:)` - The derivative of P(a,x), P'(a,x)
 
-  * `inv_gamma_reg(a:pq:)` - The inverse of the regularized incomplete gamma function such that `gamma_reg(a,x)` = p, where p is a `Probability` value.
+  * `invGammaReg(a:pq:)` - The inverse of the regularized incomplete gamma function such that `gamma_reg(a,x)` = p, where p is a `Probability` value.
 
-  * `inv_p_gamma(a:p:)` - The inverse of P such that P(a,x) = p
+  * `invPGamma(a:p:)` - The inverse of P such that P(a,x) = p
 
-  * `inv_q_gamma(a:q:)` - The inverse of Q such that Q(a,x) = q
+  * `invQGamma(a:q:)` - The inverse of Q such that Q(a,x) = q
 
 * Beta Function
 
@@ -56,19 +56,19 @@ A collection of functions with many applications in stats/ml and the sciences.
 
   * `lbeta(a:b:)` - The log of the beta function
 
-  * `beta_reg(x:a:b)` - The regularized incomplete beta function, I_x(a,b). This return a `Probability` value that can store values close to 0 or 1 with precision.
+  * `betaReg(x:a:b)` - The regularized incomplete beta function, I_x(a,b). This return a `Probability` value that can store values close to 0 or 1 with precision.
 
-  * `beta_reg_deriv(x:a:b:)` - The derivative of I, Iʹ_x(a,b)
+  * `betaRegDeriv(x:a:b:)` - The derivative of I, Iʹ_x(a,b)
 
-  * `inv_beta_reg(p:a:b:)` - The inverse of I such that I_x(a,b) = p, where p is a `Probability` value.
+  * `invBetaReg(p:a:b:)` - The inverse of I such that I_x(a,b) = p, where p is a `Probability` value.
 
 * Marcum Q Function
 
-  * `marcum(µ:x:y:)` - The Marcum Q function, Qᵤ(x,y) = e^(-x) Σᵢ₌₀... xⁱ / i! Qᵤ₊ᵢ(y). Output is a `Probability` value that can store values close to 0 or 1 with precision.
+  * `marcum(mu:x:y:)` - The Marcum Q function, Qᵤ(x,y) = e^(-x) Σᵢ₌₀... xⁱ / i! Qᵤ₊ᵢ(y). Output is a `Probability` value that can store values close to 0 or 1 with precision.
 
-  * `marcum_deriv(µ:x:y:)` - The derivative of the Marcum Q function with respect to y.
+  * `marcumDeriv(mu:x:y:)` - The derivative of the Marcum Q function with respect to y.
 
-  * `inv_marcum(µ:x:p:)` - The inverse of the Marcum Q function with respect to y such that Qᵤ(x,y) = p, where p is a `Probability` value. 
+  * `invMarcum(mu:x:p:)` - The inverse of the Marcum Q function with respect to y such that Qᵤ(x,y) = p, where p is a `Probability` value. 
 
 ### Root finding
 
