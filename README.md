@@ -36,13 +36,19 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 * Gamma Function
 
-  * `p_gamma(a:x:)` - The regularized lower incomplete gamma function Pₐ(x) = γ(a,x) / Γ(a)
+  * `gamma_reg(a:x:)` - The regularized incomplete gamma function. This return a `Probability` value that can store values close to 0 or 1 with precision.
+  
+  * `p_gamma(a:x:)` - The regularized lower incomplete gamma function Pₐ(x) = γ(a,x) / Γ(a). This is the lower tail of `gamma_reg(a:x:)`.
 
-  * `q_gamma(a:x:)` - The regularized upper incomplete gamma function Qₐ(x) = Γ(a,x) / Γ(a)
+  * `q_gamma(a:x:)` - The regularized upper incomplete gamma function Qₐ(x) = Γ(a,x) / Γ(a). This is the upper tail of `gamma_reg(a:x:)`.
 
   * `p_gamma_deriv(a:x:)` - The derivative of P(a,x), P'(a,x)
 
+  * `inv_gamma_reg(a:pq:)` - The inverse of the regularized incomplete gamma function such that `gamma_reg(a,x)` = p, where p is a `Probability` value.
+
   * `inv_p_gamma(a:p:)` - The inverse of P such that P(a,x) = p
+
+  * `inv_q_gamma(a:q:)` - The inverse of Q such that Q(a,x) = q
 
 * Beta Function
 
@@ -50,11 +56,11 @@ A collection of functions with many applications in stats/ml and the sciences.
 
   * `lbeta(a:b:)` - The log of the beta function
 
-  * `beta_reg(x:a:b)` - The regularized incomplete beta function, I_x(a,b)
+  * `beta_reg(x:a:b)` - The regularized incomplete beta function, I_x(a,b). This return a `Probability` value that can store values close to 0 or 1 with precision.
 
   * `beta_reg_deriv(x:a:b:)` - The derivative of I, Iʹ_x(a,b)
 
-  * `inv_beta_reg(p:a:b:)` - The inverse of I such that I_x(a,b) = p
+  * `inv_beta_reg(p:a:b:)` - The inverse of I such that I_x(a,b) = p, where p is a `Probability` value.
 
 * Marcum Q Function
 
@@ -70,11 +76,11 @@ Functions to find the root of a function of interest.
 
 * `root(guess:xmin?:xmax?:tolerance:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Secant, Brent's (default), Dekker's, Ridders', and TOMS Algo 748.
 
-* `root(guess:xmin?:xmax?:xtol:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
+* `root(guess:xmin?:xmax?:tolerance:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
 
-* `root(guess:xmin?:xmax?:xtol:f:f1:f2)` - Finds a root of f using its first and second derivatives. This uses Halley's method.
+* `root(guess:xmin?:xmax?:tolerance:f:f1:f2)` - Finds a root of f using its first and second derivatives. This uses Halley's method.
 
-* `root(guess:xmin?:xmax?:xtol:f:f1:f2f1)` - Same as above but takes the ratio of the second derivative to the first. For use in cases where the ratio is cheaper to calculate.
+* `root(guess:xmin?:xmax?:tolerance:f:f1:f2f1)` - Same as above but takes the ratio of the second derivative to the first. For use in cases where the ratio is cheaper to calculate.
 
 ### Quadrature
 
