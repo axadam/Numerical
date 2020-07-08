@@ -97,15 +97,15 @@ Numerically integrate a function on a closed interval.
 
 * Summation - Provides some standard summation methods
 
-  * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
+  * `sumNaive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
   
-  * `sum_pairwise()` - Pairwise summation. As fast as naive sum but accumulates error much more slowly. Implemented as extension on Collection where Element is FloatingPoint and Index is Int.
+  * `sumPairwise()` - Pairwise summation. As fast as naive sum but accumulates error much more slowly. Implemented as extension on Collection where Element is FloatingPoint and Index is Int.
   
-  * `sum_kahan()` - Kahan's compensated sum. Estimates the error after adding each term and tries to correct for it. More accurate in many cases than pairwise but slower. Implemented as extension on Sequence where Element is FloatingPoint.
+  * `sumKahan()` - Kahan's compensated sum. Estimates the error after adding each term and tries to correct for it. More accurate in many cases than pairwise but slower. Implemented as extension on Sequence where Element is FloatingPoint.
   
-  * `sum_kbn()` - Kahan-Babuška-Neumaier sum. Improves on Kahan by compensating for rounding error in either the sum or the addend. The same number of operations as Kahan sum and more accurate so KBN should be preferred. Implemented as extension on Sequence where Element is FloatingPoint.
+  * `sumKBN()` - Kahan-Babuška-Neumaier sum. Improves on Kahan by compensating for rounding error in either the sum or the addend. The same number of operations as Kahan sum and more accurate so KBN should be preferred. Implemented as extension on Sequence where Element is FloatingPoint.
 
-* Series - Some tools around evaluating convergent series.
+* Series - Some tools around evaluating convergent series and products.
 
   * `series(indices:initialSum:initialState:maxIter:tolerance:update:)` - Evaluates the potentially infinite series truncated either at its `maxIter` term or when it converges within `tolerance`. Terms are defined by the closure `update` which has access to the index and optionally some State as of the previous term.
 

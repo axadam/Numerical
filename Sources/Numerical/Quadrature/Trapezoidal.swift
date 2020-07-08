@@ -61,7 +61,7 @@ public func trapezoidal(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @
         let seq = sequence(first: a + Δxⱼ, next: { $0 + Δxⱼ₋₁ }).prefix(nⱼ₋₁)
         
         // sum up evaluations of the function at each point in the sequence
-        let sum = seq.map { f($0) }.sum_kbn()
+        let sum = seq.map { f($0) }.sumKBN()
         
         // new estimate is half the previous (since now intervals are half as wide)
         // plus ∆x/2 Σf(xᵢ), i odd

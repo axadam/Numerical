@@ -148,17 +148,17 @@ fileprivate func beta_reg_biga(x: Double, a: Double, b: Double) -> Double {
         let s₁ = ξ * (0...nint).map { mint in
             let m = Double(mint)
             return (m + 1) * (n - 2 * m + 1 + (m - n - 1) / (b - 1)) * d[mint + 1] * d[nint - mint + 1]
-        }.sum_naive()
+        }.sumNaive()
         /// s₂ = Σm=0...i (m + 1)(n - 2m - 2 - ξ + (m - n) / (b - 1)) d_(m+1) d_(n - m)
         let s₂ = (0...nint).map { mint -> (Double) in
             let m = Double(mint)
             return (m + 1) * (n - 2 * m - 2 - ξ + (m - n) / (b - 1)) * d[mint + 1] * d[nint - mint]
-        }.sum_naive()
+        }.sumNaive()
         /// s₃ = Σm=0...i (1 - m - b) d_m d_(n - m)
         let s₃ = (0...nint).map { mint -> (Double) in
             let m = Double(mint)
             return (1 - m - b) * d[mint] * d[nint - mint]
-        }.sum_naive()
+        }.sumNaive()
         return prefix * (s₁ + s₂ + s₃)
     }
     

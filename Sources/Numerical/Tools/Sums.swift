@@ -13,7 +13,7 @@ public extension Sequence where Element: FloatingPoint {
     /// Σ1...n aᵢ
     ///
     /// This method is subject to accumulation of rounding and truncation errors.
-    func sum_naive() -> Element { return reduce(Element.zero, +) }
+    func sumNaive() -> Element { return reduce(Element.zero, +) }
     
     /// Kahan Summation
     ///
@@ -27,7 +27,7 @@ public extension Sequence where Element: FloatingPoint {
     /// S2ᵢ = (Sᵢ₋₁ - Sᵢ) + (S2ᵢ₋₁ + Yᵢ)
     ///
     /// "Further remarks on reducing truncation errors", Kahan, 1965
-    func sum_kahan() -> Element {
+    func sumKahan() -> Element {
         return reduce((s: Element.zero, s2: Element.zero)) { accum, yᵢ in
             let (sᵢ₋₁,s2ᵢ₋₁) = accum
             let s2py = s2ᵢ₋₁ + yᵢ
@@ -54,7 +54,7 @@ public extension Sequence where Element: FloatingPoint {
     /// Σ1...n aᵢ = s_n + w_n
     ///
     /// "Rundungsfehleranalyse einiger Verfahren zur Summation endlicher Summen", Neumaier, 1974, Eq. 2.IV
-    func sum_kbn() -> Element {
+    func sumKBN() -> Element {
         let (s,w) = reduce((s: Element.zero,w: Element.zero)) { accum, aᵢ in
             let (sᵢ₋₁,wᵢ₋₁) = accum
             let sᵢ = sᵢ₋₁ + aᵢ
@@ -75,14 +75,14 @@ public extension Collection where Index == Int, Element: FloatingPoint {
     ///
     /// Pairwise summation is a special case of superblock accumulation where the number of
     /// blocks at each step, b, is equal to 2.
-    func sum_pairwise(N: Int = 100) -> Element {
+    func sumPairwise(N: Int = 100) -> Element {
         switch count {
         case ..<N:
-            return sum_naive()
+            return sumNaive()
         case    _:
             // Integer division to find index of mid-point
             let m = count / 2 + startIndex
-            return self[startIndex...m].sum_pairwise(N: N) + self[(m+1)...(endIndex - 1)].sum_pairwise(N: N)
+            return self[startIndex...m].sumPairwise(N: N) + self[(m+1)...(endIndex - 1)].sumPairwise(N: N)
         }
     }
 }
