@@ -12,18 +12,6 @@ Fills in a few missing basic functions.
 
 * `xmsin(_:)` - Calculate x - sin(x) with precision even when x is small
 
-### Summation
-
-Provides some standard summation methods
-
-  * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
-  
-  * `sum_pairwise()` - Pairwise summation. As fast as naive sum but accumulates error much more slowly. Implemented as extension on Collection where Element is FloatingPoint and Index is Int.
-  
-  * `sum_kahan()` - Kahan's compensated sum. Estimates the error after adding each term and tries to correct for it. More accurate in many cases than pairwise but slower. Implemented as extension on Sequence where Element is FloatingPoint.
-  
-  * `sum_kbn()` - Kahan-Babuška-Neumaier sum. Improves on Kahan by compensating for rounding error in either the sum or the addend. The same number of operations as Kahan sum and more accurate so KBN should be preferred. Implemented as extension on Sequence where Element is FloatingPoint.
-  
 ### Special functions
 
 A collection of functions with many applications in stats/ml and the sciences.
@@ -101,11 +89,21 @@ Numerically integrate a function on a closed interval.
   
   * `until(minIter:maxIter:_)` - finds the first element after minIter and before maxIter satisfying the predicate, or the last element it processed otherwise. It returns an `IterativeResult` value that tells how many elements it saw and how it exited. Available with the closure seeing only the last element or also seeing the preceding element.
 
-* Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which let's you specify if the number you are comparing to is known to be zero or only might be zero, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. Several preset tolerances are provided as static members to represent best practices of different strictness.
+* Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which let's you specify if the number you are comparing to is known to be zero or only might be zero, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. If you know you are comparing to zero there is an option to provide a value relative to which tolerance will be calculated. Several preset tolerances are provided as static members to represent best practices of different strictness.
 
   * `isApprox(_:tolerance:)` - extension on `FloatingPoint` that takes an `EqualityTarget` and an `EqualityTolerance`. Default tolerance is matching about half the digits supported by your type.
   
   * `isWithinULP(of:n:)` - extension on `BinaryFloatingPoint` that lets you specify tolerance as the number of discrete floating point values away another number is. This one has no special handling for zero and should not be used there.
+
+* Summation - Provides some standard summation methods
+
+  * `sum_naive()` - Simple sequential summation. This method is subject to accumulation of rounding and truncation errors. Implemented as extension on Sequence where Element is FloatingPoint.
+  
+  * `sum_pairwise()` - Pairwise summation. As fast as naive sum but accumulates error much more slowly. Implemented as extension on Collection where Element is FloatingPoint and Index is Int.
+  
+  * `sum_kahan()` - Kahan's compensated sum. Estimates the error after adding each term and tries to correct for it. More accurate in many cases than pairwise but slower. Implemented as extension on Sequence where Element is FloatingPoint.
+  
+  * `sum_kbn()` - Kahan-Babuška-Neumaier sum. Improves on Kahan by compensating for rounding error in either the sum or the addend. The same number of operations as Kahan sum and more accurate so KBN should be preferred. Implemented as extension on Sequence where Element is FloatingPoint.
 
 * Series - Some tools around evaluating convergent series.
 
