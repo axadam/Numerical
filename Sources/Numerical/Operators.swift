@@ -5,8 +5,6 @@
 //  Created by Adam Roberts on 12/29/18.
 //
 
-import Foundation
-
 precedencegroup ExponentiationPrecedence {
     associativity: right
     higherThan: MultiplicationPrecedence

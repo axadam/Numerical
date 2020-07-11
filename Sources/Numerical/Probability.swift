@@ -46,9 +46,15 @@ public extension Probability {
         self.init(value: q, isComplement: true)
     }
     
+    /// Create a `Probability` value by specifying the lower tail
     static func p(_ v: Double) -> Probability { return Probability(p: v) }
+
+    /// Create a `Probability` value by specifying the upper tail
     static func q(_ v: Double) -> Probability { return Probability(q: v) }
 
+    /// Create a `Probability` value of NaN.
+    ///
+    /// May be useful in the same contexts that NaN is typically useful in floating point code.
     static let nan = Probability(value: .nan, isComplement: false)
     
     /// Difference between this and another probability.

@@ -74,7 +74,31 @@ public func xmsin(_ x: Double) -> Double {
 
 /// Returns the argument with the largest absolute value
 ///
-/// absmax(x, y) = abs(x) < abs(y) ? y : x
-func absmax(_ x: Double, _ y: Double = Double.leastNormalMagnitude) -> Double {
+/// `absmax(x, y) = abs(x) > abs(y) ? x : y`
+func absmax(_ x: Double, _ y: Double) -> Double {
     return Double.maximumMagnitude(x, y)
+}
+
+public extension FloatingPoint {
+    /// Unit magnitude with same sign as self
+    ///
+    /// Zero when magnitude is zero.
+    var signum: Self {
+        if magnitude == 0 { return 0 }
+        return Self(signOf: self, magnitudeOf: 1)
+    }
+}
+
+/// Round double to integer. Round half away from zero.
+public func iround(_ x: Double) -> Int {
+    let r = x.rounded(.toNearestOrAwayFromZero)
+    let i = Int(r)
+    return i
+}
+
+/// Round double to integer. Rounds towards zero (floor of magnitude)
+public func itrunc(_ x: Double) -> Int {
+    let r = x.rounded(.towardZero)
+    let i = Int(r)
+    return i
 }
