@@ -7,6 +7,15 @@
 
 public extension Sequence {
     
+    /// Returns the first member of the sequence that satisfies the condition,
+    /// or the last member before stopping.
+    ///
+    /// It will stop before satisfying the condition if the maximum number of iterations is
+    /// reached or the sequence is exhuasted. In either of those cases it will record its
+    /// exit state in the result.
+    ///
+    /// Returns nil for the empty sequence.
+    @inlinable
     func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
         var g = makeIterator()
         var count = 0
@@ -56,6 +65,7 @@ public extension Sequence {
     /// satisfies the predicate
     ///
     /// Returns nil if the predicate is never met
+    @inlinable
     func first(where predicate: (Element,Element) throws -> Bool) rethrows -> Element? {
         var g = makeIterator()
         var last: Element? = nil
