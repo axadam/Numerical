@@ -39,11 +39,11 @@ public func bisectionRoot(bracket: BracketedRootEstimate, tolerance: EqualityTol
     
     guard let res = r else { return .error } // shouldn't happen
     
-    let e = res.result
+    let e = res.value
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error // shouldn't happen
     case .exceededMax: return .noConverge(evals: f.count, estimate: e)
-    case .converged: return .success(evals: f.count, estimate: e)
+    case .success: return .success(evals: f.count, estimate: e)
     }
 }

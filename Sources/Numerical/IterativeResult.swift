@@ -30,3 +30,9 @@ public struct IterativeResult<T,ExitState> {
         self.result = result
     }
 }
+
+public protocol IterativeValue {
+    associatedtype Value
+    var value: Value { get }
+    var work: UInt { get }
+}

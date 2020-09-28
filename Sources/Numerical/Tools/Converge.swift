@@ -16,22 +16,22 @@ public extension Sequence {
     ///
     /// Returns nil for the empty sequence.
     @inlinable
-    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
+    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element) -> Bool) -> UntilValue<Element>? {
         var g = makeIterator()
-        var count = 0
+        var count: UInt = 0
         var last: Element? = nil
         while let e = g.next() {
             if predicate(e) && count >= minIter {
-                return IterativeResult(iterations: count, exitState: .converged, result: e)
+                return .success(iterations: count, value: e)
             }
             last = e
             if count >= maxIter {
-                return IterativeResult(iterations: count, exitState: .exceededMax, result: e)
+                return .exceededMax(iterations: count, value: e)
             }
             count += 1
         }
         guard let e = last else { return nil }
-        return IterativeResult(iterations: count, exitState: .exhaustedInput, result: e)
+        return .exhaustedInput(iterations: count, value: e)
     }
     
     /// Returns the first member of the sequence that along with its preceding member
@@ -43,22 +43,22 @@ public extension Sequence {
     ///
     /// Returns nil for the empty sequence.
     @inlinable
-    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element,Element) -> Bool) -> IterativeResult<Element,ConvergenceState>? {
+    func until(minIter: Int = 0, maxIter: Int = 100, _ predicate: (Element,Element) -> Bool) -> UntilValue<Element>? {
         var g = makeIterator()
-        var count = 0
+        var count: UInt = 0
         var last: Element? = nil
         while let e = g.next() {
             if let lasty = last, predicate(lasty,e) && count >= minIter {
-                return IterativeResult(iterations: count + 1, exitState: .converged, result: e)
+                return .success(iterations: count + 1, value: e)
             }
             last = e
             if count >= maxIter {
-                return IterativeResult(iterations: count + 1, exitState: .exceededMax, result: e)
+                return .exceededMax(iterations: count + 1, value: e)
             }
             count += 1
         }
         guard let e = last else { return nil }
-        return IterativeResult(iterations: count, exitState: .exhaustedInput, result: e)
+        return .exhaustedInput(iterations: count, value: e)
     }
     
     /// Returns the first member, if any, of the sequence that along with its preceding member
@@ -79,15 +79,32 @@ public extension Sequence {
     }
 }
 
-/// Value representing the exit state of the converge function on a sequence
-public enum ConvergenceState {
-    
-    /// Success. Satisfied convergence condition
-    case converged
-    
+public enum UntilValue<Element>: IterativeValue {
     /// The sequence was used up before satisfying the convergence condition
-    case exhaustedInput
-    
+    case exceededMax(iterations: UInt, value: Element)
     /// Reached the maximum number of iterations before satisfying the convergence condition
-    case exceededMax
+    case exhaustedInput(iterations: UInt, value: Element)
+    /// Satisfied convergence condition
+    case success(iterations: UInt, value: Element)
 }
+
+public extension UntilValue {
+    typealias Value = Element
+    
+    var value: Element {
+        switch self {
+        case .exceededMax(_, let v): return v
+        case .exhaustedInput(_, let v): return v
+        case .success(_, let v): return v
+        }
+    }
+
+    var work: UInt {
+        switch self {
+        case .exceededMax(let w, _): return w
+        case .exhaustedInput(let w, _): return w
+        case .success(let w, _): return w
+        }
+    }
+}
+

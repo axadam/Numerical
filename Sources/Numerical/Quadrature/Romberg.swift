@@ -65,9 +65,9 @@ public func romberg(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @esca
     guard let quad = q else {
         return .error
     }
-    switch quad.exitState {
+    switch quad {
     case .exhaustedInput: return .error
-    case .exceededMax: return .noConverge(evals: f.count, estimate: quad.result.R.last!)
-    case .converged: return .success(evals: f.count, estimate: quad.result.R.last!)
+    case .exceededMax: return .noConverge(evals: f.count, estimate: quad.value.R.last!)
+    case .success: return .success(evals: f.count, estimate: quad.value.R.last!)
     }
 }

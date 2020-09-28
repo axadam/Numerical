@@ -36,12 +36,12 @@ public func brentRoot(bracket: BracketedRootEstimate, tolerance: EqualityToleran
 
     guard let res = r else { return .error } // shouldn't happen
     
-    let e = BracketedRootEstimate(a: res.result.a, b: res.result.b, fa: res.result.fa, fb: res.result.fb)
+    let e = BracketedRootEstimate(a: res.value.a, b: res.value.b, fa: res.value.fa, fb: res.value.fb)
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error // shouldn't happen
     case .exceededMax: return .noConverge(evals: f.count, estimate: e)
-    case .converged: return .success(evals: f.count, estimate: e)
+    case .success: return .success(evals: f.count, estimate: e)
     }
 }
 

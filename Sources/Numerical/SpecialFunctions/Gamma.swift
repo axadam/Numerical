@@ -568,7 +568,7 @@ fileprivate func lambda(_ η: Double) -> Double {
             let λ₁ = λ₀ * (s + log(λ₀)) / (λ₀ - 1)
             return λ₁
         }.until(maxIter: 100) { a, b in b.isApprox(.maybeZero(a), tolerance: .strict) }
-        return λʹ?.result ?? λ
+        return λʹ?.value ?? λ
     case _:
         return λ
     }

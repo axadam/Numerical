@@ -10,8 +10,8 @@ import Scan
 
 public enum SeriesResult {
     case error
-    case noConverge(terms: Int, estimate: Double)
-    case success(terms: Int, estimate: Double)
+    case noConverge(terms: UInt, estimate: Double)
+    case success(terms: UInt, estimate: Double)
 }
 
 public extension SeriesResult {
@@ -23,7 +23,7 @@ public extension SeriesResult {
         }
     }
     
-    var iterations: Int {
+    var iterations: UInt {
         switch self {
         case .error: return 0
         case .noConverge(let n, _): return n
@@ -71,9 +71,9 @@ public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSu
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: tolerance) }
     guard let res = r else { return .error }
-    switch res.exitState {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.iterations, estimate: res.result.0)
-    case .converged: return .success(terms: res.iterations, estimate: res.result.0)
+    switch res {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.work, estimate: res.value.0)
+    case .success: return .success(terms: res.work, estimate: res.value.0)
     }
 }
 
@@ -100,8 +100,8 @@ public func product<IntSequence: Sequence, State>(indices: IntSequence, initialP
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.maybeZero(1, trusted: true), tolerance: tolerance) }
     guard let res = r else { return .error }
-    switch res.exitState {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.iterations, estimate: res.result.0)
-    case .converged: return .success(terms: res.iterations, estimate: res.result.0)
+    switch res {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.work, estimate: res.value.0)
+    case .success: return .success(terms: res.work, estimate: res.value.0)
     }
 }

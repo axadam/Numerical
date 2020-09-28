@@ -72,9 +72,9 @@ public func trapezoidal(range: ClosedRange<Double>, maxIter: Int = 10, f rawF: @
     guard let quad = q else {
         return .error
     }
-    switch quad.exitState {
+    switch quad {
     case .exhaustedInput: return .error
-    case .exceededMax: return .noConverge(evals: f.count, estimate: quad.result.I)
-    case .converged: return .success(evals: f.count, estimate: quad.result.I)
+    case .exceededMax: return .noConverge(evals: f.count, estimate: quad.value.I)
+    case .success: return .success(evals: f.count, estimate: quad.value.I)
     }
 }

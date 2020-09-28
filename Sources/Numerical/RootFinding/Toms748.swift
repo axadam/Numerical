@@ -28,7 +28,7 @@ public func toms748Root(bracket: BracketedRootEstimate, tolerance: EqualityToler
     let (a₂, b₂, d₂, fa₂, fb₂, fd₂) = toms748Bracket(f: f, a: a, b: b, c: c₁, fa: fa, fb: fb, tolerance: tolerance.absolute)
     
     typealias Toms748State = (a: Double, b: Double, d: Double, e: Double, fa: Double, fb: Double, fd: Double, fe: Double)
-    let r: IterativeResult<Toms748State,ConvergenceState>? = (2...).lazy.scan((a: a₂, b: b₂, d: d₂, e: 1.0, fa: fa₂, fb: fb₂, fd: fd₂, fe: 1e5)) { (state: Toms748State, i: Int) -> Toms748State in
+    let r: UntilValue<Toms748State>? = (2...).lazy.scan((a: a₂, b: b₂, d: d₂, e: 1.0, fa: fa₂, fb: fb₂, fd: fd₂, fe: 1e5)) { (state: Toms748State, i: Int) -> Toms748State in
         let (aᵢ, bᵢ, dᵢ, eᵢ, faᵢ, fbᵢ, fdᵢ, feᵢ) = state
         
         // 4.2.3 First guess for the iteration is Inverse Cubic Interpolation if
@@ -95,12 +95,12 @@ public func toms748Root(bracket: BracketedRootEstimate, tolerance: EqualityToler
 
     guard let res = r else { return .error } // shouldn't happen
     
-    let e = BracketedRootEstimate(a: res.result.a, b: res.result.b, fa: res.result.fa, fb: res.result.fb)
+    let e = BracketedRootEstimate(a: res.value.a, b: res.value.b, fa: res.value.fa, fb: res.value.fb)
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error // shouldn't happen
     case .exceededMax: return .noConverge(evals: f.count, estimate: e)
-    case .converged: return .success(evals: f.count, estimate: e)
+    case .success: return .success(evals: f.count, estimate: e)
     }
 }
 

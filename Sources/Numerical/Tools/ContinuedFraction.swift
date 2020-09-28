@@ -35,9 +35,9 @@ public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int =
     guard let cfrac = cf else {
         return .error
     }
-    switch cfrac.exitState {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: cfrac.iterations, estimate: cfrac.result.fracᵢ₋₁)
-    case .converged: return .success(terms: cfrac.iterations, estimate: cfrac.result.fracᵢ₋₁)
+    switch cfrac {
+    case .exhaustedInput, .exceededMax: return .noConverge(terms: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
+    case .success: return .success(terms: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
     }
 }
 
@@ -60,8 +60,8 @@ public func continuedFraction(b0: Double, a: @escaping (Int) -> (Double), b: @es
 
 public enum ContinuedFractionResult {
     case error
-    case noConverge(terms: Int, estimate: Double)
-    case success(terms: Int, estimate: Double)
+    case noConverge(terms: UInt, estimate: Double)
+    case success(terms: UInt, estimate: Double)
 }
 
 public extension ContinuedFractionResult {
@@ -73,7 +73,7 @@ public extension ContinuedFractionResult {
         }
     }
     
-    var iterations: Int {
+    var iterations: UInt {
         switch self {
         case .error: return 0
         case .noConverge(let n, _): return n

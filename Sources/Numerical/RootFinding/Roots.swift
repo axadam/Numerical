@@ -161,8 +161,8 @@ func root(f: @escaping(Double) -> Double, bracket: BracketedRootEstimate, tolera
 
 public enum RootResult {
     case error
-    case noConverge(evals: Int, estimate: Double)
-    case success(evals: Int, estimate: Double)
+    case noConverge(evals: UInt, estimate: Double)
+    case success(evals: UInt, estimate: Double)
 }
 
 public extension RootResult {
@@ -174,7 +174,7 @@ public extension RootResult {
         }
     }
     
-    var evals: Int {
+    var evals: UInt {
         switch self {
         case .error: return 0
         case .noConverge(let n,_): return n
@@ -263,9 +263,9 @@ func rootHelper(guess: Double, xmin: Double? = nil, xmax: Double? = nil, maxIter
     
     guard let res = r else { return .error }
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error
-    case .exceededMax: return .noConverge(evals: res.iterations, estimate: res.result)
-    case .converged: return .success(evals: res.iterations, estimate: res.result)
+    case .exceededMax: return .noConverge(evals: res.work, estimate: res.value)
+    case .success: return .success(evals: res.work, estimate: res.value)
     }
 }

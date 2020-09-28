@@ -59,11 +59,11 @@ public func riddersRoot(bracket: BracketedRootEstimate, tolerance: EqualityToler
 
     guard let res = r else { return .error } // shouldn't happen
     
-    let e = BracketedRootEstimate(a: res.result.x0, b: res.result.x1, fa: res.result.y0, fb: res.result.y1)
+    let e = BracketedRootEstimate(a: res.value.x0, b: res.value.x1, fa: res.value.y0, fb: res.value.y1)
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error // shouldn't happen
     case .exceededMax: return .noConverge(evals: f.count, estimate: e)
-    case .converged: return .success(evals: f.count, estimate: e)
+    case .success: return .success(evals: f.count, estimate: e)
     }
 }

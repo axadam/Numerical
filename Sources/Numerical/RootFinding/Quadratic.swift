@@ -32,7 +32,7 @@ func newtonQuadtraticStep(a: Double,
     if fabd == 0 { return a - fa / fab } // note this is the same as secant
     let r0 = fa * fabd > 0 ? a : b
     let r = root(guess: r0, maxIter: k,
-                 f: { x in fa + (x - a) * (fab + (x - b) * fabd)},
-                 f1: { x in fab + fabd * (2 * x - a - b) }).value
+                 f: { (x: Double) in fa + (x - a) * (fab + (x - b) * fabd)},
+                 f1: { (x: Double) in fab + fabd * (2.0 * x - a - b) }).value
     return r
 }

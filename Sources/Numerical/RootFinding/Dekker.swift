@@ -43,12 +43,12 @@ public func dekkerRoot(bracket: BracketedRootEstimate, tolerance: EqualityTolera
 
     guard let res = r else { return .error } // shouldn't happen
     
-    let e = BracketedRootEstimate(a: res.result.a1, b: res.result.b1, fa: res.result.fa1, fb: res.result.fb1)
+    let e = BracketedRootEstimate(a: res.value.a1, b: res.value.b1, fa: res.value.fa1, fb: res.value.fb1)
     
-    switch res.exitState {
+    switch res {
     case .exhaustedInput: return .error // shouldn't happen
     case .exceededMax: return .noConverge(evals: f.count, estimate: e)
-    case .converged: return .success(evals: f.count, estimate: e)
+    case .success: return .success(evals: f.count, estimate: e)
     }
 }
 
