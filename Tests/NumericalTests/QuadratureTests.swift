@@ -59,13 +59,13 @@ final class Quadrature: XCTestCase {
         let x = integrate(range: -10...10, method: trapezoidal, f: ex2)
         let π4 = integrate(range: 0...1, method: trapezoidal, f: pi)
         
-        AssertLRE(c.value, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.evals)\(c.converged ? "" : "*")")
-        AssertLRE(r.value, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)\(r.converged ? "" : "*")")
-        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.evals)\(i.converged ? "" : "*")")
-        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.evals)\(p.converged ? "" : "*")")
-        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.evals)\(e.converged ? "" : "*")")
-        AssertLRE(x.value, vex2, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.evals)\(x.converged ? "" : "*")")
-        AssertLRE(4 * π4.value, vpi, digits: 7.2, resultStore: rs, table: t, testCase: tpi, field: f, annotation: "\(π4.evals)\(π4.converged ? "" : "*")")
+        AssertLRE(c.value, vcube, exact: true, digits: 6.0, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.work)\(c.converged ? "" : "*")")
+        AssertLRE(r.value, vrecip, digits: 9.7, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.work)\(r.converged ? "" : "*")")
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.work)\(i.converged ? "" : "*")")
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.work)\(p.converged ? "" : "*")")
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.work)\(e.converged ? "" : "*")")
+        AssertLRE(x.value, vex2, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.work)\(x.converged ? "" : "*")")
+        AssertLRE(4 * π4.value, vpi, digits: 7.2, resultStore: rs, table: t, testCase: tpi, field: f, annotation: "\(π4.work)\(π4.converged ? "" : "*")")
     }
     
     func testRomberg() {
@@ -79,12 +79,12 @@ final class Quadrature: XCTestCase {
         let x = integrate(range: -10...10, method: romberg, f: ex2)
         let π4 = integrate(range: 0...1, method: romberg, f: pi)
 
-        AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.evals)\(c.converged ? "" : "*")")
-        AssertLRE(r.value, vrecip, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.evals)\(r.converged ? "" : "*")")
-        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.evals)\(i.converged ? "" : "*")")
-        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.evals)\(p.converged ? "" : "*")")
-        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.evals)\(e.converged ? "" : "*")")
-        AssertLRE(x.value, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.evals)\(x.converged ? "" : "*")")
-        AssertLRE(4 * π4.value, vpi, resultStore: rs, table: t, testCase: tpi, field: f, annotation: "\(π4.evals)\(π4.converged ? "" : "*")")
+        AssertLRE(c.value, vcube, exact: true, resultStore: rs, table: t, testCase: tcube, field: f, annotation: "\(c.work)\(c.converged ? "" : "*")")
+        AssertLRE(r.value, vrecip, resultStore: rs, table: t, testCase: trecip, field: f, annotation: "\(r.work)\(r.converged ? "" : "*")")
+        AssertLRE(i.value, viden, exact: true, resultStore: rs, table: t, testCase: tiden, field: f, annotation: "\(i.work)\(i.converged ? "" : "*")")
+        AssertLRE(p.value, vpois, resultStore: rs, table: t, testCase: tpois, field: f, annotation: "\(p.work)\(p.converged ? "" : "*")")
+        AssertLRE(e.value, vecos, resultStore: rs, table: t, testCase: tecos, field: f, annotation: "\(e.work)\(e.converged ? "" : "*")")
+        AssertLRE(x.value, vex2, digits: 14.6, resultStore: rs, table: t, testCase: tex2, field: f, annotation: "\(x.work)\(x.converged ? "" : "*")")
+        AssertLRE(4 * π4.value, vpi, resultStore: rs, table: t, testCase: tpi, field: f, annotation: "\(π4.work)\(π4.converged ? "" : "*")")
     }
 }

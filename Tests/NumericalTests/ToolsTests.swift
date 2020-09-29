@@ -25,13 +25,13 @@ final class ToolsTests: XCTestCase {
         let f = "LRE"
         
         let r2 = continuedFraction(b0: 1, a: { _ in 1 }, b: { _ in 2 })
-        AssertLRE(r2.value, "1.414213562373095048801688724209698078569671875376948073176", resultStore: rs, table: t, testCase: "√2", field: f, annotation: "\(r2.iterations)\(r2.converged ? "" : "*")")
+        AssertLRE(r2.value, "1.414213562373095048801688724209698078569671875376948073176", resultStore: rs, table: t, testCase: "√2", field: f, annotation: "\(r2.work)\(r2.converged ? "" : "*")")
         
         let e  = continuedFraction(b0: 2, a: { $0 == 1 ? 1.0 : Double($0 - 1) }, b: { Double($0) })
-        AssertLRE(e.value,  "2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e", field: f, annotation: "\(e.iterations)\(e.converged ? "" : "*")")
+        AssertLRE(e.value,  "2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e", field: f, annotation: "\(e.work)\(e.converged ? "" : "*")")
 
         let pi = continuedFraction(b0: 3, a: { pow(Double(2 * $0 - 1),2) }, b: { _ in 6 }, maxIter: 1000)
-        AssertLRE(pi.value, "3.141592653589793238462643383279502884197169399375105820974", digits: 10.1, resultStore: rs, table: t, testCase: "π", field: f, annotation: "\(pi.iterations)\(pi.converged ? "" : "*")")
+        AssertLRE(pi.value, "3.141592653589793238462643383279502884197169399375105820974", digits: 10.1, resultStore: rs, table: t, testCase: "π", field: f, annotation: "\(pi.work)\(pi.converged ? "" : "*")")
     }
     
     func testChebyshev() {
@@ -76,18 +76,18 @@ final class ToolsTests: XCTestCase {
         let v = product(indices: 1..., initialState: 2.0.squareRoot()) { i, prev in
             return (prev / 2,(2 + prev).squareRoot())
         }
-        AssertLRE(v.value, "0.636619772367581343075535053490057448137838582961825794990", resultStore: rs, table: t, testCase: "Viète's formula for 2/π", field: f, annotation: "\(v.iterations)\(v.converged ? "" : "*")")
+        AssertLRE(v.value, "0.636619772367581343075535053490057448137838582961825794990", resultStore: rs, table: t, testCase: "Viète's formula for 2/π", field: f, annotation: "\(v.work)\(v.converged ? "" : "*")")
         
         // Wallis product: π / 2 = ∏ n=1... 4n² / (4n² - 1)
         let w = product(indices: 1..., initialState: ()) { i, _ in
             let t = Double(4 * i * i) / Double(4 * i * i - 1)
             return (t,())
         }
-        AssertLRE(w.value, "1.570796326794896619231321691639751442098584699687552910487", digits: 2.6, resultStore: rs, table: t, testCase: "Wallis product for π/2", field: f, annotation: "\(w.iterations)\(w.converged ? "" : "*")")
+        AssertLRE(w.value, "1.570796326794896619231321691639751442098584699687552910487", digits: 2.6, resultStore: rs, table: t, testCase: "Wallis product for π/2", field: f, annotation: "\(w.work)\(w.converged ? "" : "*")")
 
         // Verification of Wallis product truncated at n=100 since it is so slow
         // "An investigation of the comparative efficiency of the different methods in which π is calculated", Nouri Al-Othman, 2013, §8.1, Table 1, n=100
-        AssertLRE(w.value, "1.566893745314081", resultStore: rs, table: t, testCase: "Wallis product truncated at n=100", field: f, annotation: "\(w.iterations)\(w.converged ? "" : "*")")
+        AssertLRE(w.value, "1.566893745314081", resultStore: rs, table: t, testCase: "Wallis product truncated at n=100", field: f, annotation: "\(w.work)\(w.converged ? "" : "*")")
     }
     
     func testSeries() {
@@ -100,7 +100,7 @@ final class ToolsTests: XCTestCase {
             let t = 1 / (3.0^^j * Double(j))
             return (t, ())
         }
-        AssertLRE(2 * l.value, "0.693147180559945309417232121458176568075500134360255254120", resultStore: rs, table: t, testCase: "ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1)", field: f, annotation: "\(l.iterations)\(l.converged ? "" : "*")")
+        AssertLRE(2 * l.value, "0.693147180559945309417232121458176568075500134360255254120", resultStore: rs, table: t, testCase: "ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1)", field: f, annotation: "\(l.work)\(l.converged ? "" : "*")")
         
         // Newton's arcsin series to find pi
         // π = 6 sin⁻¹ 1/2 = Σ i=0... 3 C(2i, i) / (16ⁱ (2i + 1))
@@ -109,7 +109,7 @@ final class ToolsTests: XCTestCase {
             let t = 3 * c / 16.0^^i / Double(2 * i + 1)
             return (t,())
         }
-        AssertLRE(p.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Newton's arcsin series for π", field: f, annotation: "\(p.iterations)\(p.converged ? "" : "*")")
+        AssertLRE(p.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Newton's arcsin series for π", field: f, annotation: "\(p.work)\(p.converged ? "" : "*")")
         
         // Chudnovsky algorithm for pi
         // 426880 √10005 / π = Σ i=0... Mᵢ Lᵢ / Xᵢ,
@@ -126,14 +126,14 @@ final class ToolsTests: XCTestCase {
             let Xᵢ₊₁ = Xᵢ * (-262537412640768000)
             return (t, (Kᵢ₊₁,Lᵢ₊₁,Mᵢ₊₁,Xᵢ₊₁))
         }
-        AssertLRE(426880 * 10005.0.squareRoot() / c.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Chudnovsky algorithm for π", field: f, annotation: "\(c.iterations)\(c.converged ? "" : "*")")
+        AssertLRE(426880 * 10005.0.squareRoot() / c.value, "3.141592653589793238462643383279502884197169399375105820974", resultStore: rs, table: t, testCase: "Chudnovsky algorithm for π", field: f, annotation: "\(c.work)\(c.converged ? "" : "*")")
         
         // e = Σ i=0... 1 / i!
         let e = series(indices: 0..., initialState: 1.0) { i, prev in
             let fac = i == 0 ? 1 : prev * Double(i)
             return (1 / fac, fac)
         }
-        AssertLRE(e.value,"2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e = Σ i=0... 1 / i!", field: f, annotation: "\(e.iterations)\(e.converged ? "" : "*")")
+        AssertLRE(e.value,"2.718281828459045235360287471352662497757247093699959574966", resultStore: rs, table: t, testCase: "e = Σ i=0... 1 / i!", field: f, annotation: "\(e.work)\(e.converged ? "" : "*")")
     }
 
     let tSum = "Summation"

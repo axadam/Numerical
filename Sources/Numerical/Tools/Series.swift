@@ -8,37 +8,6 @@
 import Foundation
 import Scan
 
-public enum SeriesResult {
-    case error
-    case noConverge(terms: UInt, estimate: Double)
-    case success(terms: UInt, estimate: Double)
-}
-
-public extension SeriesResult {
-    var value: Double {
-        switch self {
-        case .error: return .nan
-        case .noConverge(_, let e): return e
-        case .success(_, let e): return e
-        }
-    }
-    
-    var iterations: UInt {
-        switch self {
-        case .error: return 0
-        case .noConverge(let n, _): return n
-        case .success(let n, _): return n
-        }
-    }
-    
-    var converged: Bool {
-        switch self {
-        case .error, .noConverge: return false
-        case .success: return true
-        }
-    }
-}
-
 public func indexedAccumulatingRecursiveSequence<IntSequence: Sequence, State>(indices: IntSequence, accum0: Double, state0: State, accumulate: @escaping (Double,Double) -> Double, update: @escaping (Int,State) -> (Double,State) ) -> LazyScanSequence<LazySequence<IntSequence>, (Double, Double, State)> where IntSequence.Element == Int {
     return indices.lazy.scan( (accum0,.nan,state0)) { arg0, i -> (Double,Double,State) in
         let (accumPrev,_,statePrev) = arg0
@@ -62,7 +31,7 @@ public func indexedAccumulatingRecursiveSequence<IntSequence: Sequence, State>(i
 ///    - update: Closure defining the ith term of the sequence. Has access to the index, i, and any state as of the previous term
 ///
 /// - Returns: A `SeriesResult` that encodes whether the series converged or not and how many terms were calculated
-public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSum: Double = 0, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSum: Double = 0, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> ConvergenceValue<Double>? where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
         accum0: initialSum,
@@ -70,10 +39,10 @@ public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSu
         accumulate: +,
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.zero(scaleRelativeTo: b.0), tolerance: tolerance) }
-    guard let res = r else { return .error }
+    guard let res = r else { return nil }
     switch res {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.work, estimate: res.value.0)
-    case .success: return .success(terms: res.work, estimate: res.value.0)
+    case .exhaustedInput, .exceededMax: return .didNotConverge(work: res.work, estimate: res.value.0)
+    case .success: return .converged(work: res.work, estimate: res.value.0)
     }
 }
 
@@ -91,7 +60,7 @@ public func series<IntSequence: Sequence, State>(indices: IntSequence, initialSu
 ///    - update: Closure defining the ith term of the sequence. Has access to the index, i, and any state as of the previous term
 ///
 /// - Returns: A `SeriesResult` that encodes whether the product converged or not and how many terms were calculated
-public func product<IntSequence: Sequence, State>(indices: IntSequence, initialProduct: Double = 1, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> SeriesResult where IntSequence.Element == Int {
+public func product<IntSequence: Sequence, State>(indices: IntSequence, initialProduct: Double = 1, initialState: State, maxIter: Int = 100, tolerance: EqualityTolerance<Double> = .strict, update: @escaping (Int,State) -> (Double,State)) -> ConvergenceValue<Double>? where IntSequence.Element == Int {
     let r = indexedAccumulatingRecursiveSequence(
         indices: indices,
         accum0: initialProduct,
@@ -99,9 +68,9 @@ public func product<IntSequence: Sequence, State>(indices: IntSequence, initialP
         accumulate: *,
         update: update
     ).until(maxIter: maxIter) { b in b.1.isApprox(.maybeZero(1, trusted: true), tolerance: tolerance) }
-    guard let res = r else { return .error }
+    guard let res = r else { return nil }
     switch res {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: res.work, estimate: res.value.0)
-    case .success: return .success(terms: res.work, estimate: res.value.0)
+    case .exhaustedInput, .exceededMax: return .didNotConverge(work: res.work, estimate: res.value.0)
+    case .success: return .converged(work: res.work, estimate: res.value.0)
     }
 }

@@ -18,7 +18,7 @@ import Foundation
 ///   - coeffs: A sequence of tuple pairs of (aᵢ,bᵢ)
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> ContinuedFractionResult where S.Element == (a: Double, b: Double){
+public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int = 100) -> ConvergenceValue<Double>? where S.Element == (a: Double, b: Double){
     let small = Double.leastNormalMagnitude * 10
     let h₀ = max(small, b0)
     let d₀ = 0.0
@@ -32,12 +32,10 @@ public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int =
         let fracᵢ = fracᵢ₋₁ * delta
         return (cᵢ₋₁: cᵢ, dᵢ₋₁: dᵢ, fracᵢ₋₁: fracᵢ)
     }.until(maxIter: maxIter) { b in (b.cᵢ₋₁ * b.dᵢ₋₁).isApprox(.maybeZero(1, trusted: true), tolerance: EqualityTolerance(relative: 8 * Double.ulpOfOne, absolute: 0, absoluteForZero: 8 * Double.ulpOfOne)) }
-    guard let cfrac = cf else {
-        return .error
-    }
+    guard let cfrac = cf else { return nil }
     switch cfrac {
-    case .exhaustedInput, .exceededMax: return .noConverge(terms: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
-    case .success: return .success(terms: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
+    case .exhaustedInput, .exceededMax: return .didNotConverge(work: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
+    case .success: return .converged(work: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
     }
 }
 
@@ -53,38 +51,7 @@ public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int =
 ///   - b: The ith denominator term, bᵢ, as a function of i = 1,2,3...
 ///
 /// - Returns: The convergent of the fraction (or the last step calculated if it didn't converge).
-public func continuedFraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> ContinuedFractionResult {
+public func continuedFraction(b0: Double, a: @escaping (Int) -> (Double), b: @escaping (Int) -> Double, maxIter: Int = 100) -> ConvergenceValue<Double>? {
     let seq = (1...).lazy.map { return (a: a($0), b: b($0)) }
     return continuedFraction(b0: b0, coeffs: seq, maxIter: maxIter)
-}
-
-public enum ContinuedFractionResult {
-    case error
-    case noConverge(terms: UInt, estimate: Double)
-    case success(terms: UInt, estimate: Double)
-}
-
-public extension ContinuedFractionResult {
-    var value: Double {
-        switch self {
-        case .error: return .nan
-        case .noConverge(_, let e): return e
-        case .success(_, let e): return e
-        }
-    }
-    
-    var iterations: UInt {
-        switch self {
-        case .error: return 0
-        case .noConverge(let n, _): return n
-        case .success(let n, _): return n
-        }
-    }
-    
-    var converged: Bool {
-        switch self {
-        case .error, .noConverge: return false
-        case .success: return true
-        }
-    }
 }
