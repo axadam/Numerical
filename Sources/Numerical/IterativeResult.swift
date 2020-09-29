@@ -80,5 +80,3 @@ public extension Optional where Wrapped: Converging {
         }
     }
 }
-    var work: UInt { get }
-}
