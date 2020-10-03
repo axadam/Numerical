@@ -17,7 +17,7 @@ public typealias UnivariateQuadrature = (ClosedRange<Double>,Int, @escaping (Dou
 /// Trapezoidal Rule is also available and is well suited to integrating periodic functions
 /// over their periods or peak functions with fast decaying tails.
 ///
-/// Returns a `QuadratureResult` which contains the integration estimate as well as
+/// Returns a `ConvergenceValue` which contains the integration estimate as well as
 /// information about whether the method converged and how many function evaluations
 /// were required.
 public func integrate(range: ClosedRange<Double>, maxIter: Int = 10, method: UnivariateQuadrature = romberg, f: @escaping (Double) -> Double) -> ConvergenceValue<Double>? {

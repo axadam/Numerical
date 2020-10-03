@@ -79,6 +79,10 @@ public extension Sequence {
     }
 }
 
+/// The value of an `until()` operation on a `Sequence`
+///
+/// Stores the exit state of the operation, the last value at time of exit, and how many iterations
+/// were completed.
 public enum UntilValue<Element>: IterativeValue {
     /// The sequence was used up before satisfying the convergence condition
     case exceededMax(iterations: UInt, value: Element)
@@ -91,6 +95,7 @@ public enum UntilValue<Element>: IterativeValue {
 public extension UntilValue {
     typealias Value = Element
     
+    /// The last value at time of exit regardless of exit state
     var value: Element {
         switch self {
         case .exceededMax(_, let v): return v
@@ -99,6 +104,7 @@ public extension UntilValue {
         }
     }
 
+    /// How many iterations were competed before exiting
     var work: UInt {
         switch self {
         case .exceededMax(let w, _): return w

@@ -57,11 +57,18 @@ public struct EqualityTolerance<T: FloatingPoint> {
 }
 
 public extension EqualityTolerance {
+    /// A tolerance representing best practices for general applications
     static var standard: EqualityTolerance { EqualityTolerance() }
+    
+    /// A stricter tolerance appropriate for numerical methods with expectation of convergence
     static var strict: EqualityTolerance { EqualityTolerance(relative: 2 * T.ulpOfOne, absolute: 0, absoluteForZero: 8 * T.ulpOfOne) }
 }
 
 public extension FloatingPoint {
+    /// Checks whether this value is within the specified tolerance of the target value
+    ///
+    /// The target value is expressed as an `EqualityTarget` and the tolerance as an
+    /// `EqualityTolerance`. Read the references for these types for options.
     func isApprox(_ other: EqualityTarget<Self>, tolerance: EqualityTolerance<Self> = .standard) -> Bool {
         switch other {
         case .zero(scaleRelativeTo: let s):
@@ -75,6 +82,15 @@ public extension FloatingPoint {
 }
 
 public extension BinaryFloatingPoint {
+    /// Indicates whether the reference value is within `n` ULP of this value
+    ///
+    /// This is an advanced way at looking at floating point tolerance. Most general use cases should
+    /// prefer isApprox()
+    ///
+    /// Floating point numbers are discrete points. In binary floating point all points between two
+    /// neighboring powers of two are equally spaced. As you go up powers of two these spacings double
+    /// in distance. This function checks whether you are within the specified `n` discrete points
+    /// of the reference value.
     func isWithinULP(of reference: Self, n: Int = 1024) -> Bool {
         switch (self, reference) {
         case (reference, _): return true

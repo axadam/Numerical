@@ -37,7 +37,9 @@ public extension Optional where Wrapped: IterativeValue, Wrapped.Value: Floating
     }
 }
 
+/// A value that represents the product of a converging process
 public protocol Converging {
+    /// Indicates whether the process converged
     var converged: Bool { get }
 }
 
@@ -73,6 +75,9 @@ public extension ConvergenceValue {
 }
 
 public extension Optional where Wrapped: Converging {
+    /// Indicates whether the process converged
+    ///
+    /// False if the Optional is empty.
     var converged: Bool {
         switch self {
         case .none: return false

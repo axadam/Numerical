@@ -75,8 +75,8 @@ public func xmsin(_ x: Double) -> Double {
 /// Returns the argument with the largest absolute value
 ///
 /// `absmax(x, y) = abs(x) > abs(y) ? x : y`
-func absmax(_ x: Double, _ y: Double) -> Double {
-    return Double.maximumMagnitude(x, y)
+func absmax<T: FloatingPoint>(_ x: T, _ y: T) -> T {
+    return T.maximumMagnitude(x, y)
 }
 
 public extension FloatingPoint {
