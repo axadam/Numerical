@@ -85,9 +85,9 @@ public extension Sequence {
 /// were completed.
 public enum UntilValue<Element>: IterativeValue {
     /// The sequence was used up before satisfying the convergence condition
-    case exceededMax(iterations: UInt, value: Element)
-    /// Reached the maximum number of iterations before satisfying the convergence condition
     case exhaustedInput(iterations: UInt, value: Element)
+    /// Reached the maximum number of iterations before satisfying the convergence condition
+    case exceededMax(iterations: UInt, value: Element)
     /// Satisfied convergence condition
     case success(iterations: UInt, value: Element)
 }
