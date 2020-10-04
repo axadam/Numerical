@@ -139,19 +139,28 @@ Extensive accuracy measurement and testing to make sure accuracy doesn't change 
 
 Easy is 10k random doubles from [0,1] and their negatives shuffled into an array. Hard is 10k random doubles drawn from [0,1] multiplied by random powers of ten between -10 and 10. Peters is the small pathological case [1.0,1e100,1.0,-1e100].
 
+#### Basic Functions Near Zero
+| Case | e^x - 1 - x | log(1 + x) - x | x - sin(x) |
+| --- | ---: | ---: | ---: |
+| 1e-1 | 15.0 | 14.6 | 15.0 |
+| 1e-10 | 10.5 | 10.5 | 15.0 |
+| 3e-1 | 15.0 | 15.0 | 15.0 |
+| 3e-10 | 10.0 | 10.0 | 15.0 |
+| 9e-1 | 15.0 | 15.0 | 15.0 |
+
 #### Root Finding
 | Case | ln 5; x₀=2 | sin(x) - x/2; x₀=2 | x³ - 2x - 5; x₀=2 | ∛3647963; x₀=364 |
 | --- | ---: | ---: | ---: | ---: |
 | Bisection | 15.0  (3/50*) | 15.0  (3/49) | 15.0  (2/50) | 15.0  (3/50*) |
 | Brent | 15.0  (3/8) | 15.0  (3/9) | 15.0  (2/6) | 15.0  (3/11) |
 | Dekker | 15.0  (3/9) | 15.0  (3/10) | 15.0  (2/6) | 15.0  (3/10) |
-| Halley | 15.0  (5) | 15.0  (4) | 15.0  (4) | 15.0  (6) |
-| Newton | 15.0  (6) | 15.0  (6) | 15.0  (6) | 15.0  (9) |
+| Halley | 15.0  (5) | 15.0  (5) | 15.0  (5) | 15.0  (6) |
+| Newton | 15.0  (7) | 15.0  (6) | 15.0  (6) | 15.0  (9) |
 | Ridders | 15.0  (3/8) | 15.0  (3/12) | 15.0  (2/16) | 15.0  (3/14) |
 | Secant | 15.0  (3/11) | 0.0  (3/5†) | 15.0  (2/6) | 7.8  (3/30*) |
 | TOMS 748 | 15.0  (3/11) | 15.0  (3/8) | 15.0  (2/7) | 15.0  (3/11) |
 
-(number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many function iterations to bracket. * indicates method didn't converge. † indicates converged to a different root.)
+(number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many evaluations to bracket. * indicates method didn't converge. † indicates converged to a different root.)
 
 #### Error Function
 | Case | f | f⁻¹ |
