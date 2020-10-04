@@ -12,6 +12,10 @@ Fills in a few missing basic functions.
 
 * `xmsin(_:)` - Calculate x - sin(x) with precision even when x is small
 
+* `signum` - property on `FloatingPoint` that gives a value of same sign and magnitude 1 (or zero if the magnitude is 0)
+
+* `absmax(_:_:)` - Returns whichever of the two arguments has a larger magnitude regardless of sign. This is just a generic version of FloatingPoint's `maximumMagnitude` static function.
+
 ### Special functions
 
 A collection of functions with many applications in stats/ml and the sciences.
@@ -80,6 +84,15 @@ Numerically integrate a function on a closed interval.
 
   * `romberg` - (default) Romberg's Method: this method layers Richardson extrapolation on top of the Trapezoidal Rule to achieve more accuracy for the same number of function evaluations in many cases.
 
+### Types
+
+A few types with use cases in numerical computing.
+
+* `Probability` - A value representing a probability between zero and one. The underlying value may be stored as either the probability itself or as its complement. This allows us to store numbers either very close to zero or very close to one without loss of precision.
+
+* `CountedFunction` - An object to wrap a function and count how many times it is called. Can be useful if you are evaluating an expensive function and have a computation budget. In Swift 5.2 or later the object is callable.
+
+* `IterativeValue` - A protocol for types that need to store a value and how many iterations or evaluations went into computing it.
 
 ### Tools
 
@@ -87,7 +100,7 @@ Numerically integrate a function on a closed interval.
 
   * `first(where:)` - a variant of the Standard Library function where the closure also has access to the preceding element.
   
-  * `until(minIter:maxIter:_)` - finds the first element after minIter and before maxIter satisfying the predicate, or the last element it processed otherwise. It returns an `IterativeResult` value that tells how many elements it saw and how it exited. Available with the closure seeing only the last element or also seeing the preceding element.
+  * `until(minIter:maxIter:_)` - finds the first element after minIter and before maxIter satisfying the predicate, or the last element it processed otherwise. It returns an `UntilValue` that tells how many elements it saw and how it exited. Available with the closure seeing only the last element or also seeing the preceding element.
 
 * Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which let's you specify if the number you are comparing to is known to be zero or only might be zero, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. If you know you are comparing to zero there is an option to provide a value relative to which tolerance will be calculated. Several preset tolerances are provided as static members to represent best practices of different strictness.
 
