@@ -14,7 +14,7 @@ Fills in a few missing basic functions.
 
 * `signum` - property on `FloatingPoint` that gives a value of same sign and magnitude 1 (or zero if the magnitude is 0)
 
-* `absmax(_:_:)` - Returns whichever of the two arguments has a larger magnitude regardless of sign. This is just a generic version of FloatingPoint's `maximumMagnitude` static function.
+* `absmax(_:_:)` - Returns whichever of the two arguments has a larger magnitude regardless of sign. This is a generic wrapper of FloatingPoint's `maximumMagnitude` static function.
 
 ### Special functions
 
@@ -28,7 +28,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 * Gamma Function
 
-  * `gammaReg(a:x:)` - The regularized incomplete gamma function. This return a `Probability` value that can store values close to 0 or 1 with precision.
+  * `gammaReg(a:x:)` - The regularized incomplete gamma function. This returns a `Probability` value that can store values close to 0 or 1 with precision.
   
   * `pGamma(a:x:)` - The regularized lower incomplete gamma function Pₐ(x) = γ(a,x) / Γ(a). This is the lower tail of `gammaReg(a:x:)`.
 
@@ -66,7 +66,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 
 Functions to find the root of a function of interest.
 
-* `root(guess:xmin?:xmax?:tolerance:method:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Secant, Brent's (default), Dekker's, Ridders', and TOMS Algo 748.
+* `root(guess:xmin?:xmax?:tolerance:method:intercept:f)` - Finds a root of f without any derivatives. It first brackets the root and then finds it within that interval. Multiple methods to find the root are available, including: Secant, Brent's (default), Dekker's, Ridders', and TOMS Algo 748. A non-zero intercept may optionally be specified which then informs the tolerance of the exit condition. This is useful when using the root to invert a function.
 
 * `root(guess:xmin?:xmax?:tolerance:f:f1)` - Finds a root of f using its first derivative. This is the Newton-Raphson method.
 
