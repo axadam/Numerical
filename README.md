@@ -140,50 +140,50 @@ A few types with use cases in numerical computing.
 
 ### Accuracy
 
-Extensive accuracy measurement and testing to make sure accuracy doesn't change from the expected levels. Accuracy is measured in terms of Log Relative Error.
+Extensive accuracy measurement and testing to make sure accuracy doesn't change from the expected levels. Accuracy is measured in terms of Log Relative Error. Bolded results have achieved full accuracy relative to the reference value or machine precision of the data type.
 
 #### Summation
 | Case | Easy | Hard | Peters |
 | --- | ---: | ---: | ---: |
-| Kahan | 15.0 | 5.6 | -0.0 |
-| Kahan-Babuška-Neumaier | 15.0 | 15.0 | 15.0 |
+| Kahan | __15.0__ | 5.6 | -0.0 |
+| Kahan-Babuška-Neumaier | __15.0__ | __15.0__ | __15.0__ |
 | Naive | 12.9 | 4.1 | -0.0 |
-| Pairwise | 15.0 | 4.2 | -0.0 |
+| Pairwise | __15.0__ | 4.2 | -0.0 |
 
 Easy is 10k random doubles from [0,1] and their negatives shuffled into an array. Hard is 10k random doubles drawn from [0,1] multiplied by random powers of ten between -10 and 10. Peters is the small pathological case [1.0,1e100,1.0,-1e100].
 
 #### Basic Functions Near Zero
 | Case | e^x - 1 - x | log(1 + x) - x | x - sin(x) |
 | --- | ---: | ---: | ---: |
-| 1e-1 | 15.0 | 14.6 | 15.0 |
-| 1e-10 | 10.5 | 10.5 | 15.0 |
-| 3e-1 | 15.0 | 15.0 | 15.0 |
-| 3e-10 | 10.0 | 10.0 | 15.0 |
-| 9e-1 | 15.0 | 15.0 | 15.0 |
+| 1e-1 | __15.0__ | 14.6 | __15.0__ |
+| 1e-10 | 10.5 | 10.5 | __15.0__ |
+| 3e-1 | __15.0__ | __15.0__ | __15.0__ |
+| 3e-10 | 10.0 | 10.0 | __15.0__ |
+| 9e-1 | __15.0__ | __15.0__ | __15.0__ |
 
 #### Root Finding
 | Case | ln 5; x₀=2 | sin(x) - x/2; x₀=2 | x³ - 2x - 5; x₀=2 | ∛3647963; x₀=364 |
 | --- | ---: | ---: | ---: | ---: |
-| Bisection | 15.0  (3/50*) | 15.0  (3/49) | 15.0  (2/50) | 15.0  (3/50*) |
-| Brent | 15.0  (3/8) | 15.0  (3/9) | 15.0  (2/6) | 15.0  (3/11) |
-| Dekker | 15.0  (3/9) | 15.0  (3/10) | 15.0  (2/6) | 15.0  (3/10) |
-| Halley | 15.0  (5) | 15.0  (5) | 15.0  (5) | 15.0  (6) |
-| Newton | 15.0  (7) | 15.0  (6) | 15.0  (6) | 15.0  (9) |
-| Ridders | 15.0  (3/8) | 15.0  (3/12) | 15.0  (2/16) | 15.0  (3/14) |
-| Secant | 15.0  (3/11) | 0.0  (3/5†) | 15.0  (2/6) | 7.8  (3/30*) |
-| TOMS 748 | 15.0  (3/11) | 15.0  (3/8) | 15.0  (2/7) | 15.0  (3/11) |
+| Bisection | __15.0__  (3/50*) | __15.0__  (3/49) | __15.0__  (2/50) | __15.0__  (3/50*) |
+| Brent | __15.0__  (3/8) | __15.0__  (3/9) | __15.0__  (2/6) | __15.0__  (3/11) |
+| Dekker | __15.0__  (3/9) | __15.0__  (3/10) | __15.0__  (2/6) | __15.0__  (3/10) |
+| Halley | __15.0__  (5) | __15.0__  (5) | __15.0__  (5) | __15.0__  (6) |
+| Newton | __15.0__  (7) | __15.0__  (6) | __15.0__  (6) | __15.0__  (9) |
+| Ridders | __15.0__  (3/8) | __15.0__  (3/12) | __15.0__  (2/16) | __15.0__  (3/14) |
+| Secant | __15.0__  (3/11) | 0.0  (3/5†) | __15.0__  (2/6) | 7.8  (3/30*) |
+| TOMS 748 | __15.0__  (3/11) | __15.0__  (3/8) | __15.0__  (2/7) | __15.0__  (3/11) |
 
 (number of function evaluations in parentheses. for bracketing methods first number in parentheses is how many evaluations to bracket. * indicates method didn't converge. † indicates converged to a different root.)
 
 #### Error Function
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
-| 1.2345 | 15.0 | 15.0 |
+| 1.2345 | __15.0__ | __15.0__ |
 
 #### Regularized Incomplete Gamma Function, reference values from Mathematica
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
-| (a:4,x:0.7) | 15.0 | 14.7 |
+| (a:4,x:0.7) | __15.0__ | 14.7 |
 
 #### Regularized Incomplete Gamma Function, 'GammaCHI', Gil, Tegura, and Temme 2015, Table 1
 | Case | f | f⁻¹ |
@@ -191,22 +191,22 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 | (a:1e-13,x:0.01) | 12.8 | 12.2 |
 | (a:1e-13,x:6.310e-15) | 4.3 | 2.8 |
 | (a:1e-13,x:7.110e-7) | 4.0 | 2.9 |
-| (a:1e-249,x:0.01) | 15.0 | 0.0 |
+| (a:1e-249,x:0.01) | __15.0__ | 0.0 |
 | (a:1e-249,x:6.310e-15) | 4.3 | 0.0 |
 | (a:1e-249,x:7.110e-7) | 4.0 | 0.0 |
 
 #### Regularized Incomplete Beta Function
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
-| (a:3,b:5,x:0.4) | 15.0 | 15.0 |
+| (a:3,b:5,x:0.4) | __15.0__ | __15.0__ |
 
 #### Marcum Q Function, reference values from Mathematica
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
 | µ:11.5,x:15.3,y:23 | 13.3 | 14.0 |
-| µ:11.5,x:15.3,y:29 | 15.0 | 15.0 |
-| µ:25,x:35,y:49 | 13.8 | 15.0 |
-| µ:25,x:35,y:65 | 13.9 | 15.0 |
+| µ:11.5,x:15.3,y:29 | __15.0__ | __15.0__ |
+| µ:25,x:35,y:49 | 13.8 | __15.0__ |
+| µ:25,x:35,y:65 | 13.9 | __15.0__ |
 
 #### Marcum Q large µ. µ = 8192, y = 1.05µ, and x is a fraction of µ. 'Computation of the Marcum Q-function', Gil, Segura, Temme 2013, Table 6.1
 | Case | f | f⁻¹ |
@@ -225,27 +225,27 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Marcum Q far left tail, 'GammaCHI', Gil, Tegura, and Temme 2015, Table 3
 | Case | f | f⁻¹ |
 | --- | ---: | ---: |
-| µ:1,x:75,y:0.5 | 13.0 | 13.0 |
-| µ:10,x:100,y:1 | 13.0 | 13.0 |
-| µ:2,x:100,y:2 | 12.3 | 13.0 |
-| µ:5,x:150,y:30 | 13.0 | 13.0 |
+| µ:1,x:75,y:0.5 | __13.0__ | __13.0__ |
+| µ:10,x:100,y:1 | __13.0__ | __13.0__ |
+| µ:2,x:100,y:2 | 12.3 | __13.0__ |
+| µ:5,x:150,y:30 | __13.0__ | __13.0__ |
 
 #### Marcum Q inverse, tail values. µ: 15.3, x: 11.5, p varies. Reference values from Mathematica
 | Case | f⁻¹ |
 | --- | ---: |
-| p:1e-10 | 6.0 |
-| p:1e-20 | 6.0 |
-| p:1e-30 | 5.0 |
-| q:1e-10 | 6.0 |
-| q:1e-20 | 6.0 |
+| p:1e-10 | __6.0__ |
+| p:1e-20 | __6.0__ |
+| p:1e-30 | __5.0__ |
+| q:1e-10 | __6.0__ |
+| q:1e-20 | __6.0__ |
 | q:1e-30 | 5.4 |
 
 #### Continued Fraction
 | Case | LRE |
 | --- | ---: |
-| e | 15.0  (16) |
+| e | __15.0__  (16) |
 | π | 10.1  (1000*) |
-| √2 | 15.0  (20) |
+| √2 | __15.0__  (20) |
 
 (number of terms in parentheses. * indicates method didn't converge.)
 
@@ -258,36 +258,36 @@ Easy is 10k random doubles from [0,1] and their negatives shuffled into an array
 #### Horner's Method of polynomial evaluation
 | Case | LRE |
 | --- | ---: |
-| -19 + 7x - 4x² + 6x³; x=3 | 15.0 |
+| -19 + 7x - 4x² + 6x³; x=3 | __15.0__ |
 
 #### Infinite Series
 | Case | LRE |
 | --- | ---: |
-| Chudnovsky algorithm for π | 15.0  (3) |
-| Newton's arcsin series for π | 15.0  (23) |
-| e = Σ i=0... 1 / i! | 15.0  (19) |
-| ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1) | 15.0  (16) |
+| Chudnovsky algorithm for π | __15.0__  (3) |
+| Newton's arcsin series for π | __15.0__  (23) |
+| e = Σ i=0... 1 / i! | __15.0__  (19) |
+| ln 2 = 2 Σ i=0... 3⁻²ⁱ⁻¹ / (2i + 1) | __15.0__  (16) |
 
 (number of terms in parentheses. * indicates method didn't converge.)
 
 #### Infinite Product
 | Case | LRE |
 | --- | ---: |
-| Viète's formula for 2/π | 15.0  (26) |
+| Viète's formula for 2/π | __15.0__  (26) |
 | Wallis product for π/2 | 2.6  (100*) |
-| Wallis product truncated at n=100 | 15.0  (100*) |
+| Wallis product truncated at n=100 | __15.0__  (100*) |
 
 (number of terms in parentheses. * indicates method didn't converge.)
 
 #### Quadrature
 | Case | Romberg | Trapezoidal |
 | --- | ---: | ---: |
-| 1/x; [1,100] | 15.0  (16385) | 9.8  (1048577*) |
-| e^(-x²) / √π; [-10,10] | 14.7  (1025*) | 15.0  (129) |
-| e^cos(θ); [0,2π] | 15.0  (1025) | 15.0  (33) |
-| x; [0,5000] | 15.0  (9) | 15.0  (9) |
-| x³; [0,1] | 15.0  (9) | 6.0  (1025*) |
-| π = 4 ∫0...1 1 / (1 + t²) dt; [0,1] | 15.0  (257) | 7.3  (1025*) |
-| √(1 - 0.36sin²θ) / √(2π); [0,2π] | 15.0  (1025) | 15.0  (65) |
+| 1/x; [1,100] | __15.0__  (16385) | 9.8  (1048577*) |
+| e^(-x²) / √π; [-10,10] | 14.7  (1025*) | __15.0__  (129) |
+| e^cos(θ); [0,2π] | __15.0__  (1025) | __15.0__  (33) |
+| x; [0,5000] | __15.0__  (9) | __15.0__  (9) |
+| x³; [0,1] | __15.0__  (9) | 6.0  (1025*) |
+| π = 4 ∫0...1 1 / (1 + t²) dt; [0,1] | __15.0__  (257) | 7.3  (1025*) |
+| √(1 - 0.36sin²θ) / √(2π); [0,2π] | __15.0__  (1025) | __15.0__  (65) |
 
 (number of function evaluations in parentheses. * indicates method didn't converge.)
