@@ -46,13 +46,9 @@ public struct EqualityTolerance<T: FloatingPoint> {
     /// The allowable absolute tolerance. In the hybrid allowable error equation `ε ﹤ rx + a` this is `a`
     public let absolute: T
     
-    /// The allowable absolute tolerance in the case where we have no scale to define relative tolerance. 
-    public let absoluteForZero: T
-    
-    public init(relative: T = T.ulpOfOne.squareRoot(), absolute: T = 0, absoluteForZero: T = T.ulpOfOne.squareRoot() ) {
+    public init(relative: T = T.ulpOfOne.squareRoot(), absolute: T = 8 * T.leastNormalMagnitude) {
         self.relative = relative
         self.absolute = absolute
-        self.absoluteForZero = absoluteForZero
     }
 }
 
@@ -61,7 +57,7 @@ public extension EqualityTolerance {
     static var standard: EqualityTolerance { EqualityTolerance() }
     
     /// A stricter tolerance appropriate for numerical methods with expectation of convergence
-    static var strict: EqualityTolerance { EqualityTolerance(relative: 2 * T.ulpOfOne, absolute: 0, absoluteForZero: 8 * T.ulpOfOne) }
+    static var strict: EqualityTolerance { EqualityTolerance(relative: 2 * T.ulpOfOne) }
 }
 
 public extension FloatingPoint {
@@ -72,7 +68,7 @@ public extension FloatingPoint {
     func isApprox(_ other: EqualityTarget<Self>, tolerance: EqualityTolerance<Self> = .standard) -> Bool {
         switch other {
         case .zero(scaleRelativeTo: let s):
-            let tol = s == 0 ? tolerance.absoluteForZero : tolerance.relative * s + tolerance.absolute
+            let tol = tolerance.relative * s + tolerance.absolute
             return abs(self) < tol
         case .maybeZero(let x, trusted: let trust):
             let scale = trust ? abs(x) : max(abs(self),abs(x))
@@ -110,7 +106,7 @@ public extension BinaryFloatingPoint {
 /// The space between two adjacent floating point values is termed the Unit in the Last Place, or "ULP".
 /// Binary floating point values within an interval bounded by powers of two, [2ⁿ,2ⁿ⁺¹), will all be separated
 /// by the same size ULP. Such an interval is called a "binade" . Every binade has the same number of
-/// discrete values, so there as the same number of binary floating point values between 1 and 2 as between
+/// discrete values, so there are the same number of binary floating point values between 1 and 2 as between
 /// 1024 and 2048.
 ///
 /// This distance method works by simply finding the distance between the two points and dividing by the size

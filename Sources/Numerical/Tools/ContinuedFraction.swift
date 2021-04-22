@@ -31,7 +31,7 @@ public func continuedFraction<S: Sequence>(b0: Double, coeffs: S, maxIter: Int =
         let delta = cᵢ * dᵢ
         let fracᵢ = fracᵢ₋₁ * delta
         return (cᵢ₋₁: cᵢ, dᵢ₋₁: dᵢ, fracᵢ₋₁: fracᵢ)
-    }.until(maxIter: maxIter) { b in (b.cᵢ₋₁ * b.dᵢ₋₁).isApprox(.maybeZero(1, trusted: true), tolerance: EqualityTolerance(relative: 8 * Double.ulpOfOne, absolute: 0, absoluteForZero: 8 * Double.ulpOfOne)) }
+    }.until(maxIter: maxIter) { b in (b.cᵢ₋₁ * b.dᵢ₋₁).isApprox(.maybeZero(1, trusted: true), tolerance: EqualityTolerance(relative: 8 * Double.ulpOfOne)) }
     guard let cfrac = cf else { return nil }
     switch cfrac {
     case .exhaustedInput, .exceededMax: return .didNotConverge(work: cfrac.work, estimate: cfrac.value.fracᵢ₋₁)
