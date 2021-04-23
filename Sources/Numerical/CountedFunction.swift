@@ -27,13 +27,12 @@ public class CountedFunction<I,O> {
     /// Call the function and increment the counter
     ///
     /// If the function takes more than one argument you must pass the arguments as a tuple
-    public func callAsFunction(_ x: I) -> O { eval(x) }
+    public func callAsFunction(_ x: I) -> O { count += 1; return f(x) }
     
     /// Call the function and increment the counter
     ///
-    /// If the function takes more than one argument you must pass the arguments as a tuple
-    public func eval(_ x: I) -> O {
-        count += 1
-        return f(x)
-    }
+    /// If the function takes more than one argument you must pass the arguments as a tuple.
+    /// This is a convenience short function name for older versions of Swift that don't support
+    /// callable types.
+    public func eval(_ x: I) -> O { callAsFunction(x) }
 }
