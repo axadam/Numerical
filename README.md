@@ -48,7 +48,7 @@ A collection of functions with many applications in stats/ml and the sciences.
 
   * `lbeta(a:b:)` - The log of the beta function
 
-  * `betaReg(x:a:b)` - The regularized incomplete beta function, I_x(a,b). This return a `Probability` value that can store values close to 0 or 1 with precision.
+  * `betaReg(x:a:b)` - The regularized incomplete beta function, I_x(a,b). This returns a `Probability` value that can store values close to 0 or 1 with precision.
 
   * `betaRegDeriv(x:a:b:)` - The derivative of I, Iʹ_x(a,b)
 
@@ -102,7 +102,7 @@ A few types with use cases in numerical computing.
   
   * `until(minIter:maxIter:_)` - finds the first element after minIter and before maxIter satisfying the predicate, or the last element it processed otherwise. It returns an `UntilValue` that tells how many elements it saw and how it exited. Available with the closure seeing only the last element or also seeing the preceding element.
 
-* Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which let's you specify if the number you are comparing to is known to be zero or only might be zero, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. If you know you are comparing to zero there is an option to provide a value relative to which tolerance will be calculated. Several preset tolerances are provided as static members to represent best practices of different strictness.
+* Approximate Equality - methods for determing if two `FloatingPoint` numbers are close to each other in a way useful for numerical computations. This introduces an `EqualityTarget` type which lets you specify arguments related to determining the scale for relative tolerance, and an `EqualityTolerance` type which lets you specify tolerance both relatively and absolutely. Several preset tolerances are provided as static members to represent best practices of different strictness.
 
   * `isApprox(_:tolerance:)` - extension on `FloatingPoint` that takes an `EqualityTarget` and an `EqualityTolerance`. Default tolerance is matching about half the digits supported by your type.
   
