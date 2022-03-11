@@ -297,7 +297,9 @@ fileprivate func p_series(µ: Double, x: Double, y: Double) -> Double {
     let ε = 1e-15
     let C = lgamma(µ) - log(2 * .pi * ε) + µ
     let f = { (n: Double) -> Double in
-        return (n + µ) * log(n + µ) + n * log(n) - 2 * n - n * log(x * y) - C
+        let lhs: Double = (n + µ) * log(n + µ) + n * log(n)
+        let rhs: Double = 2 * n - n * log(x * y) - C
+        return lhs - rhs
     }
     
     // the first derivative of f is:
