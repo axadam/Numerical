@@ -233,11 +233,10 @@ public func invBetaReg(p: Probability, a: Double, b: Double) -> Double {
         case (1...,1...):
             // inverse normal approximation
             let yp = p.p < 0.5 ? qapprox(p: p.p) : -qapprox(p: p.q)
-            
             let λ = (yp^^2 - 3.0) / 6.0
-            let h = 2 / (1 / (2 * a - 1) + 1 / (2 * b - 1))
+            let h = 2.0 / (1.0 / (2.0 * a - 1.0) + 1.0 / (2.0 * b - 1.0))
             let w = yp * sqrt(h + λ) / h - (1 / (2 * b - 1) - 1 / (2 * a - 1)) * (λ + 5 / 6 - 2 / (3 * h))
-            return Double(a / (a + b * exp(2 * w)))
+            return a / (a + b * exp(2.0 * w))
         // At least one of a and b < 1. Use NR approximation
         case (_,_):
             let lna = log(a / (a + b))
@@ -246,7 +245,7 @@ public func invBetaReg(p: Probability, a: Double, b: Double) -> Double {
             let u = exp(b * lnb) / b
             let w = t + u
             if p.p < t / w { return pow(a * w * p.p, 1 / a) }
-            return Double(1 - pow(b * w * p.q, 1 / b))
+            return 1 - pow(b * w * p.q, 1 / b)
         }
     }()
     
